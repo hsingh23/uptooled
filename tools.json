@@ -2,7 +2,16 @@
   {
     "file": "tools/Calendar Timeline Visualizer.html",
     "title": "Calendar Timeline Visualizer",
-    "description": "",
-    "keywords": []
+    "description": "A free, interactive tool to create beautiful, color-coded project timelines. Input your project phases, set durations, and instantly generate a shareable visual calendar. Export to PNG or SVG.",
+    "keywords": [
+      "timeline generator",
+      "project timeline",
+      "gantt chart",
+      "project management",
+      "roadmap planner",
+      "visual calendar",
+      "project schedule",
+      "free tool"
+    ]
   }
 ]
