@@ -1,0 +1,12 @@
+{
+  "name": "uptooled",
+  "version": "1.0.0",
+  "description": "Tools gallery",
+  "main": "generate-tools.js",
+  "scripts": {
+    "generate": "node generate-tools.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT"
+}
