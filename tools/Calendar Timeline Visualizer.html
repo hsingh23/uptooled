@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Timeline Visualizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Libraries for D&D and Exporting -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar */
+        .timeline-container::-webkit-scrollbar { height: 8px; }
+        .timeline-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .timeline-container::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        .timeline-container::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* SortableJS styles */
+        .sortable-ghost {
+            background-color: #e0f2fe;
+            opacity: 0.7;
+        }
+        .sortable-drag {
+            cursor: grabbing;
+        }
+
+        /* Inline editable title */
+        [contenteditable]:focus {
+            outline: 2px solid #3b82f6;
+            border-radius: 8px;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+        .phase-row{
+            cursor: grab;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 id="main-title" contenteditable="true" class="text-3xl md:text-4xl font-bold text-slate-900 cursor-pointer p-2 rounded-lg">Project Timeline Generator</h1>
+            <p class="text-slate-600 mt-2">Visualize your project schedule with custom phases and durations.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- ==== INPUT CONTROLS ==== -->
+            <div class="lg:col-span-4 bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                <h2 class="text-xl font-bold mb-6 border-b pb-3">Configuration</h2>
+                
+                <div id="config-form">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="startMonth" class="block text-sm font-medium text-slate-700 mb-1">Start Month</label>
+                            <select id="startMonth" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"></select>
+                        </div>
+                        <div>
+                            <label for="startYear" class="block text-sm font-medium text-slate-700 mb-1">Start Year</label>
+                            <input type="number" id="startYear" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" value="2025">
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold mt-6 mb-3 text-slate-800">Phase Breakdown</h3>
+                    <div id="phases-container" class="space-y-3">
+                        <!-- Draggable phase inputs will be added here -->
+                    </div>
+
+                    <div class="flex justify-between items-center mt-4">
+                         <button id="add-phase-btn" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">+ Add Phase</button>
+                         <div class="text-sm font-medium text-slate-700">
+                            Total: <span id="total-months-display" class="font-bold">0</span> months
+                        </div>
+                    </div>
+                   
+                    <div class="mt-8">
+                        <button id="generate-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300 transform hover:scale-105">
+                            Generate Timeline
+                        </button>
+                    </div>
+                </div>
+                 <!-- Error Message Area -->
+                <div id="error-message" class="hidden mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
+                    <p class="font-bold">Error</p>
+                    <p id="error-text"></p>
+                </div>
+            </div>
+
+            <!-- ==== OUTPUT DISPLAY ==== -->
+            <div id="export-area" class="lg:col-span-8 bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
+                <div class="flex justify-between items-center border-b pb-3 mb-4">
+                    <h2 class="text-xl font-bold">Timeline Visual</h2>
+                    <div class="flex gap-2">
+                        <button id="export-png-btn" class="text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-3 rounded-lg transition-colors">Export PNG</button>
+                        <button id="export-svg-btn" class="text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-3 rounded-lg transition-colors">Export SVG</button>
+                    </div>
+                </div>
+                <div id="output-container" class="min-h-[200px] flex flex-col justify-center items-center">
+                    <div class="text-slate-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p>Your timeline will appear here.</p>
+                    </div>
+                </div>
+
+                <div id="timeline-wrapper" class="hidden">
+                    <div id="timeline-container" class="w-full overflow-x-auto pb-4"></div>
+                </div>
+
+                <h2 class="text-xl font-bold mt-8 mb-4 border-b pb-3">Legend</h2>
+                <div id="legend-container" class="flex flex-wrap gap-4">
+                   <p class="text-slate-500">Legend will be generated with the timeline.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DOM ELEMENTS ---
+            const startMonthSelect = document.getElementById('startMonth');
+            const startYearInput = document.getElementById('startYear');
+            const phasesContainer = document.getElementById('phases-container');
+            const addPhaseBtn = document.getElementById('add-phase-btn');
+            const generateBtn = document.getElementById('generate-btn');
+            const timelineWrapper = document.getElementById('timeline-wrapper');
+            const timelineContainer = document.getElementById('timeline-container');
+            const legendContainer = document.getElementById('legend-container');
+            const outputContainer = document.getElementById('output-container');
+            const errorMessageDiv = document.getElementById('error-message');
+            const errorTextP = document.getElementById('error-text');
+            const totalMonthsDisplay = document.getElementById('total-months-display');
+            const exportPngBtn = document.getElementById('export-png-btn');
+            const exportSvgBtn = document.getElementById('export-svg-btn');
+            const exportArea = document.getElementById('export-area');
+
+            // --- CONSTANTS & STATE ---
+            const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const COLORS = ['#fdba74', '#67e8f9', '#86efac', '#c4b5fd', '#f9a8d4', '#fcd34d', '#5eead4', '#a7f3d0', '#ddd6fe', '#fbcfe8', '#fb923c', '#22d3ee', '#4ade80', '#a78bfa', '#f472b6'];
+            let phaseIdCounter = 0;
+
+            // --- INITIALIZATION ---
+            function initialize() {
+                populateMonthSelect();
+                setupSortable();
+                addDefaultPhases();
+                updateTotalMonths();
+            }
+
+            function populateMonthSelect() {
+                MONTH_NAMES.forEach((month, index) => {
+                    const option = new Option(month, index);
+                    startMonthSelect.appendChild(option);
+                });
+                startMonthSelect.value = new Date().getMonth();
+                startYearInput.value = new Date().getFullYear();
+            }
+
+            function setupSortable() {
+                Sortable.create(phasesContainer, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    handle: '.phase-row',
+                    onEnd: () => { /* Future logic if needed */ }
+                });
+            }
+
+            function addDefaultPhases() {
+                addPhaseRow("Planning", 1);
+                addPhaseRow("Design & Development", 5);
+                addPhaseRow("Testing & QA", 3);
+                addPhaseRow("Deployment", 1);
+                addPhaseRow("Post-Launch Support", 2);
+            }
+            
+            // --- DYNAMIC PHASE MANAGEMENT ---
+            function addPhaseRow(name = '', duration = '') {
+                phaseIdCounter++;
+                const phaseDiv = document.createElement('div');
+                phaseDiv.className = 'flex items-center gap-2 phase-row p-1 rounded-lg';
+                phaseDiv.setAttribute('data-id', phaseIdCounter);
+
+                phaseDiv.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    <input type="text" placeholder="Phase Name" class="phase-name w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" value="${name}">
+                    <input type="number" placeholder="Months" class="phase-duration w-28 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" min="1" value="${duration}">
+                    <button type="button" class="remove-phase-btn text-slate-400 hover:text-red-500 p-1 rounded-full transition-transform hover:scale-110">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                    </button>
+                `;
+                phasesContainer.appendChild(phaseDiv);
+
+                phaseDiv.querySelector('.remove-phase-btn').addEventListener('click', () => {
+                    phaseDiv.remove();
+                    updateTotalMonths();
+                });
+                phaseDiv.querySelector('.phase-duration').addEventListener('input', updateTotalMonths);
+            }
+
+            function updateTotalMonths() {
+                const durations = [...document.querySelectorAll('.phase-duration')].map(input => parseInt(input.value) || 0);
+                totalMonthsDisplay.textContent = durations.reduce((sum, current) => sum + current, 0);
+            }
+
+            // --- CORE LOGIC ---
+            function generateTimeline() {
+                hideError();
+                const phases = getPhaseData();
+                if (!phases) return;
+                
+                const totalDuration = phases.reduce((acc, p) => acc + p.duration, 0);
+                if (totalDuration === 0) {
+                    showError("Please add at least one phase with a duration > 0.");
+                    return;
+                }
+
+                const months = buildMonthArray(totalDuration);
+                const timelineData = assignPhases(months, phases);
+
+                renderTimeline(timelineData);
+                renderLegend(phases);
+                
+                outputContainer.classList.add('hidden');
+                timelineWrapper.classList.remove('hidden');
+            }
+
+            function getPhaseData() {
+                const phaseRows = document.querySelectorAll('.phase-row');
+                const phases = [];
+                let validationPassed = true;
+
+                phaseRows.forEach((row, index) => {
+                    const nameInput = row.querySelector('.phase-name');
+                    const durationInput = row.querySelector('.phase-duration');
+                    const name = nameInput.value.trim() || `Phase ${index + 1}`;
+                    const duration = parseInt(durationInput.value);
+
+                    if (isNaN(duration) || duration <= 0) {
+                        showError(`Enter a valid duration for "${name}".`);
+                        validationPassed = false;
+                        return;
+                    }
+                    
+                    phases.push({ name, duration, color: COLORS[index % COLORS.length] });
+                });
+
+                return validationPassed ? phases : null;
+            }
+
+            function buildMonthArray(totalDuration) {
+                const monthArray = [];
+                let currentMonth = parseInt(startMonthSelect.value);
+                let currentYear = parseInt(startYearInput.value);
+
+                for (let i = 0; i < totalDuration; i++) {
+                    monthArray.push({ monthIndex: currentMonth, year: currentYear });
+                    currentMonth = (currentMonth + 1) % 12;
+                    if (currentMonth === 0) currentYear++;
+                }
+                return monthArray;
+            }
+
+            function assignPhases(months, phases) {
+                const timeline = [];
+                let monthCursor = 0;
+                phases.forEach(phase => {
+                    for (let i = 0; i < phase.duration; i++) {
+                        if (monthCursor < months.length) {
+                           timeline.push({ ...months[monthCursor], phaseName: phase.name, color: phase.color });
+                           monthCursor++;
+                        }
+                    }
+                });
+                return timeline;
+            }
+
+            // --- RENDERING ---
+            function renderTimeline(timelineData) {
+                timelineContainer.innerHTML = '';
+                const groupedByYear = timelineData.reduce((acc, item) => {
+                    (acc[item.year] = acc[item.year] || []).push(item);
+                    return acc;
+                }, {});
+
+                Object.entries(groupedByYear).forEach(([year, months]) => {
+                    const yearGroup = document.createElement('div');
+                    yearGroup.className = 'flex items-stretch mt-2';
+                    
+                    const yearLabel = document.createElement('div');
+                    yearLabel.className = 'flex-shrink-0 flex items-center justify-center font-bold text-slate-600 pr-4 py-2 text-lg w-20';
+                    yearLabel.textContent = year;
+                    yearGroup.appendChild(yearLabel);
+
+                    const monthsContainer = document.createElement('div');
+                    monthsContainer.className = 'flex items-stretch';
+                    months.forEach(item => {
+                        const monthEl = document.createElement('div');
+                        monthEl.className = 'flex-shrink-0 flex items-center justify-center w-16 h-16 m-1 rounded-lg text-sm font-semibold shadow-sm text-white';
+                        monthEl.style.backgroundColor = item.color;
+                        monthEl.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
+                        monthEl.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
+                        monthsContainer.appendChild(monthEl);
+                    });
+                    yearGroup.appendChild(monthsContainer);
+                    timelineContainer.appendChild(yearGroup);
+                });
+            }
+
+            function renderLegend(phases) {
+                legendContainer.innerHTML = (phases.length === 0) 
+                    ? '<p class="text-slate-500">Legend will be generated.</p>' 
+                    : phases.map(phase => `
+                        <div class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded-md shadow" style="background-color: ${phase.color};"></div>
+                            <span class="text-sm font-medium text-slate-700">${phase.name}</span>
+                        </div>
+                    `).join('');
+            }
+            
+            // --- UI & EXPORT UTILITIES ---
+            function showError(message) {
+                errorTextP.textContent = message;
+                errorMessageDiv.classList.remove('hidden');
+            }
+            function hideError() { errorMessageDiv.classList.add('hidden'); }
+
+            function downloadURI(uri, name) {
+                const link = document.createElement("a");
+                link.download = name;
+                link.href = uri;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            
+            function domToSvg(domNode) {
+                const {
+                    width,
+                    height
+                } = domNode.getBoundingClientRect();
+                const SvgNamespace = "http://www.w3.org/2000/svg";
+                const XhtmlNamespace = "http://www.w3.org/1999/xhtml";
+
+                const doctype = '<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
+                const svg = document.createElementNS(SvgNamespace, "svg");
+                svg.setAttribute("width", width);
+                svg.setAttribute("height", height);
+                svg.setAttribute("xmlns", SvgNamespace);
+                svg.setAttribute("xmlns:xhtml", XhtmlNamespace);
+
+                const foreignObject = document.createElementNS(SvgNamespace, "foreignObject");
+                foreignObject.setAttribute("x", 0);
+                foreignObject.setAttribute("y", 0);
+                foreignObject.setAttribute("width", "100%");
+                foreignObject.setAttribute("height", "100%");
+                
+                const style = document.createElement("style");
+                style.textContent = `
+                    * {
+                      font-family: 'Inter', sans-serif;
+                    }
+                `;
+
+                const body = document.createElementNS(XhtmlNamespace, "body");
+                body.setAttribute("style", `margin: 0px; background-color: ${window.getComputedStyle(domNode).backgroundColor};`);
+                body.appendChild(domNode.cloneNode(true));
+                body.prepend(style);
+
+                foreignObject.appendChild(body);
+                svg.appendChild(foreignObject);
+
+                const svgString = new XMLSerializer().serializeToString(svg);
+                return `${doctype}${svgString}`;
+            }
+
+            // --- EVENT LISTENERS ---
+            addPhaseBtn.addEventListener('click', () => addPhaseRow());
+            generateBtn.addEventListener('click', generateTimeline);
+            
+            exportPngBtn.addEventListener('click', () => {
+                html2canvas(exportArea, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+                    downloadURI(canvas.toDataURL('image/png'), 'timeline.png');
+                });
+            });
+
+            exportSvgBtn.addEventListener('click', () => {
+                const svgData = domToSvg(exportArea);
+                const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+                const svgUrl = URL.createObjectURL(svgBlob);
+                downloadURI(svgUrl, 'timeline.svg');
+            });
+
+            // --- RUN ---
+            initialize();
+        });
+    </script>
+</body>
+</html>
