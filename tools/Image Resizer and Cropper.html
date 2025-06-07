@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Image Resizer & Cropper - Online Tool</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="A free online tool to resize, crop, and edit images for any purpose. Perfect for creating favicons, app icons (Chrome extensions, web apps), and social media assets. Features zoom, pan, and custom background colors.">
+    <meta name="keywords" content="image resizer, image cropper, icon generator, favicon creator, resize image online, crop image, png resizer, jpeg resizer, chrome extension icons, web app icons">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com/">
+    <meta property="og:title" content="Free Image Resizer & Cropper - Online Tool">
+    <meta property="og:description" content="Easily resize, crop, and edit images for favicons, app icons, and more. Features zoom, pan, and custom background colors.">
+    <meta property="og:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Image+Resizer\n&cropper">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://example.com/">
+    <meta property="twitter:title" content="Free Image Resizer & Cropper - Online Tool">
+    <meta property="twitter:description" content="Easily resize, crop, and edit images for favicons, app icons, and more. Features zoom, pan, and custom background colors.">
+    <meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Image+Resizer\n&cropper">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        #imageListContainer::-webkit-scrollbar {
+            width: 8px;
+        }
+        #imageListContainer::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        #imageListContainer::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        #imageListContainer::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .thumbnail-selected {
+            outline: 3px solid #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        #canvasContainer {
+             display: flex;
+             justify-content: center;
+             align-items: center;
+             width: 100%;
+        }
+        #editorCanvas {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 0.375rem; /* rounded-md */
+            background-image:
+                linear-gradient(45deg, #eee 25%, transparent 25%),
+                linear-gradient(-45deg, #eee 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #eee 75%),
+                linear-gradient(-45deg, transparent 75%, #eee 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        /* Custom styling for range input */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #d1d5db; /* gray-300 */
+            border-radius: 9999px; /* rounded-full */
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3b82f6; /* blue-500 */
+            border-radius: 9999px; /* rounded-full */
+            cursor: pointer;
+            border: 2px solid white;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6; /* blue-500 */
+            border-radius: 9999px; /* rounded-full */
+            cursor: pointer;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <header class="mb-6 text-center">
+      <h1 class="text-3xl sm:text-4xl font-bold text-blue-600">Image Resizer & Cropper</h1>
+      <p class="text-gray-600 mt-1">Upload, zoom, position, set background, and download your images.</p>
+    </header>
+
+    <!-- How to Use Guide -->
+    <div class="bg-white p-5 rounded-lg shadow-md mb-6">
+        <h2 class="text-xl font-semibold text-gray-700 mb-3">How to Use This Tool</h2>
+        <ol class="list-decimal list-inside space-y-2 text-gray-600">
+            <li><strong>Upload:</strong> Click "Choose Files" to select one or more images from your device.</li>
+            <li><strong>Select:</strong> Click on any image in the "Uploaded Images" list to activate it in the editor.</li>
+            <li><strong>Set Size:</strong> Pick a preset size (e.g., for icons) or enter custom dimensions and click "Set".</li>
+            <li><strong>Adjust:</strong> Use the zoom slider and drag the image in the preview window to get the perfect crop. You can also pick a background color or make it transparent.</li>
+            <li><strong>Download:</strong>
+                <ul class="list-disc list-inside ml-4 mt-1 text-sm">
+                    <li>Download just the current edited version.</li>
+                    <li>Download all processed versions for the selected image.</li>
+                    <li>Download a ZIP file of every image you've edited.</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+
+    <div class="flex flex-col lg:flex-row gap-6">
+      <!-- Left Column: Uploads and Image List -->
+      <div class="lg:w-1/3 bg-white p-6 rounded-lg shadow-xl">
+        <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">1. Upload Images</h2>
+        <input type="file" id="fileInput" multiple accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4 cursor-pointer">
+
+        <h3 class="text-lg font-semibold mb-3 text-gray-700">Uploaded Images:</h3>
+        <div id="imageListContainer" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+          <p id="noImagesMessage" class="text-gray-500 italic">No images uploaded yet.</p>
+        </div>
+      </div>
+
+      <!-- Right Column: Editor and Controls -->
+      <div id="editorArea" class="lg:w-2/3 bg-white p-6 rounded-lg shadow-xl hidden">
+        <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">2. Adjust & Resize: <span id="currentImageNameDisplay" class="text-blue-600 font-medium"></span></h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div> <!-- Column 1: Size, Zoom, Background -->
+            <h3 class="text-lg font-semibold mb-2 text-gray-700">Target Size:</h3>
+            <div id="sizeSelectionContainer" class="space-y-2 mb-4">
+            </div>
+            <div>
+              <h4 class="text-md font-semibold mb-1 text-gray-700">Custom Size (px):</h4>
+              <div class="flex gap-2 items-center mb-4 flex-wrap">
+                <input type="number" id="customWidthInput" placeholder="Width" class="w-24 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                <span class="font-semibold text-gray-500">x</span>
+                <input type="number" id="customHeightInput" placeholder="Height" class="w-24 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                <button id="setCustomSizeButton" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Set</button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-md font-semibold mb-1 text-gray-700">Zoom: <span id="zoomValueDisplay">100</span>%</h4>
+                <input type="range" id="zoomSlider" min="10" max="500" value="100" class="w-full">
+            </div>
+
+            <div>
+                <h4 class="text-md font-semibold mb-1 text-gray-700">Background Color:</h4>
+                <div class="flex gap-2 items-center">
+                    <input type="color" id="bgColorPicker" value="#FFFFFF" class="w-10 h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                    <button id="transparentBgButton" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm">Transparent BG</button>
+                </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col"> <!-- Column 2: Preview -->
+            <h3 class="text-lg font-semibold mb-2 text-gray-700">Preview & Position:</h3>
+            <p class="text-sm text-gray-500 mb-1">Canvas: <span id="canvasSizeDisplay" class="font-medium">N/A</span></p>
+            <p class="text-xs text-gray-400 mb-2">Click and drag image to position. Use slider to zoom.</p>
+            <div id="canvasContainer" class="border border-gray-300 rounded-md bg-white flex items-center justify-center min-h-[200px] sm:min-h-[256px] overflow-hidden">
+              <canvas id="editorCanvas" class="cursor-grab active:cursor-grabbing"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 space-y-3">
+            <button id="downloadCurrentImageVersionButton" class="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                Download This Version (<span id="currentVersionSizeDisplay">N/A</span>)
+            </button>
+            <button id="downloadAllForCurrentImageButton" class="w-full px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+                Download All Processed for This Image
+            </button>
+            <button id="downloadAllProcessedButton" class="w-full px-6 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+                Download All Processed Images (ZIP)
+            </button>        </div>
+      </div>
+      <div id="editorPlaceholder" class="lg:w-2/3 bg-white p-6 rounded-lg shadow-xl flex flex-col items-center justify-center text-center text-gray-500 min-h-[400px]">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-20 h-20 mb-4 text-gray-400">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+        <p class="text-xl font-medium">Select or upload an image to begin.</p>
+        <p class="text-sm mt-1">Follow the guide above to get started!</p>
+      </div>
+    </div>
+
+    <footer class="text-center mt-8 text-gray-500 text-sm">
+        <p>&copy; 2025 Image Resizer & Cropper. Created with Gemini.</p>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 space-y-3 z-50 w-full max-w-xs sm:max-w-sm"></div>
+  </div>
+
+<script>
+    // DOM Elements
+    const fileInput = document.getElementById('fileInput');
+    const imageListContainer = document.getElementById('imageListContainer');
+    const noImagesMessage = document.getElementById('noImagesMessage');
+    const editorArea = document.getElementById('editorArea');
+    const editorPlaceholder = document.getElementById('editorPlaceholder');
+    const currentImageNameDisplay = document.getElementById('currentImageNameDisplay');
+    const sizeSelectionContainer = document.getElementById('sizeSelectionContainer');
+    const customWidthInput = document.getElementById('customWidthInput');
+    const customHeightInput = document.getElementById('customHeightInput');
+    const setCustomSizeButton = document.getElementById('setCustomSizeButton');
+    const canvasContainer = document.getElementById('canvasContainer');
+    const editorCanvas = document.getElementById('editorCanvas');
+    const ctx = editorCanvas.getContext('2d');
+    const canvasSizeDisplay = document.getElementById('canvasSizeDisplay');
+    const downloadCurrentImageVersionButton = document.getElementById('downloadCurrentImageVersionButton');
+    const currentVersionSizeDisplay = document.getElementById('currentVersionSizeDisplay');
+    const downloadAllForCurrentImageButton = document.getElementById('downloadAllForCurrentImageButton');
+    const downloadAllProcessedButton = document.getElementById('downloadAllProcessedButton');
+    const toastContainer = document.getElementById('toastContainer');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const zoomValueDisplay = document.getElementById('zoomValueDisplay');
+    const bgColorPicker = document.getElementById('bgColorPicker');
+    const transparentBgButton = document.getElementById('transparentBgButton');
+
+    // App State
+    let imagesData = []; 
+    let activeImageId = null;
+    let currentTargetSize = null; 
+    let originalImageToDraw = null;
+    let currentPan = { x: 0, y: 0 };
+    let currentZoom = 1.0;
+    let currentBackgroundColor = '#FFFFFF';
+    let isPanning = false;
+    let lastMousePos = { x: 0, y: 0 };
+
+    const PREDEFINED_SIZES = [
+        { name: 'Icon 16x16', width: 16, height: 16 },
+        { name: 'Icon 32x32', width: 32, height: 32 },
+        { name: 'Icon 48x48', width: 48, height: 48 },
+        { name: 'Icon 128x128', width: 128, height: 128 },
+        { name: 'Favicon 32x32', width: 32, height: 32 },
+        { name: 'Web App Icon 192x192', width: 192, height: 192 },
+        { name: 'Web App Icon 512x512', width: 512, height: 512 },
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        fileInput.addEventListener('change', handleFileSelect);
+        setCustomSizeButton.addEventListener('click', handleSetCustomSize);
+        
+        editorCanvas.addEventListener('mousedown', startPan);
+        editorCanvas.addEventListener('mousemove', panImage);
+        editorCanvas.addEventListener('mouseup', endPan);
+        editorCanvas.addEventListener('mouseleave', endPan);
+        editorCanvas.addEventListener('touchstart', startPan, { passive: false });
+        editorCanvas.addEventListener('touchmove', panImage, { passive: false });
+        editorCanvas.addEventListener('touchend', endPan);
+        editorCanvas.addEventListener('touchcancel', endPan);
+
+        zoomSlider.addEventListener('input', handleZoomChange);
+        bgColorPicker.addEventListener('input', handleBgColorChange);
+        transparentBgButton.addEventListener('click', setTransparentBackground);
+
+        downloadCurrentImageVersionButton.addEventListener('click', downloadCurrentVersion);
+        downloadAllForCurrentImageButton.addEventListener('click', downloadAllVersionsForCurrentImage);
+        downloadAllProcessedButton.addEventListener('click', downloadAllProcessedZip);
+        
+        populatePredefinedSizes();
+        updateEditorVisibility();
+        updateDownloadButtonsState();
+    });
+
+    function populatePredefinedSizes() {
+        PREDEFINED_SIZES.forEach(size => {
+            const button = document.createElement('button');
+            button.textContent = `${size.name} (${size.width}x${size.height})`;
+            button.classList.add('w-full', 'text-sm', 'text-left', 'px-3', 'py-2', 'bg-gray-200', 'text-gray-700', 'rounded-md', 'hover:bg-gray-300', 'transition-colors', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
+            button.onclick = () => {
+                currentTargetSize = { width: size.width, height: size.height };
+                customWidthInput.value = size.width;
+                customHeightInput.value = size.height;
+                resetZoomAndBgToDefaultsOrStored();
+                highlightActiveSizeButton();
+            };
+            sizeSelectionContainer.appendChild(button);
+        });
+    }
+    
+    function highlightActiveSizeButton() {
+        Array.from(sizeSelectionContainer.children).forEach(button => {
+            button.classList.remove('bg-blue-500', 'text-white', 'ring-2', 'ring-blue-300');
+            button.classList.add('bg-gray-200', 'text-gray-700');
+            if (currentTargetSize) {
+                 const sizeFromButtonText = button.textContent.match(/(\d+)x(\d+)/);
+                 if (sizeFromButtonText && parseInt(sizeFromButtonText[1]) === currentTargetSize.width && parseInt(sizeFromButtonText[2]) === currentTargetSize.height) {
+                    const matchingPredefined = PREDEFINED_SIZES.find(s => s.width === currentTargetSize.width && s.height === currentTargetSize.height && button.textContent.startsWith(s.name));
+                    if (matchingPredefined) {
+                         button.classList.add('bg-blue-500', 'text-white', 'ring-2', 'ring-blue-300');
+                         button.classList.remove('bg-gray-200', 'text-gray-700');
+                    }
+                 }
+            }
+        });
+    }
+
+    function handleFileSelect(event) {
+        const files = event.target.files;
+        if (!files.length) return;
+        noImagesMessage.classList.add('hidden');
+
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            const imageId = `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+            reader.onload = (e) => {
+                const imgElement = new Image();
+                imgElement.onload = () => {
+                    const newImage = {
+                        id: imageId,
+                        file: file,
+                        name: file.name,
+                        originalSrc: e.target.result,
+                        originalWidth: imgElement.naturalWidth,
+                        originalHeight: imgElement.naturalHeight,
+                        imgElement: imgElement,
+                        processedVersions: {}
+                    };
+                    imagesData.push(newImage);
+                    renderImageListItem(newImage);
+                    if (!activeImageId) {
+                        setActiveImage(imageId);
+                    }
+                    updateDownloadButtonsState();
+                };
+                imgElement.onerror = () => showToast(`Error loading image: ${file.name}`, 'error');
+                imgElement.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        fileInput.value = '';
+    }
+
+    function renderImageListItem(imgData) {
+        const item = document.createElement('div');
+        item.classList.add('p-3', 'border', 'border-gray-200', 'rounded-lg', 'flex', 'items-center', 'gap-3', 'cursor-pointer', 'hover:bg-gray-50', 'transition-colors');
+        item.dataset.imageId = imgData.id;
+        item.title = imgData.name;
+
+        const thumb = document.createElement('img');
+        thumb.src = imgData.originalSrc;
+        thumb.alt = imgData.name;
+        thumb.classList.add('w-12', 'h-12', 'object-cover', 'rounded-md', 'border', 'border-gray-300', 'flex-shrink-0');
+
+        const nameEl = document.createElement('span');
+        nameEl.textContent = imgData.name;
+        nameEl.classList.add('text-sm', 'font-medium', 'text-gray-700', 'flex-grow', 'truncate');
+        
+        const checkmarkContainer = document.createElement('div');
+        checkmarkContainer.classList.add('w-5', 'h-5', 'text-green-500', 'opacity-0', 'transition-opacity', 'duration-300', 'flex-shrink-0');
+        checkmarkContainer.id = `checkmark-${imgData.id}`;
+        checkmarkContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        
+        item.appendChild(thumb);
+        item.appendChild(nameEl);
+        item.appendChild(checkmarkContainer);
+
+        item.onclick = () => setActiveImage(imgData.id);
+        imageListContainer.appendChild(item);
+    }
+    
+    function updateImageListItemProcessedState(imageId) {
+        const imgData = imagesData.find(img => img.id === imageId);
+        const checkmark = document.getElementById(`checkmark-${imageId}`);
+        if (imgData && checkmark) {
+            const hasProcessedVersions = Object.keys(imgData.processedVersions).length > 0;
+            checkmark.style.opacity = hasProcessedVersions ? '1' : '0';
+        }
+    }
+
+    function setActiveImage(imageId) {
+        if (activeImageId === imageId && originalImageToDraw) return; 
+
+        activeImageId = imageId;
+        const imgData = imagesData.find(img => img.id === activeImageId);
+
+        if (!imgData) {
+            activeImageId = null;
+            originalImageToDraw = null;
+            updateEditorVisibility();
+            return;
+        }
+
+        currentImageNameDisplay.textContent = imgData.name;
+        originalImageToDraw = imgData.imgElement;
+
+        document.querySelectorAll('#imageListContainer > div').forEach(el => {
+            el.classList.remove('thumbnail-selected', 'bg-blue-50');
+            if (el.dataset.imageId === imageId) {
+                el.classList.add('thumbnail-selected', 'bg-blue-50');
+            }
+        });
+        
+        updateEditorVisibility();
+        if (currentTargetSize) {
+            resetZoomAndBgToDefaultsOrStored();
+        } else {
+            if (PREDEFINED_SIZES.length > 0) {
+                 currentTargetSize = { width: PREDEFINED_SIZES[3].width, height: PREDEFINED_SIZES[3].height }; // Default to 128x128
+                 customWidthInput.value = currentTargetSize.width;
+                 customHeightInput.value = currentTargetSize.height;
+                 resetZoomAndBgToDefaultsOrStored();
+                 highlightActiveSizeButton();
+            }
+        }
+        updateDownloadButtonsState();
+    }
+
+    function handleSetCustomSize() {
+        const width = parseInt(customWidthInput.value);
+        const height = parseInt(customHeightInput.value);
+
+        if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+            showToast('Please enter valid positive numbers for width and height.', 'error');
+            return;
+        }
+        currentTargetSize = { width, height };
+        resetZoomAndBgToDefaultsOrStored();
+        highlightActiveSizeButton(); 
+    }
+
+    function resetZoomAndBgToDefaultsOrStored() {
+        if (!activeImageId || !currentTargetSize || !originalImageToDraw) {
+            updateCanvasForNewState();
+            return;
+        }
+
+        const imgData = imagesData.find(img => img.id === activeImageId);
+        const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
+        const storedVersion = imgData.processedVersions[sizeKey];
+
+        if (storedVersion) {
+            currentZoom = storedVersion.zoom;
+            currentBackgroundColor = storedVersion.backgroundColor;
+            currentPan.x = storedVersion.panX;
+            currentPan.y = storedVersion.panY;
+        } else {
+            const zoomX = currentTargetSize.width / originalImageToDraw.naturalWidth;
+            const zoomY = currentTargetSize.height / originalImageToDraw.naturalHeight;
+            currentZoom = Math.max(zoomX, zoomY);
+            
+            const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
+            const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
+            currentPan.x = (currentTargetSize.width - drawWidth) / 2;
+            currentPan.y = (currentTargetSize.height - drawHeight) / 2;
+            
+            currentBackgroundColor = '#FFFFFF';
+        }
+        
+        zoomSlider.value = currentZoom * 100;
+        zoomValueDisplay.textContent = Math.round(currentZoom * 100);
+        bgColorPicker.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor;
+
+        updateCanvasForNewState();
+    }
+
+
+    function updateCanvasForNewState() {
+        if (!activeImageId || !currentTargetSize || !originalImageToDraw) {
+            ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+            editorCanvas.style.width = '0px';
+            editorCanvas.style.height = '0px';
+            canvasSizeDisplay.textContent = 'N/A';
+            currentVersionSizeDisplay.textContent = 'N/A';
+            updateDownloadButtonsState();
+            return;
+        }
+        
+        editorCanvas.width = currentTargetSize.width;
+        editorCanvas.height = currentTargetSize.height;
+
+        const canvasAspectRatio = editorCanvas.width / editorCanvas.height;
+        const containerWidth = canvasContainer.clientWidth;
+        let displayW = containerWidth;
+        let displayH = displayW / canvasAspectRatio;
+        const maxDisplayHeight = 400;
+
+        if (displayH > maxDisplayHeight) {
+            displayH = maxDisplayHeight;
+            displayW = displayH * canvasAspectRatio;
+        }
+
+        editorCanvas.style.width = `${displayW}px`;
+        editorCanvas.style.height = `${displayH}px`;
+
+        canvasSizeDisplay.textContent = `${currentTargetSize.width}x${currentTargetSize.height}px`;
+        currentVersionSizeDisplay.textContent = `${currentTargetSize.width}x${currentTargetSize.height}`;
+        
+        applyPanConstraints(); 
+        redrawCanvasAndStore();
+        updateDownloadButtonsState();
+    }
+    
+    function handleZoomChange(event) {
+        if (!originalImageToDraw || !currentTargetSize) return;
+
+        const newZoomSliderValue = parseInt(event.target.value);
+        const newZoom = newZoomSliderValue / 100;
+        zoomValueDisplay.textContent = newZoomSliderValue;
+
+        const canvasCenterX = editorCanvas.width / 2;
+        const canvasCenterY = editorCanvas.height / 2;
+
+        const imgPtXAtCenter = (canvasCenterX - currentPan.x) / currentZoom;
+        const imgPtYAtCenter = (canvasCenterY - currentPan.y) / currentZoom;
+        
+        currentZoom = newZoom;
+
+        currentPan.x = canvasCenterX - (imgPtXAtCenter * currentZoom);
+        currentPan.y = canvasCenterY - (imgPtYAtCenter * currentZoom);
+
+        applyPanConstraints();
+        redrawCanvasAndStore();
+    }
+
+    function handleBgColorChange(event) {
+        currentBackgroundColor = event.target.value;
+        redrawCanvasAndStore();
+    }
+
+    function setTransparentBackground() {
+        currentBackgroundColor = 'transparent';
+        bgColorPicker.value = '#FFFFFF';
+        showToast('Background set to transparent.', 'info');
+        redrawCanvasAndStore();
+    }
+    
+    function applyPanConstraints() {
+        if (!originalImageToDraw || !currentTargetSize) return;
+
+        const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
+        const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
+
+        const minPanX = (drawWidth <= editorCanvas.width) ? (editorCanvas.width - drawWidth) / 2 : editorCanvas.width - drawWidth;
+        const maxPanX = (drawWidth <= editorCanvas.width) ? (editorCanvas.width - drawWidth) / 2 : 0;
+        const minPanY = (drawHeight <= editorCanvas.height) ? (editorCanvas.height - drawHeight) / 2 : editorCanvas.height - drawHeight;
+        const maxPanY = (drawHeight <= editorCanvas.height) ? (editorCanvas.height - drawHeight) / 2 : 0;
+        
+        currentPan.x = Math.max(minPanX, Math.min(maxPanX, currentPan.x));
+        currentPan.y = Math.max(minPanY, Math.min(maxPanY, currentPan.y));
+    }
+
+
+    function redrawCanvasAndStore() {
+        if (!originalImageToDraw || !currentTargetSize) return;
+
+        ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+        
+        if (currentBackgroundColor && currentBackgroundColor !== 'transparent') {
+            ctx.fillStyle = currentBackgroundColor;
+            ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
+        }
+
+        const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
+        const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
+        ctx.drawImage(originalImageToDraw, currentPan.x, currentPan.y, drawWidth, drawHeight);
+
+        const dataURL = editorCanvas.toDataURL('image/png'); 
+        const imgData = imagesData.find(img => img.id === activeImageId);
+        if (imgData) {
+            const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
+            imgData.processedVersions[sizeKey] = {
+                dataURL,
+                panX: currentPan.x,
+                panY: currentPan.y,
+                zoom: currentZoom,
+                backgroundColor: currentBackgroundColor,
+                targetWidth: currentTargetSize.width,
+                targetHeight: currentTargetSize.height
+            };
+            updateImageListItemProcessedState(activeImageId);
+        }
+        updateDownloadButtonsState();
+    }
+    
+    function getEventCoordinates(event) {
+        if (event.touches && event.touches.length > 0) {
+            return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+        }
+        return { x: event.clientX, y: event.clientY };
+    }
+
+    function startPan(event) {
+        if (!activeImageId || !currentTargetSize || !originalImageToDraw) return;
+        const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
+        const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
+        if (drawWidth <= editorCanvas.width && drawHeight <= editorCanvas.height) {
+            isPanning = false;
+            return;
+        }
+
+        event.preventDefault(); 
+        isPanning = true;
+        editorCanvas.classList.remove('cursor-grab');
+        editorCanvas.classList.add('cursor-grabbing');
+        const coords = getEventCoordinates(event);
+        lastMousePos = { x: coords.x, y: coords.y };
+    }
+
+    function panImage(event) {
+        if (!isPanning) return;
+        event.preventDefault();
+        
+        const coords = getEventCoordinates(event);
+        const currentMousePos = { x: coords.x, y: coords.y };
+
+        const scaleX = editorCanvas.width / editorCanvas.offsetWidth;
+        const scaleY = editorCanvas.height / editorCanvas.offsetHeight;
+
+        const dx = (currentMousePos.x - lastMousePos.x) * (editorCanvas.offsetWidth > 0 ? scaleX : 1) ;
+        const dy = (currentMousePos.y - lastMousePos.y) * (editorCanvas.offsetHeight > 0 ? scaleY : 1);
+
+        currentPan.x += dx;
+        currentPan.y += dy;
+        
+        applyPanConstraints();
+        lastMousePos = currentMousePos;
+        redrawCanvasAndStore(); 
+    }
+
+    function endPan() {
+        if (!isPanning) return;
+        isPanning = false;
+        editorCanvas.classList.remove('cursor-grabbing');
+        editorCanvas.classList.add('cursor-grab');
+        if (activeImageId && currentTargetSize) {
+             redrawCanvasAndStore();
+        }
+    }
+    
+    function updateEditorVisibility() {
+        if (activeImageId) {
+            editorArea.classList.remove('hidden');
+            editorPlaceholder.classList.add('hidden');
+        } else {
+            editorArea.classList.add('hidden');
+            editorPlaceholder.classList.remove('hidden');
+        }
+    }
+
+    function updateDownloadButtonsState() {
+        const imgData = imagesData.find(img => img.id === activeImageId);
+        let currentVersionExists = false;
+        let anyVersionExistsForCurrentImage = false;
+        let anyVersionExistsAtAll = false;
+
+        if (imgData && currentTargetSize) {
+            const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
+            if (imgData.processedVersions[sizeKey] && imgData.processedVersions[sizeKey].dataURL) {
+                currentVersionExists = true;
+            }
+            if (Object.keys(imgData.processedVersions).length > 0) {
+                anyVersionExistsForCurrentImage = true;
+            }
+        }
+        
+        imagesData.forEach(img => {
+            if (Object.keys(img.processedVersions).length > 0) {
+                anyVersionExistsAtAll = true;
+            }
+        });
+
+        downloadCurrentImageVersionButton.disabled = !currentVersionExists;
+        downloadAllForCurrentImageButton.disabled = !anyVersionExistsForCurrentImage;
+        downloadAllProcessedButton.disabled = !anyVersionExistsAtAll;
+    }
+
+    function downloadCurrentVersion() {
+        if (!activeImageId || !currentTargetSize) return;
+        const imgData = imagesData.find(img => img.id === activeImageId);
+        const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
+        const version = imgData?.processedVersions[sizeKey];
+
+        if (version?.dataURL) {
+            triggerDownload(version.dataURL, `${getSafeFilenameBase(imgData.name)}_${version.targetWidth}x${version.targetHeight}.png`);
+            showToast(`Downloading ${version.targetWidth}x${version.targetHeight} version.`, 'success');
+        } else {
+            showToast('No processed version available for this size.', 'error');
+        }
+    }
+
+    function downloadAllVersionsForCurrentImage() {
+        if (!activeImageId) return;
+        const imgData = imagesData.find(img => img.id === activeImageId);
+        if (!imgData || Object.keys(imgData.processedVersions).length === 0) {
+            showToast('No processed versions for this image.', 'info');
+            return;
+        }
+
+        Object.values(imgData.processedVersions).forEach(version => {
+            if (version.dataURL) {
+                triggerDownload(version.dataURL, `${getSafeFilenameBase(imgData.name)}_${version.targetWidth}x${version.targetHeight}.png`);
+            }
+        });
+        showToast(`Downloading all processed versions for ${imgData.name}.`, 'success');
+    }
+
+    async function downloadAllProcessedZip() {
+        const zip = new JSZip();
+        let filesAdded = 0;
+
+        imagesData.forEach(imgData => {
+            const safeOriginalNameBase = getSafeFilenameBase(imgData.name);
+            Object.values(imgData.processedVersions).forEach(versionData => {
+                if (versionData.dataURL) {
+                    const base64Data = versionData.dataURL.split(',')[1];
+                    zip.file(`${safeOriginalNameBase}_${versionData.targetWidth}x${versionData.targetHeight}.png`, base64Data, { base64: true });
+                    filesAdded++;
+                }
+            });
+        });
+
+        if (filesAdded === 0) {
+            showToast('No processed images to download.', 'info');
+            return;
+        }
+
+        try {
+            showToast(`Generating ZIP with ${filesAdded} images...`, 'info');
+            const content = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = "resized_images_pack.zip";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            showToast(`Downloaded ZIP with ${filesAdded} images.`, 'success');
+        } catch (err) {
+            console.error("Error generating ZIP:", err);
+            showToast('Error creating ZIP file.', 'error');
+        }
+    }
+    
+    function getSafeFilenameBase(originalName) {
+        const nameWithoutExt = originalName.includes('.') ? originalName.substring(0, originalName.lastIndexOf('.')) : originalName;
+        return nameWithoutExt.replace(/[^a-zA-Z0-9_-]/g, '_') || 'image';
+    }
+
+    function triggerDownload(dataURL, filename) {
+        const link = document.createElement('a');
+        link.href = dataURL;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function showToast(message, type = 'info') {
+        const toastId = `toast-${Date.now()}`;
+        let bgColorClass = 'bg-blue-500'; 
+        if (type === 'success') bgColorClass = 'bg-green-500';
+        if (type === 'error') bgColorClass = 'bg-red-500';
+
+        const toastElement = document.createElement('div');
+        toastElement.id = toastId;
+        toastElement.className = `p-4 rounded-lg shadow-lg text-white text-sm ${bgColorClass} transition-all duration-300 opacity-0 translate-y-2`;
+        toastElement.textContent = message;
+        
+        toastContainer.prepend(toastElement);
+
+        requestAnimationFrame(() => {
+            toastElement.classList.remove('opacity-0', 'translate-y-2');
+            toastElement.classList.add('opacity-100', 'translate-y-0');
+        });
+
+        setTimeout(() => {
+            toastElement.classList.remove('opacity-100', 'translate-y-0');
+            toastElement.classList.add('opacity-0', 'translate-y-2');
+            setTimeout(() => toastElement.remove(), 300); 
+        }, type === 'info' ? 2000 : 3000);
+    }
+
+</script>
+</body>
+</html>
