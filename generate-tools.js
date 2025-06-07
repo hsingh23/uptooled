@@ -25,3 +25,4 @@ fs.writeFileSync(
   path.join(__dirname, 'tools.json'),
   JSON.stringify(tools, null, 2) + '\n'
 );
+

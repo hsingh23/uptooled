@@ -4,10 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendar Timeline Visualizer</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="A free, interactive tool to create beautiful, color-coded project timelines. Input your project phases, set durations, and instantly generate a shareable visual calendar. Export to PNG or SVG.">
+    <meta name="keywords" content="timeline generator, project timeline, gantt chart, project management, roadmap planner, visual calendar, project schedule, free tool">
+    <meta name="author" content="Gemini">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com/">
+    <meta property="og:title" content="Calendar Timeline Visualizer">
+    <meta property="og:description" content="Create beautiful, color-coded project timelines instantly. Input phases, set durations, and export your visual schedule as a PNG or SVG.">
+    <meta property="og:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Timeline\nVisualizer">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://example.com/">
+    <meta property="twitter:title" content="Calendar Timeline Visualizer">
+    <meta property="twitter:description" content="Create beautiful, color-coded project timelines instantly. Input phases, set durations, and export your visual schedule as a PNG or SVG.">
+    <meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Timeline\nVisualizer">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Libraries for D&D and Exporting -->
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -25,10 +46,9 @@
         .sortable-ghost {
             background-color: #e0f2fe;
             opacity: 0.7;
+            border: 2px dashed #0284c7;
         }
-        .sortable-drag {
-            cursor: grabbing;
-        }
+        .sortable-drag { cursor: grabbing; }
 
         /* Inline editable title */
         [contenteditable]:focus {
@@ -36,18 +56,49 @@
             border-radius: 8px;
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
         }
-        .phase-row{
-            cursor: grab;
-        }
+        .phase-row { cursor: grab; }
+
+        /* Accordion style */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details .summary-icon { transition: transform 0.2s; }
+        details[open] .summary-icon { transform: rotate(45deg); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
 
     <div class="container mx-auto p-4 md:p-8">
-        <header class="text-center mb-8">
+        <header class="text-center mb-4">
             <h1 id="main-title" contenteditable="true" class="text-3xl md:text-4xl font-bold text-slate-900 cursor-pointer p-2 rounded-lg">Project Timeline Generator</h1>
-            <p class="text-slate-600 mt-2">Visualize your project schedule with custom phases and durations.</p>
+            <p class="text-slate-600 mt-2 max-w-2xl mx-auto">An interactive tool to create beautiful, color-coded project timelines. Input your phases, set durations, and generate a shareable visual calendar.</p>
         </header>
+
+        <!-- How to Use Guide -->
+        <div class="max-w-4xl mx-auto mb-8">
+            <details class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <summary class="font-semibold text-lg cursor-pointer flex justify-between items-center">
+                    <span>How to Use This Tool</span>
+                    <span class="summary-icon text-blue-500 font-bold text-2xl">+</span>
+                </summary>
+                <div class="mt-4 prose prose-slate max-w-none">
+                    <ol>
+                        <li><strong>Edit the Title:</strong> Click the main "Project Timeline Generator" title to rename your project.</li>
+                        <li><strong>Set the Start Date:</strong> Choose a starting month and year for your timeline.</li>
+                        <li><strong>Define Phases:</strong>
+                            <ul>
+                                <li>Give each project phase a name and a duration in months.</li>
+                                <li>Click <strong>"+ Add Phase"</strong> to add more steps.</li>
+                                <li><strong>Drag and drop</strong> phases using the handle icon (☰) to reorder them.</li>
+                                <li>Click the red 'X' button to remove a phase.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Generate:</strong> Hit the "Generate Timeline" button to see your visual schedule.</li>
+                        <li><strong>Export:</strong> Use the "Export PNG" or "Export SVG" buttons to save a high-quality image of your timeline.</li>
+                    </ol>
+                </div>
+            </details>
+        </div>
+
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <!-- ==== INPUT CONTROLS ==== -->
@@ -93,7 +144,7 @@
 
             <!-- ==== OUTPUT DISPLAY ==== -->
             <div id="export-area" class="lg:col-span-8 bg-white p-6 rounded-2xl shadow-lg border border-slate-200">
-                <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <div class="flex flex-wrap justify-between items-center gap-y-2 border-b pb-3 mb-4">
                     <h2 class="text-xl font-bold">Timeline Visual</h2>
                     <div class="flex gap-2">
                         <button id="export-png-btn" class="text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-3 rounded-lg transition-colors">Export PNG</button>
@@ -114,7 +165,7 @@
                 </div>
 
                 <h2 class="text-xl font-bold mt-8 mb-4 border-b pb-3">Legend</h2>
-                <div id="legend-container" class="flex flex-wrap gap-4">
+                <div id="legend-container" class="flex flex-wrap gap-x-4 gap-y-2">
                    <p class="text-slate-500">Legend will be generated with the timeline.</p>
                 </div>
             </div>
@@ -166,11 +217,11 @@
                 Sortable.create(phasesContainer, {
                     animation: 150,
                     ghostClass: 'sortable-ghost',
-                    handle: '.phase-row',
-                    onEnd: () => { /* Future logic if needed */ }
+                    handle: '.drag-handle',
+                    onEnd: () => {}
                 });
             }
-
+            
             function addDefaultPhases() {
                 addPhaseRow("Planning", 1);
                 addPhaseRow("Design & Development", 5);
@@ -187,7 +238,7 @@
                 phaseDiv.setAttribute('data-id', phaseIdCounter);
 
                 phaseDiv.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 flex-shrink-0 drag-handle" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
                     <input type="text" placeholder="Phase Name" class="phase-name w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" value="${name}">
                     <input type="number" placeholder="Months" class="phase-duration w-28 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" min="1" value="${duration}">
                     <button type="button" class="remove-phase-btn text-slate-400 hover:text-red-500 p-1 rounded-full transition-transform hover:scale-110">
@@ -293,7 +344,7 @@
                     yearGroup.className = 'flex items-stretch mt-2';
                     
                     const yearLabel = document.createElement('div');
-                    yearLabel.className = 'flex-shrink-0 flex items-center justify-center font-bold text-slate-600 pr-4 py-2 text-lg w-20';
+                    yearLabel.className = 'flex-shrink-0 flex items-center justify-center font-bold text-slate-600 pr-4 py-2 text-lg w-16 sm:w-20';
                     yearLabel.textContent = year;
                     yearGroup.appendChild(yearLabel);
 
@@ -301,7 +352,7 @@
                     monthsContainer.className = 'flex items-stretch';
                     months.forEach(item => {
                         const monthEl = document.createElement('div');
-                        monthEl.className = 'flex-shrink-0 flex items-center justify-center w-16 h-16 m-1 rounded-lg text-sm font-semibold shadow-sm text-white';
+                        monthEl.className = 'flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 m-1 rounded-lg text-sm font-semibold shadow-sm text-white';
                         monthEl.style.backgroundColor = item.color;
                         monthEl.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
                         monthEl.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
@@ -361,19 +412,48 @@
                 foreignObject.setAttribute("height", "100%");
                 
                 const style = document.createElement("style");
-                style.textContent = `
-                    * {
-                      font-family: 'Inter', sans-serif;
-                    }
-                `;
+                // Copy all styles from the document
+                const styleSheets = Array.from(document.styleSheets);
+                style.textContent = styleSheets
+                    .map(sheet => {
+                        try {
+                           return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n');
+                        } catch(e) {
+                           console.log('Could not read css rules from stylesheet', e);
+                           return '';
+                        }
+                    }).join('\n');
 
                 const body = document.createElementNS(XhtmlNamespace, "body");
                 body.setAttribute("style", `margin: 0px; background-color: ${window.getComputedStyle(domNode).backgroundColor};`);
-                body.appendChild(domNode.cloneNode(true));
-                body.prepend(style);
+                // Deep clone the node to be exported
+                const clonedNode = domNode.cloneNode(true);
+                // Also need to get the font
+                const fontLink = document.querySelector('link[href*="fonts.googleapis.com"]');
 
-                foreignObject.appendChild(body);
-                svg.appendChild(foreignObject);
+                const newForeignObject = document.createElementNS(SvgNamespace, 'foreignObject');
+                newForeignObject.setAttribute('x', 0);
+                newForeignObject.setAttribute('y', 0);
+                newForeignObject.setAttribute('width', '100%');
+                newForeignObject.setAttribute('height', '100%');
+                const clonedHtml = document.createElementNS(XhtmlNamespace, 'html');
+                clonedHtml.setAttribute('xmlns', XhtmlNamespace);
+
+                const clonedHead = document.createElementNS(XhtmlNamespace, 'head');
+                if (fontLink) {
+                    clonedHead.appendChild(fontLink.cloneNode(true));
+                }
+                clonedHead.appendChild(style);
+                
+                const clonedBody = document.createElementNS(XhtmlNamespace, 'body');
+                clonedBody.setAttribute("style", `margin: 0px; background-color: ${window.getComputedStyle(domNode).backgroundColor};`);
+                clonedBody.appendChild(clonedNode);
+                
+                clonedHtml.appendChild(clonedHead);
+                clonedHtml.appendChild(clonedBody);
+                
+                newForeignObject.appendChild(clonedHtml);
+                svg.appendChild(newForeignObject);
 
                 const svgString = new XMLSerializer().serializeToString(svg);
                 return `${doctype}${svgString}`;
@@ -384,16 +464,20 @@
             generateBtn.addEventListener('click', generateTimeline);
             
             exportPngBtn.addEventListener('click', () => {
+                const titleText = document.getElementById('main-title').textContent || "timeline";
+                const filename = titleText.toLowerCase().replace(/\s+/g, '_') + '.png';
                 html2canvas(exportArea, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
-                    downloadURI(canvas.toDataURL('image/png'), 'timeline.png');
+                    downloadURI(canvas.toDataURL('image/png'), filename);
                 });
             });
 
             exportSvgBtn.addEventListener('click', () => {
+                const titleText = document.getElementById('main-title').textContent || "timeline";
+                const filename = titleText.toLowerCase().replace(/\s+/g, '_') + '.svg';
                 const svgData = domToSvg(exportArea);
                 const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
                 const svgUrl = URL.createObjectURL(svgBlob);
-                downloadURI(svgUrl, 'timeline.svg');
+                downloadURI(svgUrl, filename);
             });
 
             // --- RUN ---
