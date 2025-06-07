@@ -1,58 +1,52 @@
-const { useState, useEffect } = React;
-const { Container, Box, Grid, TextField, Card, CardContent, Typography } = MaterialUI;
+// Minimal search and render for tools
+async function init() {
+  const res = await fetch('tools.json');
+  const tools = await res.json();
+  const container = document.getElementById('tool-container');
+  const search = document.getElementById('search');
 
-function App() {
-  const [tools, setTools] = useState([]);
-  const [query, setQuery] = useState('');
+  function matches(tool, q) {
+    q = q.toLowerCase();
+    return tool.title.toLowerCase().includes(q) ||
+           tool.description.toLowerCase().includes(q) ||
+           (tool.keywords || []).some(k => k.toLowerCase().includes(q));
+  }
 
-  useEffect(() => {
-    fetch('tools.json')
-      .then(res => res.json())
-      .then(setTools);
-  }, []);
+  function render(list) {
+    container.innerHTML = '';
+    list.forEach(tool => {
+      const col = document.createElement('div');
+      col.className = 'mui-col-md-4 mui-col-sm-6 mui-col-xs-12';
+      const panel = document.createElement('div');
+      panel.className = 'mui-panel tool-card';
+      const iframe = document.createElement('iframe');
+      iframe.src = tool.file;
+      iframe.className = 'tool-frame';
+      const title = document.createElement('h3');
+      title.textContent = tool.title;
+      const desc = document.createElement('p');
+      desc.textContent = tool.description;
+      panel.appendChild(iframe);
+      panel.appendChild(title);
+      panel.appendChild(desc);
+      if (tool.keywords && tool.keywords.length) {
+        const keys = document.createElement('small');
+        keys.textContent = 'Keywords: ' + tool.keywords.join(', ');
+        panel.appendChild(keys);
+      }
+      col.appendChild(panel);
+      container.appendChild(col);
+    });
+  }
 
-  const filtered = tools.filter(t => {
-    const lower = query.toLowerCase();
-    return (
-      t.title.toLowerCase().includes(lower) ||
-      t.description.toLowerCase().includes(lower) ||
-      (t.keywords || []).some(k => k.toLowerCase().includes(lower))
-    );
-  });
+  function filter() {
+    const q = search.value.trim();
+    render(q ? tools.filter(t => matches(t, q)) : tools);
+  }
 
-  return (
-    React.createElement(Container, { sx: { py: 4 } },
-      React.createElement(Box, { sx: { mb: 2 } },
-        React.createElement(TextField, {
-          fullWidth: true,
-          label: 'Search tools',
-          variant: 'outlined',
-          value: query,
-          onChange: e => setQuery(e.target.value)
-        })
-      ),
-      React.createElement(Grid, { container: true, spacing: 2 },
-        filtered.map(tool => (
-          React.createElement(Grid, { item: true, xs: 12, sm: 6, md: 4, key: tool.file },
-            React.createElement(Card, null,
-              React.createElement('iframe', {
-                src: tool.file,
-                style: { width: '100%', height: '200px', border: 0 }
-              }),
-              React.createElement(CardContent, null,
-                React.createElement(Typography, { variant: 'h6' }, tool.title),
-                React.createElement(Typography, { variant: 'body2', sx: { mb: 1 } }, tool.description),
-                tool.keywords && tool.keywords.length > 0 &&
-                  React.createElement(Typography, { variant: 'caption', color: 'text.secondary' },
-                    'Keywords: ' + tool.keywords.join(', ')
-                  )
-              )
-            )
-          )
-        ))
-      )
-    )
-  );
+  search.addEventListener('input', filter);
+  render(tools);
 }
 
-ReactDOM.render(React.createElement(App), document.getElementById('root'));
+document.addEventListener('DOMContentLoaded', init);
+
