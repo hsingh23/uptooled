@@ -119,8 +119,32 @@ HAVE FUN
                 <span id="fullscreen-text">Full Screen</span>
             </button>
         </div>
-        <canvas id="poster-canvas" class="bg-white shadow-lg rounded-md"></canvas>
-    </div>
+                <canvas id="poster-canvas" class="bg-white shadow-lg rounded-md"></canvas>
+                <div id="item-editor" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white p-4 rounded-md shadow-lg w-72">
+                        <div class="mb-2">
+                            <label for="editor-text" class="block text-sm font-medium text-gray-700 mb-1">Text</label>
+                            <input id="editor-text" type="text" class="w-full p-1 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="mb-2">
+                            <label for="editor-font" class="block text-sm font-medium text-gray-700 mb-1">Font</label>
+                            <select id="editor-font" class="w-full p-1 border border-gray-300 rounded-md"></select>
+                        </div>
+                        <div class="mb-2">
+                            <label for="editor-color" class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                            <input id="editor-color" type="color" class="w-full h-8 p-0 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="flex items-center space-x-4 mb-4">
+                            <label class="flex items-center"><input type="checkbox" id="editor-bold" class="rounded text-indigo-600"><span class="ml-2 text-sm">Bold</span></label>
+                            <label class="flex items-center"><input type="checkbox" id="editor-italic" class="rounded text-indigo-600"><span class="ml-2 text-sm">Italic</span></label>
+                        </div>
+                        <div class="flex justify-end space-x-2">
+                            <button id="editor-reset" class="btn-action">Reset</button>
+                            <button id="editor-close" class="btn-action">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -137,6 +161,14 @@ HAVE FUN
             const textInput = document.getElementById('text-input');
             const marginInput = document.getElementById('margin-input');
             const downloadBtn = document.getElementById('download-btn');
+            const editor = document.getElementById('item-editor');
+            const editorText = document.getElementById('editor-text');
+            const editorFont = document.getElementById('editor-font');
+            const editorColor = document.getElementById('editor-color');
+            const editorBold = document.getElementById('editor-bold');
+            const editorItalic = document.getElementById('editor-italic');
+            const editorReset = document.getElementById('editor-reset');
+            const editorClose = document.getElementById('editor-close');
 
             const controls = {
                 bgColor: document.getElementById('bg-color'),
@@ -147,13 +179,14 @@ HAVE FUN
             };
             
             let textItems = [];
+            let currentEditItem = null;
             let backgroundImage = null;
             let lastMousePos = { x: 0, y: 0 };
             const RESIZE_HANDLE_SIZE = 20;
             const sizes = { tall: { width: 1080, height: 1920 }, wide: { width: 1920, height: 1080 }, square: { width: 1080, height: 1080 } };
 
             function populateFontSelectors() {
-                const selects = [controls.primary.font, controls.secondary.font];
+                const selects = [controls.primary.font, controls.secondary.font, editorFont];
                 selects.forEach(select => {
                     select.innerHTML = '';
                     for (const category in FONT_LIST) {
@@ -359,12 +392,15 @@ HAVE FUN
                 const pos = getCanvasPos(e);
                 lastMousePos = pos;
                 const target = getActionTarget(pos);
-
                 const all = backgroundImage ? [backgroundImage, ...textItems] : [...textItems];
                 if (target) {
+                    if (e.ctrlKey && !target.item.img) {
+                        openItemEditor(target.item);
+                        return;
+                    }
                     if (e.shiftKey) {
                         target.item.isSelected = !target.item.isSelected;
-                    } else {
+                    } else if (!target.item.isSelected) {
                         all.forEach(i => i.isSelected = false);
                         target.item.isSelected = true;
                     }
@@ -378,7 +414,7 @@ HAVE FUN
                         }
                     });
                 } else {
-                    all.forEach(i => i.isSelected = false);
+                    if (!e.shiftKey) all.forEach(i => i.isSelected = false);
                 }
                 draw();
             }
@@ -433,9 +469,85 @@ HAVE FUN
                      item.color = props.color.value;
                      item.bold = props.bold.checked;
                      item.italic = props.italic.checked;
+                     item.custom = true;
                 });
                 if(selected.length > 0) draw();
             }
+
+            function handleGlobalStyleChange() {
+                const selected = textItems.filter(i => i.isSelected);
+                if (selected.length) {
+                    applyStyleToSelection();
+                } else {
+                    textItems.forEach(item => {
+                        if (!item.custom) {
+                            const props = item.isSecondary ? controls.secondary : controls.primary;
+                            item.fontFamily = props.font.value;
+                            item.color = props.color.value;
+                            item.bold = props.bold.checked;
+                            item.italic = props.italic.checked;
+                        }
+                    });
+                    draw();
+                }
+            }
+
+            function openItemEditor(item) {
+                currentEditItem = item;
+                editorText.value = item.text;
+                editorFont.value = item.fontFamily;
+                editorColor.value = item.color;
+                editorBold.checked = item.bold;
+                editorItalic.checked = item.italic;
+                editor.classList.remove('hidden');
+            }
+
+            function closeItemEditor() {
+                currentEditItem = null;
+                editor.classList.add('hidden');
+            }
+
+            editorText.addEventListener('input', () => {
+                if (!currentEditItem) return;
+                currentEditItem.text = editorText.value;
+                currentEditItem.custom = true;
+                draw();
+            });
+            editorFont.addEventListener('input', () => {
+                if (!currentEditItem) return;
+                currentEditItem.fontFamily = editorFont.value;
+                currentEditItem.custom = true;
+                draw();
+            });
+            editorColor.addEventListener('input', () => {
+                if (!currentEditItem) return;
+                currentEditItem.color = editorColor.value;
+                currentEditItem.custom = true;
+                draw();
+            });
+            editorBold.addEventListener('change', () => {
+                if (!currentEditItem) return;
+                currentEditItem.bold = editorBold.checked;
+                currentEditItem.custom = true;
+                draw();
+            });
+            editorItalic.addEventListener('change', () => {
+                if (!currentEditItem) return;
+                currentEditItem.italic = editorItalic.checked;
+                currentEditItem.custom = true;
+                draw();
+            });
+            editorReset.addEventListener('click', () => {
+                if (!currentEditItem) return;
+                const props = currentEditItem.isSecondary ? controls.secondary : controls.primary;
+                currentEditItem.fontFamily = props.font.value;
+                currentEditItem.color = props.color.value;
+                currentEditItem.bold = props.bold.checked;
+                currentEditItem.italic = props.italic.checked;
+                currentEditItem.custom = false;
+                draw();
+            });
+            editorClose.addEventListener('click', closeItemEditor);
             
             function init() {
                 populateFontSelectors();
@@ -446,8 +558,8 @@ HAVE FUN
                 controls.bgImage.addEventListener('change', handleImageUpload);
                 downloadBtn.addEventListener('click', downloadImage);
                 controls.canvasSize.addEventListener('change', resizeCanvas);
-                Object.values(controls.primary).forEach(el => el.addEventListener('input', applyStyleToSelection));
-                Object.values(controls.secondary).forEach(el => el.addEventListener('input', applyStyleToSelection));
+                Object.values(controls.primary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
+                Object.values(controls.secondary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
                 window.addEventListener('resize', resizeCanvas);
                 canvas.addEventListener('mousedown', handleMouseDown);
                 canvas.addEventListener('mousemove', handleMouseMove);
