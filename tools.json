@@ -30,5 +30,18 @@
       "chrome extension icons",
       "web app icons"
     ]
+  },
+  {
+    "file": "tools/Poster Creator.html",
+    "title": "Poster Creator",
+    "description": "Create stunning posters with a powerful online tool. Customize text, fonts, colors, and layouts to design your perfect poster.",
+    "keywords": [
+      "poster creator",
+      "design tool",
+      "graphic design",
+      "custom poster",
+      "online editor",
+      "typography design"
+    ]
   }
 ]
