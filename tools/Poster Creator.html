@@ -81,6 +81,8 @@ HAVE FUN
                  <div class="space-y-2">
                      <button id="download-btn" class="btn-action"><span>Download JPEG</span></button>
                      <button id="copy-btn" class="btn-action"><span id="copy-btn-text">Copy Styles</span></button>
+                     <button id="undo-btn" class="btn-action"><span>Undo</span></button>
+                     <button id="redo-btn" class="btn-action"><span>Redo</span></button>
                  </div>
             </div>
             <div class="mb-4">
@@ -183,6 +185,8 @@ HAVE FUN
             const textInput = document.getElementById('text-input');
             const marginInput = document.getElementById('margin-input');
             const downloadBtn = document.getElementById('download-btn');
+            const undoBtn = document.getElementById('undo-btn');
+            const redoBtn = document.getElementById('redo-btn');
             const editor = document.getElementById('item-editor');
             const editorText = document.getElementById('editor-text');
             const editorFont = document.getElementById('editor-font');
@@ -208,8 +212,54 @@ HAVE FUN
             let currentEditItem = null;
             let backgroundImage = null;
             let lastMousePos = { x: 0, y: 0 };
+            const undoStack = [];
+            const redoStack = [];
             const RESIZE_HANDLE_SIZE = 20;
             const sizes = { tall: { width: 1080, height: 1920 }, wide: { width: 1920, height: 1080 }, square: { width: 1080, height: 1080 } };
+
+            function cloneState() {
+                return {
+                    textItems: textItems.map(i => ({...i})),
+                    backgroundImage: backgroundImage ? {
+                        ...backgroundImage,
+                        imgSrc: backgroundImage.img ? backgroundImage.img.src : null
+                    } : null
+                };
+            }
+
+            function applyState(state) {
+                textItems = state.textItems.map(i => ({...i}));
+                if (state.backgroundImage) {
+                    const img = new Image();
+                    img.src = state.backgroundImage.imgSrc;
+                    backgroundImage = {...state.backgroundImage, img};
+                } else {
+                    backgroundImage = null;
+                }
+                draw();
+            }
+
+            function saveState() {
+                undoStack.push(cloneState());
+                if (undoStack.length > 50) undoStack.shift();
+                redoStack.length = 0;
+            }
+
+            function undo() {
+                if (!undoStack.length) return;
+                const current = cloneState();
+                redoStack.push(current);
+                const state = undoStack.pop();
+                applyState(state);
+            }
+
+            function redo() {
+                if (!redoStack.length) return;
+                const current = cloneState();
+                undoStack.push(current);
+                const state = redoStack.pop();
+                applyState(state);
+            }
 
             function populateFontSelectors() {
                 const selects = [controls.primary.font, controls.secondary.font, editorFont];
@@ -319,6 +369,7 @@ HAVE FUN
 
                 textItems = newTextItems;
                 draw();
+                saveState();
             }
 
             function handleImageUpload(e) {
@@ -337,6 +388,7 @@ HAVE FUN
                         action: null
                     };
                     draw();
+                    saveState();
                 };
                 img.src = URL.createObjectURL(file);
             }
@@ -447,6 +499,7 @@ HAVE FUN
                 const target = getActionTarget(pos);
                 const all = backgroundImage ? [backgroundImage, ...textItems] : [...textItems];
                 if (target) {
+                    saveState();
                     if (e.ctrlKey && !target.item.img) {
                         openItemEditor(target.item);
                         return;
@@ -515,6 +568,7 @@ HAVE FUN
             }
 
             function applyStyleToSelection() {
+                saveState();
                 const selected = textItems.filter(i => i.isSelected);
                 selected.forEach(item => {
                      const props = item.isSecondary ? controls.secondary : controls.primary;
@@ -530,7 +584,8 @@ HAVE FUN
                 if(selected.length > 0) draw();
             }
 
-            function handleGlobalStyleChange() {
+           function handleGlobalStyleChange() {
+                saveState();
                 const selected = textItems.filter(i => i.isSelected);
                 if (selected.length) {
                     applyStyleToSelection();
@@ -571,54 +626,63 @@ HAVE FUN
 
             editorText.addEventListener('input', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.text = editorText.value;
                 currentEditItem.custom = true;
                 draw();
             });
             editorFont.addEventListener('input', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.fontFamily = editorFont.value;
                 currentEditItem.custom = true;
                 draw();
             });
             editorColor.addEventListener('input', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.color = editorColor.value;
                 currentEditItem.custom = true;
                 draw();
             });
             editorAlpha.addEventListener('input', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.alpha = parseFloat(editorAlpha.value);
                 currentEditItem.custom = true;
                 draw();
             });
             editorBold.addEventListener('change', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.bold = editorBold.checked;
                 currentEditItem.custom = true;
                 draw();
             });
             editorItalic.addEventListener('change', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.italic = editorItalic.checked;
                 currentEditItem.custom = true;
                 draw();
             });
             editorStrike.addEventListener('change', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.strike = editorStrike.checked;
                 currentEditItem.custom = true;
                 draw();
             });
             editorShadow.addEventListener('change', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.shadow = editorShadow.checked;
                 currentEditItem.custom = true;
                 draw();
             });
             editorReset.addEventListener('click', () => {
                 if (!currentEditItem) return;
+                saveState();
                 const props = currentEditItem.isSecondary ? controls.secondary : controls.primary;
                 currentEditItem.fontFamily = props.font.value;
                 currentEditItem.color = props.color.value;
@@ -641,6 +705,8 @@ HAVE FUN
                 controls.bgAlpha.addEventListener('input', draw);
                 controls.bgImage.addEventListener('change', handleImageUpload);
                 downloadBtn.addEventListener('click', downloadImage);
+                undoBtn.addEventListener('click', undo);
+                redoBtn.addEventListener('click', redo);
                 controls.canvasSize.addEventListener('change', resizeCanvas);
                 Object.values(controls.primary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
                 Object.values(controls.secondary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
@@ -648,8 +714,12 @@ HAVE FUN
                 canvas.addEventListener('mousedown', handleMouseDown);
                 canvas.addEventListener('mousemove', handleMouseMove);
                 canvas.addEventListener('mouseup', () => {
-                    textItems.forEach(i=>i.action=null);
-                    if (backgroundImage) backgroundImage.action=null;
+                    let changed = false;
+                    textItems.forEach(i=>{
+                        if(i.action){changed = true; i.action=null;}
+                    });
+                    if (backgroundImage && backgroundImage.action) {changed = true; backgroundImage.action=null;}
+                    if(changed) saveState();
                 });
                 canvas.addEventListener('mouseleave', () => {
                     textItems.forEach(i=>i.action=null);
@@ -658,8 +728,16 @@ HAVE FUN
                 canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
                 canvas.addEventListener('touchmove', handleMouseMove, { passive: false });
                 canvas.addEventListener('touchend', () => {
-                    textItems.forEach(i=>i.action=null);
-                    if (backgroundImage) backgroundImage.action=null;
+                    let changed = false;
+                    textItems.forEach(i=>{
+                        if(i.action){changed=true; i.action=null;}
+                    });
+                    if (backgroundImage && backgroundImage.action) {changed=true; backgroundImage.action=null;}
+                    if(changed) saveState();
+                });
+                document.addEventListener('keydown', e => {
+                    if((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key==='z') { e.preventDefault(); undo(); }
+                    else if((e.ctrlKey||e.metaKey) && (e.key==='y' || (e.shiftKey && e.key==='z'))) { e.preventDefault(); redo(); }
                 });
             }
             loadFonts();
