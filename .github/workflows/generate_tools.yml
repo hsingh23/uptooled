@@ -1,4 +1,4 @@
-name: Generate tools.json
+name: Generate site data
 
 on:
   push:
@@ -19,14 +19,16 @@ jobs:
           node-version: 22
       - name: Generate tools.json
         run: node generate-tools.js
-      - name: Commit tools.json
+      - name: Generate external-sites.json
+        run: node generate-external-sites.js
+      - name: Commit generated files
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add tools.json
+          git add tools.json external-sites.json
           if git diff --cached --quiet; then
             echo "No changes"
           else
-            git commit -m "Update tools.json"
+            git commit -m "Update generated data"
             git push
           fi

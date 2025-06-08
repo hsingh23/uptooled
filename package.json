@@ -4,7 +4,8 @@
   "description": "Tools gallery",
   "main": "generate-tools.js",
   "scripts": {
-    "generate": "node generate-tools.js"
+    "generate": "node generate-tools.js",
+    "generate:external": "node generate-external-sites.js"
   },
   "keywords": [],
   "author": "",
