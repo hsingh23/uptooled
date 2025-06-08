@@ -106,7 +106,7 @@
                 <h2 class="text-xl font-bold mb-6 border-b pb-3">Configuration</h2>
                 
                 <div id="config-form">
-                    <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="grid grid-cols-3 gap-4 mb-4">
                         <div>
                             <label for="startMonth" class="block text-sm font-medium text-slate-700 mb-1">Start Month</label>
                             <select id="startMonth" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"></select>
@@ -114,6 +114,10 @@
                         <div>
                             <label for="startYear" class="block text-sm font-medium text-slate-700 mb-1">Start Year</label>
                             <input type="number" id="startYear" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" value="2025">
+                        </div>
+                        <div>
+                            <label for="unitsPerRow" class="block text-sm font-medium text-slate-700 mb-1">Units per Row</label>
+                            <input type="number" id="unitsPerRow" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" value="12" min="1">
                         </div>
                     </div>
                     
@@ -151,6 +155,11 @@
                         <button id="export-svg-btn" class="text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-3 rounded-lg transition-colors">Export SVG</button>
                     </div>
                 </div>
+                <div class="flex gap-2 mb-4">
+                    <button class="view-btn bg-blue-600 text-white text-sm font-semibold py-1 px-3 rounded" data-view="month">Month View</button>
+                    <button class="view-btn bg-slate-200 text-slate-700 text-sm font-semibold py-1 px-3 rounded" data-view="week">Week View</button>
+                    <button class="view-btn bg-slate-200 text-slate-700 text-sm font-semibold py-1 px-3 rounded" data-view="day">Day View</button>
+                </div>
                 <div id="output-container" class="min-h-[200px] flex flex-col justify-center items-center">
                     <div class="text-slate-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
@@ -161,7 +170,7 @@
                 </div>
 
                 <div id="timeline-wrapper" class="hidden">
-                    <div id="timeline-container" class="w-full overflow-x-auto pb-4"></div>
+                    <div id="timeline-container" class="w-full overflow-x-auto pb-4 timeline-container"></div>
                 </div>
 
                 <h2 class="text-xl font-bold mt-8 mb-4 border-b pb-3">Legend</h2>
@@ -177,6 +186,7 @@
             // --- DOM ELEMENTS ---
             const startMonthSelect = document.getElementById('startMonth');
             const startYearInput = document.getElementById('startYear');
+            const unitsPerRowInput = document.getElementById('unitsPerRow');
             const phasesContainer = document.getElementById('phases-container');
             const addPhaseBtn = document.getElementById('add-phase-btn');
             const generateBtn = document.getElementById('generate-btn');
@@ -190,11 +200,13 @@
             const exportPngBtn = document.getElementById('export-png-btn');
             const exportSvgBtn = document.getElementById('export-svg-btn');
             const exportArea = document.getElementById('export-area');
+            const viewButtons = document.querySelectorAll('.view-btn');
 
             // --- CONSTANTS & STATE ---
             const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const COLORS = ['#fdba74', '#67e8f9', '#86efac', '#c4b5fd', '#f9a8d4', '#fcd34d', '#5eead4', '#a7f3d0', '#ddd6fe', '#fbcfe8', '#fb923c', '#22d3ee', '#4ade80', '#a78bfa', '#f472b6'];
             let phaseIdCounter = 0;
+            let currentView = 'month';
 
             // --- INITIALIZATION ---
             function initialize() {
@@ -202,6 +214,7 @@
                 setupSortable();
                 addDefaultPhases();
                 updateTotalMonths();
+                setupViewButtons();
             }
 
             function populateMonthSelect() {
@@ -219,6 +232,19 @@
                     ghostClass: 'sortable-ghost',
                     handle: '.drag-handle',
                     onEnd: () => {}
+                });
+            }
+
+            function setupViewButtons() {
+                viewButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        viewButtons.forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
+                        btn.classList.add('bg-blue-600', 'text-white');
+                        currentView = btn.dataset.view;
+                        if (!timelineWrapper.classList.contains('hidden')) {
+                            generateTimeline();
+                        }
+                    });
                 });
             }
             
@@ -264,17 +290,23 @@
                 hideError();
                 const phases = getPhaseData();
                 if (!phases) return;
-                
+
                 const totalDuration = phases.reduce((acc, p) => acc + p.duration, 0);
                 if (totalDuration === 0) {
                     showError("Please add at least one phase with a duration > 0.");
                     return;
                 }
 
-                const months = buildMonthArray(totalDuration);
-                const timelineData = assignPhases(months, phases);
+                const unitsPerRow = parseInt(unitsPerRowInput.value) || totalDuration;
 
-                renderTimeline(timelineData);
+                const months = buildMonthArray(totalDuration);
+                let units = months;
+                if (currentView === 'week') units = buildSubUnits(months, 4, 'week');
+                if (currentView === 'day') units = buildSubUnits(months, 30, 'day');
+
+                const timelineData = assignPhases(units, phases, currentView);
+
+                renderTimeline(timelineData, unitsPerRow, currentView);
                 renderLegend(phases);
                 
                 outputContainer.classList.add('hidden');
@@ -317,14 +349,29 @@
                 return monthArray;
             }
 
-            function assignPhases(months, phases) {
+            function buildSubUnits(months, count, type) {
+                const arr = [];
+                months.forEach(m => {
+                    for (let i = 0; i < count; i++) {
+                        const unit = { monthIndex: m.monthIndex, year: m.year };
+                        if (type === 'week') unit.weekIndex = i + 1;
+                        if (type === 'day') unit.day = i + 1;
+                        arr.push(unit);
+                    }
+                });
+                return arr;
+            }
+
+            function assignPhases(units, phases, view) {
                 const timeline = [];
-                let monthCursor = 0;
+                let cursor = 0;
+                const factor = view === 'week' ? 4 : view === 'day' ? 30 : 1;
                 phases.forEach(phase => {
-                    for (let i = 0; i < phase.duration; i++) {
-                        if (monthCursor < months.length) {
-                           timeline.push({ ...months[monthCursor], phaseName: phase.name, color: phase.color });
-                           monthCursor++;
+                    const unitsNeeded = phase.duration * factor;
+                    for (let i = 0; i < unitsNeeded; i++) {
+                        if (cursor < units.length) {
+                            timeline.push({ ...units[cursor], phaseName: phase.name, color: phase.color });
+                            cursor++;
                         }
                     }
                 });
@@ -332,35 +379,27 @@
             }
 
             // --- RENDERING ---
-            function renderTimeline(timelineData) {
+            function renderTimeline(timelineData, perRow, view) {
                 timelineContainer.innerHTML = '';
-                const groupedByYear = timelineData.reduce((acc, item) => {
-                    (acc[item.year] = acc[item.year] || []).push(item);
-                    return acc;
-                }, {});
-
-                Object.entries(groupedByYear).forEach(([year, months]) => {
-                    const yearGroup = document.createElement('div');
-                    yearGroup.className = 'flex items-stretch mt-2';
-                    
-                    const yearLabel = document.createElement('div');
-                    yearLabel.className = 'flex-shrink-0 flex items-center justify-center font-bold text-slate-600 pr-4 py-2 text-lg w-16 sm:w-20';
-                    yearLabel.textContent = year;
-                    yearGroup.appendChild(yearLabel);
-
-                    const monthsContainer = document.createElement('div');
-                    monthsContainer.className = 'flex items-stretch';
-                    months.forEach(item => {
-                        const monthEl = document.createElement('div');
-                        monthEl.className = 'flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 m-1 rounded-lg text-sm font-semibold shadow-sm text-white';
-                        monthEl.style.backgroundColor = item.color;
-                        monthEl.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
-                        monthEl.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
-                        monthsContainer.appendChild(monthEl);
+                for (let i = 0; i < timelineData.length; i += perRow) {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-stretch mt-2';
+                    timelineData.slice(i, i + perRow).forEach(item => {
+                        const cell = document.createElement('div');
+                        cell.className = 'flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 m-1 rounded-lg text-xs sm:text-sm font-semibold shadow-sm text-white';
+                        cell.style.backgroundColor = item.color;
+                        if (view === 'week') {
+                            cell.textContent = 'W' + item.weekIndex;
+                        } else if (view === 'day') {
+                            cell.textContent = item.day;
+                        } else {
+                            cell.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
+                        }
+                        cell.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
+                        row.appendChild(cell);
                     });
-                    yearGroup.appendChild(monthsContainer);
-                    timelineContainer.appendChild(yearGroup);
-                });
+                    timelineContainer.appendChild(row);
+                }
             }
 
             function renderLegend(phases) {
@@ -466,15 +505,21 @@
             exportPngBtn.addEventListener('click', () => {
                 const titleText = document.getElementById('main-title').textContent || "timeline";
                 const filename = titleText.toLowerCase().replace(/\s+/g, '_') + '.png';
+                const prevClass = timelineContainer.className;
+                timelineContainer.classList.remove('overflow-x-auto');
                 html2canvas(exportArea, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
                     downloadURI(canvas.toDataURL('image/png'), filename);
+                    timelineContainer.className = prevClass;
                 });
             });
 
             exportSvgBtn.addEventListener('click', () => {
                 const titleText = document.getElementById('main-title').textContent || "timeline";
                 const filename = titleText.toLowerCase().replace(/\s+/g, '_') + '.svg';
+                const prevClass = timelineContainer.className;
+                timelineContainer.classList.remove('overflow-x-auto');
                 const svgData = domToSvg(exportArea);
+                timelineContainer.className = prevClass;
                 const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
                 const svgUrl = URL.createObjectURL(svgBlob);
                 downloadURI(svgUrl, filename);
