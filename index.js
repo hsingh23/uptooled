@@ -2,6 +2,21 @@
 async function init() {
   const res = await fetch('tools.json');
   const tools = await res.json();
+  let external = [];
+  try {
+    const extRes = await fetch('external-sites.json');
+    if (extRes.ok) {
+      external = await extRes.json();
+    }
+  } catch (err) {
+    console.error('Failed to load external sites', err);
+  }
+  const allTools = tools.concat(external.map(s => ({
+    file: s.file || s.url,
+    title: s.title || s.url,
+    description: s.description || '',
+    keywords: s.keywords || []
+  })));
 
   const searchEl = document.getElementById('search');
   const listEl = document.getElementById('tool-list');
@@ -89,7 +104,7 @@ async function init() {
 
   function filter() {
     const q = searchEl.value.trim();
-    const filtered = q ? tools.filter(t => matches(t, q)) : tools;
+    const filtered = q ? allTools.filter(t => matches(t, q)) : allTools;
     renderList(filtered);
     if (filtered.length) {
       renderGrid(filtered);
@@ -115,19 +130,19 @@ async function init() {
   window.addEventListener('hashchange', () => {
     const file = decodeURIComponent(location.hash.slice(1));
     if (file) {
-      const tool = tools.find(t => t.file === file);
+      const tool = allTools.find(t => t.file === file);
       if (tool) selectTool(tool, false);
     } else {
       showGrid();
     }
   });
 
-  renderList(tools);
-  renderGrid(tools);
+  renderList(allTools);
+  renderGrid(allTools);
 
   const startFile = decodeURIComponent(location.hash.slice(1));
   if (startFile) {
-    const tool = tools.find(t => t.file === startFile);
+    const tool = allTools.find(t => t.file === startFile);
     if (tool) {
       selectTool(tool, false);
     } else {
