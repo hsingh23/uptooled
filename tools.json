@@ -1,7 +1,7 @@
 [
   {
     "file": "tools/Calendar Timeline Visualizer.html",
-    "title": "Calendar Timeline Visualizer",
+    "title": "Calendar Timeline to Image Visualizer",
     "description": "A free, interactive tool to create beautiful, color-coded project timelines. Input your project phases, set durations, and instantly generate a shareable visual calendar. Export to PNG or SVG.",
     "keywords": [
       "timeline generator",
