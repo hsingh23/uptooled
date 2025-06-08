@@ -21,6 +21,7 @@
         #poster-canvas { cursor: default; }
         .btn-action { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background-color: white; transition: background-color 0.2s; }
         .btn-action:hover { background-color: #f9fafb; }
+        .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* Font previews in select dropdown */
         .font-select-merriweather { font-family: 'Merriweather', serif; }
@@ -81,6 +82,8 @@ HAVE FUN
                  <div class="space-y-2">
                      <button id="download-btn" class="btn-action"><span>Download JPEG</span></button>
                      <button id="copy-btn" class="btn-action"><span id="copy-btn-text">Copy Styles</span></button>
+                     <button id="undo-btn" class="btn-action"><span>Undo</span></button>
+                     <button id="redo-btn" class="btn-action"><span>Redo</span></button>
                  </div>
             </div>
             <div class="mb-4">
@@ -91,9 +94,7 @@ HAVE FUN
             </div>
             <div class="mb-4">
                 <label for="bg-color" class="block text-sm font-medium text-gray-700 mb-1">Background Color</label>
-                <input type="color" id="bg-color" value="#00008B" class="w-full h-10 p-1 border border-gray-300 rounded-md mb-1">
-                <label for="bg-alpha" class="block text-sm font-medium text-gray-700 mb-1">Background Opacity</label>
-                <input type="range" id="bg-alpha" min="0" max="1" step="0.05" value="1" class="w-full">
+                <input type="text" id="bg-color" value="rgba(0,0,139,1)" class="w-full p-1 border border-gray-300 rounded-md mb-2" placeholder="rgba(r,g,b,a)">
             </div>
             <div class="mb-4">
                 <label for="bg-image" class="block text-sm font-medium text-gray-700 mb-1">Background Image</label>
@@ -102,29 +103,38 @@ HAVE FUN
             <div class="p-4 border rounded-md mb-4 bg-gray-50">
                 <h2 class="text-lg font-semibold mb-2 text-gray-700">Primary Font</h2>
                 <select id="primary-font" class="w-full p-2 border border-gray-300 rounded-md mb-2"></select>
-                <input type="color" id="primary-color" value="#FFFFFF" class="w-full h-10 p-1 border border-gray-300 rounded-md mb-1">
-                <label for="primary-alpha" class="block text-sm font-medium text-gray-700 mb-1">Opacity</label>
-                <input type="range" id="primary-alpha" min="0" max="1" step="0.05" value="1" class="w-full mb-2">
-                <div class="flex flex-wrap items-center gap-4"><label class="flex items-center"><input type="checkbox" id="primary-bold" class="rounded text-indigo-600"><span class="ml-2 text-sm">Bold</span></label><label class="flex items-center"><input type="checkbox" id="primary-italic" class="rounded text-indigo-600"><span class="ml-2 text-sm">Italic</span></label><label class="flex items-center"><input type="checkbox" id="primary-strike" class="rounded text-indigo-600"><span class="ml-2 text-sm">Strike</span></label><label class="flex items-center"><input type="checkbox" id="primary-shadow" class="rounded text-indigo-600"><span class="ml-2 text-sm">Shadow</span></label></div>
+                <input type="text" id="primary-color" value="rgba(255,255,255,1)" class="w-full p-1 border border-gray-300 rounded-md mb-2" placeholder="rgba(r,g,b,a)">
+                <div class="flex flex-wrap items-center gap-4">
+                    <label class="flex items-center"><input type="checkbox" id="primary-bold" class="rounded text-indigo-600"><span class="ml-2 text-sm">Bold</span></label>
+                    <label class="flex items-center"><input type="checkbox" id="primary-italic" class="rounded text-indigo-600"><span class="ml-2 text-sm">Italic</span></label>
+                    <label class="flex items-center"><input type="checkbox" id="primary-strike" class="rounded text-indigo-600"><span class="ml-2 text-sm">Strike</span></label>
+                </div>
+                <div class="grid grid-cols-3 gap-2 mt-2">
+                    <input type="number" id="primary-shadow-x" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="X">
+                    <input type="number" id="primary-shadow-y" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="Y">
+                    <input type="number" id="primary-shadow-blur" value="4" class="p-1 border border-gray-300 rounded-md" placeholder="Blur">
+                    <input type="text" id="primary-shadow-color" value="rgba(0,0,0,0.5)" class="col-span-3 p-1 border border-gray-300 rounded-md" placeholder="rgba(r,g,b,a)">
+                </div>
             </div>
             <div class="p-4 border rounded-md bg-gray-50">
                 <h2 class="text-lg font-semibold mb-2 text-gray-700">Call-to-Action Font (*)</h2>
                 <select id="secondary-font" class="w-full p-2 border border-gray-300 rounded-md mb-2"></select>
-                <input type="color" id="secondary-color" value="#ADD8E6" class="w-full h-10 p-1 border border-gray-300 rounded-md mb-1">
-                <label for="secondary-alpha" class="block text-sm font-medium text-gray-700 mb-1">Opacity</label>
-                <input type="range" id="secondary-alpha" min="0" max="1" step="0.05" value="1" class="w-full mb-2">
-                 <div class="flex flex-wrap items-center gap-4"><label class="flex items-center"><input type="checkbox" id="secondary-bold" class="rounded text-indigo-600"><span class="ml-2 text-sm">Bold</span></label><label class="flex items-center"><input type="checkbox" id="secondary-italic" class="rounded text-indigo-600"><span class="ml-2 text-sm">Italic</span></label><label class="flex items-center"><input type="checkbox" id="secondary-strike" class="rounded text-indigo-600"><span class="ml-2 text-sm">Strike</span></label><label class="flex items-center"><input type="checkbox" id="secondary-shadow" class="rounded text-indigo-600"><span class="ml-2 text-sm">Shadow</span></label></div>
+                <input type="text" id="secondary-color" value="rgba(173,216,230,1)" class="w-full p-1 border border-gray-300 rounded-md mb-2" placeholder="rgba(r,g,b,a)">
+                 <div class="flex flex-wrap items-center gap-4">
+                    <label class="flex items-center"><input type="checkbox" id="secondary-bold" class="rounded text-indigo-600"><span class="ml-2 text-sm">Bold</span></label>
+                    <label class="flex items-center"><input type="checkbox" id="secondary-italic" class="rounded text-indigo-600"><span class="ml-2 text-sm">Italic</span></label>
+                    <label class="flex items-center"><input type="checkbox" id="secondary-strike" class="rounded text-indigo-600"><span class="ml-2 text-sm">Strike</span></label>
+                </div>
+                <div class="grid grid-cols-3 gap-2 mt-2">
+                    <input type="number" id="secondary-shadow-x" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="X">
+                    <input type="number" id="secondary-shadow-y" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="Y">
+                    <input type="number" id="secondary-shadow-blur" value="4" class="p-1 border border-gray-300 rounded-md" placeholder="Blur">
+                    <input type="text" id="secondary-shadow-color" value="rgba(0,0,0,0.5)" class="col-span-3 p-1 border border-gray-300 rounded-md" placeholder="rgba(r,g,b,a)">
+                </div>
             </div>
         </div>
     </div>
     <div id="canvas-container" class="flex-grow flex items-center justify-center p-4 bg-gray-200 relative min-h-0">
-        <div class="absolute top-5 right-5 z-10">
-            <button id="fullscreen-btn" class="bg-white text-gray-700 px-3 py-2 rounded-md shadow-md hover:bg-gray-100 transition flex items-center gap-2">
-                <svg id="fullscreen-enter-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 1v-4m0 0h-4m4 0l-5 5"></path></svg>
-                <svg id="fullscreen-exit-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6m0 0l-7 7M9 21H3v-6m0 0l7-7m7 7h6v6m0 0l-7-7M9 3H3v6m0 0l7 7"></path></svg>
-                <span id="fullscreen-text">Full Screen</span>
-            </button>
-        </div>
                 <canvas id="poster-canvas" class="bg-white shadow-lg rounded-md"></canvas>
                 <div id="item-editor" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div class="bg-white p-4 rounded-md shadow-lg w-72">
@@ -138,15 +148,18 @@ HAVE FUN
                         </div>
                         <div class="mb-2">
                             <label for="editor-color" class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                            <input id="editor-color" type="color" class="w-full h-8 p-0 border border-gray-300 rounded-md mb-1">
-                            <label for="editor-alpha" class="block text-sm font-medium text-gray-700 mb-1">Opacity</label>
-                            <input id="editor-alpha" type="range" min="0" max="1" step="0.05" value="1" class="w-full">
+                            <input id="editor-color" type="text" class="w-full p-1 border border-gray-300 rounded-md mb-2" value="rgba(255,255,255,1)" placeholder="rgba(r,g,b,a)">
                         </div>
                         <div class="flex flex-wrap items-center gap-4 mb-4">
                             <label class="flex items-center"><input type="checkbox" id="editor-bold" class="rounded text-indigo-600"><span class="ml-2 text-sm">Bold</span></label>
                             <label class="flex items-center"><input type="checkbox" id="editor-italic" class="rounded text-indigo-600"><span class="ml-2 text-sm">Italic</span></label>
                             <label class="flex items-center"><input type="checkbox" id="editor-strike" class="rounded text-indigo-600"><span class="ml-2 text-sm">Strike</span></label>
-                            <label class="flex items-center"><input type="checkbox" id="editor-shadow" class="rounded text-indigo-600"><span class="ml-2 text-sm">Shadow</span></label>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <input type="number" id="editor-shadow-x" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="X">
+                            <input type="number" id="editor-shadow-y" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="Y">
+                            <input type="number" id="editor-shadow-blur" value="4" class="p-1 border border-gray-300 rounded-md" placeholder="Blur">
+                            <input type="text" id="editor-shadow-color" value="rgba(0,0,0,0.5)" class="col-span-3 p-1 border border-gray-300 rounded-md" placeholder="rgba(r,g,b,a)">
                         </div>
                         <div class="flex justify-end space-x-2">
                             <button id="editor-reset" class="btn-action">Reset</button>
@@ -183,33 +196,166 @@ HAVE FUN
             const textInput = document.getElementById('text-input');
             const marginInput = document.getElementById('margin-input');
             const downloadBtn = document.getElementById('download-btn');
+            const undoBtn = document.getElementById('undo-btn');
+            const redoBtn = document.getElementById('redo-btn');
             const editor = document.getElementById('item-editor');
             const editorText = document.getElementById('editor-text');
             const editorFont = document.getElementById('editor-font');
             const editorColor = document.getElementById('editor-color');
-            const editorAlpha = document.getElementById('editor-alpha');
             const editorBold = document.getElementById('editor-bold');
             const editorItalic = document.getElementById('editor-italic');
             const editorStrike = document.getElementById('editor-strike');
-            const editorShadow = document.getElementById('editor-shadow');
+            const editorShadow = {
+                x: document.getElementById('editor-shadow-x'),
+                y: document.getElementById('editor-shadow-y'),
+                blur: document.getElementById('editor-shadow-blur'),
+                color: document.getElementById('editor-shadow-color')
+            };
             const editorReset = document.getElementById('editor-reset');
             const editorClose = document.getElementById('editor-close');
 
             const controls = {
                 bgColor: document.getElementById('bg-color'),
-                bgAlpha: document.getElementById('bg-alpha'),
                 bgImage: document.getElementById('bg-image'),
                 canvasSize: document.getElementById('canvas-size'),
-                primary: {font: document.getElementById('primary-font'), color: document.getElementById('primary-color'), alpha: document.getElementById('primary-alpha'), bold: document.getElementById('primary-bold'), italic: document.getElementById('primary-italic'), strike: document.getElementById('primary-strike'), shadow: document.getElementById('primary-shadow')},
-                secondary: {font: document.getElementById('secondary-font'), color: document.getElementById('secondary-color'), alpha: document.getElementById('secondary-alpha'), bold: document.getElementById('secondary-bold'), italic: document.getElementById('secondary-italic'), strike: document.getElementById('secondary-strike'), shadow: document.getElementById('secondary-shadow')}
+                primary: {
+                    font: document.getElementById('primary-font'),
+                    color: document.getElementById('primary-color'),
+                    bold: document.getElementById('primary-bold'),
+                    italic: document.getElementById('primary-italic'),
+                    strike: document.getElementById('primary-strike'),
+                    shadowX: document.getElementById('primary-shadow-x'),
+                    shadowY: document.getElementById('primary-shadow-y'),
+                    shadowBlur: document.getElementById('primary-shadow-blur'),
+                    shadowColor: document.getElementById('primary-shadow-color')
+                },
+                secondary: {
+                    font: document.getElementById('secondary-font'),
+                    color: document.getElementById('secondary-color'),
+                    bold: document.getElementById('secondary-bold'),
+                    italic: document.getElementById('secondary-italic'),
+                    strike: document.getElementById('secondary-strike'),
+                    shadowX: document.getElementById('secondary-shadow-x'),
+                    shadowY: document.getElementById('secondary-shadow-y'),
+                    shadowBlur: document.getElementById('secondary-shadow-blur'),
+                    shadowColor: document.getElementById('secondary-shadow-color')
+                }
             };
             
             let textItems = [];
             let currentEditItem = null;
             let backgroundImage = null;
             let lastMousePos = { x: 0, y: 0 };
+            const undoStack = [];
+            const redoStack = [];
             const RESIZE_HANDLE_SIZE = 20;
             const sizes = { tall: { width: 1080, height: 1920 }, wide: { width: 1920, height: 1080 }, square: { width: 1080, height: 1080 } };
+
+            function cloneState() {
+                return {
+                    textItems: textItems.map(i => ({...i})),
+                    backgroundImage: backgroundImage ? {
+                        ...backgroundImage,
+                        imgSrc: backgroundImage.img ? backgroundImage.img.src : null
+                    } : null,
+                    ui: {
+                        text: textInput.value,
+                        margin: marginInput.value,
+                        bgColor: controls.bgColor.value,
+                        primary: {
+                            font: controls.primary.font.value,
+                            color: controls.primary.color.value,
+                            bold: controls.primary.bold.checked,
+                            italic: controls.primary.italic.checked,
+                            strike: controls.primary.strike.checked,
+                            shadowX: controls.primary.shadowX.value,
+                            shadowY: controls.primary.shadowY.value,
+                            shadowBlur: controls.primary.shadowBlur.value,
+                            shadowColor: controls.primary.shadowColor.value
+                        },
+                        secondary: {
+                            font: controls.secondary.font.value,
+                            color: controls.secondary.color.value,
+                            bold: controls.secondary.bold.checked,
+                            italic: controls.secondary.italic.checked,
+                            strike: controls.secondary.strike.checked,
+                            shadowX: controls.secondary.shadowX.value,
+                            shadowY: controls.secondary.shadowY.value,
+                            shadowBlur: controls.secondary.shadowBlur.value,
+                            shadowColor: controls.secondary.shadowColor.value
+                        }
+                    }
+                };
+            }
+
+            function applyState(state) {
+                textItems = state.textItems.map(i => ({...i}));
+                if (state.backgroundImage) {
+                    const img = new Image();
+                    img.src = state.backgroundImage.imgSrc;
+                    backgroundImage = {...state.backgroundImage, img};
+                } else {
+                    backgroundImage = null;
+                }
+                if (state.ui) {
+                    textInput.value = state.ui.text;
+                    marginInput.value = state.ui.margin;
+                    controls.bgColor.value = state.ui.bgColor;
+                    const p = state.ui.primary;
+                    controls.primary.font.value = p.font;
+                    controls.primary.color.value = p.color;
+                    controls.primary.bold.checked = p.bold;
+                    controls.primary.italic.checked = p.italic;
+                    controls.primary.strike.checked = p.strike;
+                    controls.primary.shadowX.value = p.shadowX;
+                    controls.primary.shadowY.value = p.shadowY;
+                    controls.primary.shadowBlur.value = p.shadowBlur;
+                    controls.primary.shadowColor.value = p.shadowColor;
+                    const s = state.ui.secondary;
+                    controls.secondary.font.value = s.font;
+                    controls.secondary.color.value = s.color;
+                    controls.secondary.bold.checked = s.bold;
+                    controls.secondary.italic.checked = s.italic;
+                    controls.secondary.strike.checked = s.strike;
+                    controls.secondary.shadowX.value = s.shadowX;
+                    controls.secondary.shadowY.value = s.shadowY;
+                    controls.secondary.shadowBlur.value = s.shadowBlur;
+                    controls.secondary.shadowColor.value = s.shadowColor;
+                }
+                draw();
+            }
+
+            function saveState() {
+                undoStack.push(cloneState());
+                if (undoStack.length > 50) undoStack.shift();
+                redoStack.length = 0;
+                updateUndoRedo();
+            }
+
+            function undo() {
+                if (!undoStack.length) return;
+                const current = cloneState();
+                redoStack.push(current);
+                const state = undoStack.pop();
+                applyState(state);
+                updateUndoRedo();
+            }
+
+            function redo() {
+                if (!redoStack.length) return;
+                const current = cloneState();
+                undoStack.push(current);
+                const state = redoStack.pop();
+                applyState(state);
+                updateUndoRedo();
+            }
+
+            function updateUndoRedo() {
+                undoBtn.disabled = undoStack.length === 0;
+                redoBtn.disabled = redoStack.length === 0;
+                undoBtn.classList.toggle('opacity-50', undoBtn.disabled);
+                redoBtn.classList.toggle('opacity-50', redoBtn.disabled);
+            }
 
             function populateFontSelectors() {
                 const selects = [controls.primary.font, controls.secondary.font, editorFont];
@@ -287,11 +433,15 @@ HAVE FUN
                         isSecondary: isSecondary,
                         fontFamily: props.font.value,
                         color: props.color.value,
-                        alpha: parseFloat(props.alpha.value),
                         bold: props.bold.checked,
                         italic: props.italic.checked,
                         strike: props.strike.checked,
-                        shadow: props.shadow.checked,
+                        shadow: {
+                            x: props.shadowX.value,
+                            y: props.shadowY.value,
+                            blur: props.shadowBlur.value,
+                            color: props.shadowColor.value
+                        },
                         x: canvas.width / 2,
                         y: 0, // temp y
                         isSelected: false,
@@ -319,6 +469,7 @@ HAVE FUN
 
                 textItems = newTextItems;
                 draw();
+                saveState();
             }
 
             function handleImageUpload(e) {
@@ -337,6 +488,7 @@ HAVE FUN
                         action: null
                     };
                     draw();
+                    saveState();
                 };
                 img.src = URL.createObjectURL(file);
             }
@@ -352,7 +504,7 @@ HAVE FUN
             }
 
             function draw(isExporting = false) {
-                ctx.fillStyle = hexToRgba(controls.bgColor.value, parseFloat(controls.bgAlpha.value));
+                ctx.fillStyle = controls.bgColor.value;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 if(backgroundImage && backgroundImage.img){
                     ctx.drawImage(backgroundImage.img,
@@ -369,14 +521,14 @@ HAVE FUN
                     item.width = metrics.width;
                     item.actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
                     ctx.fillStyle = item.color;
-                    ctx.globalAlpha = item.alpha;
+                    ctx.globalAlpha = 1;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     if (item.shadow) {
-                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                        ctx.shadowBlur = 4;
-                        ctx.shadowOffsetX = 2;
-                        ctx.shadowOffsetY = 2;
+                        ctx.shadowColor = item.shadow.color;
+                        ctx.shadowBlur = parseFloat(item.shadow.blur) || 0;
+                        ctx.shadowOffsetX = parseFloat(item.shadow.x) || 0;
+                        ctx.shadowOffsetY = parseFloat(item.shadow.y) || 0;
                     }
                     ctx.fillText(item.text, item.x, item.y);
                     if (item.strike) {
@@ -408,9 +560,8 @@ HAVE FUN
             function resizeCanvas() {
                 const size = sizes[controls.canvasSize.value];
                 const container = canvasContainer;
-                const isFullscreen = !!document.fullscreenElement;
-                const containerW = isFullscreen ? window.innerWidth : container.clientWidth;
-                const containerH = isFullscreen ? window.innerHeight : container.clientHeight;
+                const containerW = container.clientWidth;
+                const containerH = container.clientHeight;
                 const ratio = containerW / containerH > size.width / size.height;
                 canvas.style.height = (ratio ? containerH : containerW / (size.width / size.height)) * 0.9 + 'px';
                 canvas.style.width = (ratio ? containerH * (size.width / size.height) : containerW) * 0.9 + 'px';
@@ -447,6 +598,7 @@ HAVE FUN
                 const target = getActionTarget(pos);
                 const all = backgroundImage ? [backgroundImage, ...textItems] : [...textItems];
                 if (target) {
+                    saveState();
                     if (e.ctrlKey && !target.item.img) {
                         openItemEditor(target.item);
                         return;
@@ -515,22 +667,28 @@ HAVE FUN
             }
 
             function applyStyleToSelection() {
+                saveState();
                 const selected = textItems.filter(i => i.isSelected);
                 selected.forEach(item => {
                      const props = item.isSecondary ? controls.secondary : controls.primary;
                      item.fontFamily = props.font.value;
                      item.color = props.color.value;
-                     item.alpha = parseFloat(props.alpha.value);
                      item.bold = props.bold.checked;
                      item.italic = props.italic.checked;
                      item.strike = props.strike.checked;
-                     item.shadow = props.shadow.checked;
+                     item.shadow = {
+                         x: props.shadowX.value,
+                         y: props.shadowY.value,
+                         blur: props.shadowBlur.value,
+                         color: props.shadowColor.value
+                     };
                      item.custom = true;
                 });
                 if(selected.length > 0) draw();
             }
 
-            function handleGlobalStyleChange() {
+           function handleGlobalStyleChange() {
+                saveState();
                 const selected = textItems.filter(i => i.isSelected);
                 if (selected.length) {
                     applyStyleToSelection();
@@ -540,11 +698,15 @@ HAVE FUN
                             const props = item.isSecondary ? controls.secondary : controls.primary;
                             item.fontFamily = props.font.value;
                             item.color = props.color.value;
-                            item.alpha = parseFloat(props.alpha.value);
                             item.bold = props.bold.checked;
                             item.italic = props.italic.checked;
                             item.strike = props.strike.checked;
-                            item.shadow = props.shadow.checked;
+                            item.shadow = {
+                                x: props.shadowX.value,
+                                y: props.shadowY.value,
+                                blur: props.shadowBlur.value,
+                                color: props.shadowColor.value
+                            };
                         }
                     });
                     draw();
@@ -556,11 +718,13 @@ HAVE FUN
                 editorText.value = item.text;
                 editorFont.value = item.fontFamily;
                 editorColor.value = item.color;
-                editorAlpha.value = item.alpha;
                 editorBold.checked = item.bold;
                 editorItalic.checked = item.italic;
                 editorStrike.checked = item.strike;
-                editorShadow.checked = item.shadow;
+                editorShadow.x.value = item.shadow?.x || 0;
+                editorShadow.y.value = item.shadow?.y || 0;
+                editorShadow.blur.value = item.shadow?.blur || 0;
+                editorShadow.color.value = item.shadow?.color || 'rgba(0,0,0,0.5)';
                 editor.classList.remove('hidden');
             }
 
@@ -571,62 +735,73 @@ HAVE FUN
 
             editorText.addEventListener('input', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.text = editorText.value;
                 currentEditItem.custom = true;
                 draw();
             });
             editorFont.addEventListener('input', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.fontFamily = editorFont.value;
                 currentEditItem.custom = true;
                 draw();
             });
             editorColor.addEventListener('input', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.color = editorColor.value;
-                currentEditItem.custom = true;
-                draw();
-            });
-            editorAlpha.addEventListener('input', () => {
-                if (!currentEditItem) return;
-                currentEditItem.alpha = parseFloat(editorAlpha.value);
                 currentEditItem.custom = true;
                 draw();
             });
             editorBold.addEventListener('change', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.bold = editorBold.checked;
                 currentEditItem.custom = true;
                 draw();
             });
             editorItalic.addEventListener('change', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.italic = editorItalic.checked;
                 currentEditItem.custom = true;
                 draw();
             });
             editorStrike.addEventListener('change', () => {
                 if (!currentEditItem) return;
+                saveState();
                 currentEditItem.strike = editorStrike.checked;
                 currentEditItem.custom = true;
                 draw();
             });
-            editorShadow.addEventListener('change', () => {
+            [editorShadow.x, editorShadow.y, editorShadow.blur, editorShadow.color].forEach(el => el.addEventListener('input', () => {
                 if (!currentEditItem) return;
-                currentEditItem.shadow = editorShadow.checked;
+                saveState();
+                currentEditItem.shadow = {
+                    x: editorShadow.x.value,
+                    y: editorShadow.y.value,
+                    blur: editorShadow.blur.value,
+                    color: editorShadow.color.value
+                };
                 currentEditItem.custom = true;
                 draw();
-            });
+            }));
             editorReset.addEventListener('click', () => {
                 if (!currentEditItem) return;
+                saveState();
                 const props = currentEditItem.isSecondary ? controls.secondary : controls.primary;
                 currentEditItem.fontFamily = props.font.value;
                 currentEditItem.color = props.color.value;
-                currentEditItem.alpha = parseFloat(props.alpha.value);
                 currentEditItem.bold = props.bold.checked;
                 currentEditItem.italic = props.italic.checked;
                 currentEditItem.strike = props.strike.checked;
-                currentEditItem.shadow = props.shadow.checked;
+                currentEditItem.shadow = {
+                    x: props.shadowX.value,
+                    y: props.shadowY.value,
+                    blur: props.shadowBlur.value,
+                    color: props.shadowColor.value
+                };
                 currentEditItem.custom = false;
                 draw();
             });
@@ -638,18 +813,24 @@ HAVE FUN
                 textInput.addEventListener('input', syncTextItems);
                 marginInput.addEventListener('change', syncTextItems);
                 controls.bgColor.addEventListener('input', draw);
-                controls.bgAlpha.addEventListener('input', draw);
                 controls.bgImage.addEventListener('change', handleImageUpload);
                 downloadBtn.addEventListener('click', downloadImage);
+                undoBtn.addEventListener('click', undo);
+                redoBtn.addEventListener('click', redo);
                 controls.canvasSize.addEventListener('change', resizeCanvas);
                 Object.values(controls.primary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
                 Object.values(controls.secondary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
                 window.addEventListener('resize', resizeCanvas);
+                updateUndoRedo();
                 canvas.addEventListener('mousedown', handleMouseDown);
                 canvas.addEventListener('mousemove', handleMouseMove);
                 canvas.addEventListener('mouseup', () => {
-                    textItems.forEach(i=>i.action=null);
-                    if (backgroundImage) backgroundImage.action=null;
+                    let changed = false;
+                    textItems.forEach(i=>{
+                        if(i.action){changed = true; i.action=null;}
+                    });
+                    if (backgroundImage && backgroundImage.action) {changed = true; backgroundImage.action=null;}
+                    if(changed) saveState();
                 });
                 canvas.addEventListener('mouseleave', () => {
                     textItems.forEach(i=>i.action=null);
@@ -658,8 +839,16 @@ HAVE FUN
                 canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
                 canvas.addEventListener('touchmove', handleMouseMove, { passive: false });
                 canvas.addEventListener('touchend', () => {
-                    textItems.forEach(i=>i.action=null);
-                    if (backgroundImage) backgroundImage.action=null;
+                    let changed = false;
+                    textItems.forEach(i=>{
+                        if(i.action){changed=true; i.action=null;}
+                    });
+                    if (backgroundImage && backgroundImage.action) {changed=true; backgroundImage.action=null;}
+                    if(changed) saveState();
+                });
+                document.addEventListener('keydown', e => {
+                    if((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key==='z') { e.preventDefault(); undo(); }
+                    else if((e.ctrlKey||e.metaKey) && (e.key==='y' || (e.shiftKey && e.key==='z'))) { e.preventDefault(); redo(); }
                 });
             }
             loadFonts();
