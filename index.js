@@ -3,6 +3,7 @@ async function init() {
   const resTools = await fetch('tools.json?v=' + new Date().getTime());
   const localTools = await resTools.json();
 
+
   let externalSites = []; // Default to empty array
   try {
     const resExternal = await fetch('external-sites.json?v=' + new Date().getTime());
@@ -159,6 +160,7 @@ async function init() {
 
   function filter() {
     const q = dom.searchEl.value.trim(); // Use dom object
+
     const filtered = q ? allTools.filter(t => matches(t, q)) : allTools;
     renderList(filtered);
     if (filtered.length) {
@@ -186,6 +188,7 @@ async function init() {
     const id = decodeURIComponent(location.hash.slice(1)); // id from hash
     if (id) {
       const tool = allTools.find(t => t.id === id); // Use allTools and id
+
       if (tool) selectTool(tool, false);
     } else {
       showGrid();
@@ -198,6 +201,7 @@ async function init() {
   const startId = decodeURIComponent(location.hash.slice(1)); // id from hash
   if (startId) {
     const tool = allTools.find(t => t.id === startId); // Use allTools and id
+
     if (tool) {
       selectTool(tool, false);
     } else {
