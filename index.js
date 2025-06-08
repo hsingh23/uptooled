@@ -11,6 +11,9 @@ async function init() {
   const titleEl = document.getElementById('tool-title');
   const descEl = document.getElementById('tool-description');
   const keysEl = document.getElementById('tool-keywords');
+  const backBtn = document.getElementById('back-button');
+  const toggleInfoBtn = document.getElementById('toggle-info');
+  const infoEl = document.getElementById('tool-info');
 
   function matches(tool, q) {
     q = q.toLowerCase();
@@ -60,6 +63,9 @@ async function init() {
   function showGrid() {
     viewerEl.style.display = 'none';
     gridEl.style.display = 'grid';
+    if (location.hash) {
+      history.replaceState(null, '', location.pathname);
+    }
   }
 
   function showViewer() {
@@ -67,7 +73,7 @@ async function init() {
     viewerEl.style.display = 'flex';
   }
 
-  function selectTool(tool) {
+  function selectTool(tool, updateHash = true) {
     frameEl.src = tool.file;
     titleEl.textContent = tool.title;
     descEl.textContent = tool.description || '';
@@ -76,6 +82,9 @@ async function init() {
         ? 'Keywords: ' + tool.keywords.join(', ')
         : '';
     showViewer();
+    if (updateHash) {
+      location.hash = encodeURIComponent(tool.file);
+    }
   }
 
   function filter() {
@@ -92,9 +101,41 @@ async function init() {
   }
 
   searchEl.addEventListener('input', filter);
+  backBtn.addEventListener('click', showGrid);
+  toggleInfoBtn.addEventListener('click', () => {
+    if (infoEl.style.display === 'none') {
+      infoEl.style.display = 'block';
+      toggleInfoBtn.textContent = 'Hide Info';
+    } else {
+      infoEl.style.display = 'none';
+      toggleInfoBtn.textContent = 'Show Info';
+    }
+  });
+
+  window.addEventListener('hashchange', () => {
+    const file = decodeURIComponent(location.hash.slice(1));
+    if (file) {
+      const tool = tools.find(t => t.file === file);
+      if (tool) selectTool(tool, false);
+    } else {
+      showGrid();
+    }
+  });
+
   renderList(tools);
   renderGrid(tools);
-  showGrid();
+
+  const startFile = decodeURIComponent(location.hash.slice(1));
+  if (startFile) {
+    const tool = tools.find(t => t.file === startFile);
+    if (tool) {
+      selectTool(tool, false);
+    } else {
+      showGrid();
+    }
+  } else {
+    showGrid();
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);
