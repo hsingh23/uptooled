@@ -166,7 +166,7 @@
   }
 
   function repoUrl(path) {
-    const owner = "hsync23";
+    const owner = "hsingh23";
     const repo = "uptooled";
     return `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
   }
@@ -289,7 +289,7 @@
       return;
     }
 
-    const owner = 'hsync23'; // Hardcoded
+    const owner = 'hsingh23'; // Hardcoded
     const repo = 'uptooled'; // Hardcoded
     const path = 'tools';
     const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
