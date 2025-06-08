@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>Free Masonry Image Collage Generator | Create & Download Collages</title>
+    <meta name="description" content="Easily create, customize, and download beautiful masonry-style image and video collages online for free. No sign-up required. Upload your files, adjust layouts, and share your creation.">
+    <meta name="keywords" content="image collage, masonry collage, photo collage, collage generator, online collage maker, free collage maker, video collage, picture collage, download collage, create collage">
+    <meta name="author" content="Collage Creator">
+    <link rel="canonical" href="https://your-domain.com/" /> <!-- Replace with your actual domain -->
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-domain.com/"> <!-- Replace with your actual domain -->
+    <meta property="og:title" content="Free Masonry Image Collage Generator | Create & Download Collages">
+    <meta property="og:description" content="Easily create, customize, and download beautiful masonry-style image and video collages online for free.">
+    <meta property="og:image" content="https://placehold.co/1200x630/0f172a/e2e8f0?text=Image+Collage+Creator"> <!-- Replace with a link to a preview image -->
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-domain.com/"> <!-- Replace with your actual domain -->
+    <meta property="twitter:title" content="Free Masonry Image Collage Generator | Create & Download Collages">
+    <meta property="twitter:description" content="Easily create, customize, and download beautiful masonry-style image and video collages online for free.">
+    <meta property="twitter:image" content="https://placehold.co/1200x630/0f172a/e2e8f0?text=Image+Collage+Creator"> <!-- Replace with a link to a preview image -->
+
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* General Body and Scrollbar Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Tailwind slate-900 */
+            color: #cbd5e1; /* Tailwind slate-300 */
+            overscroll-behavior-y: contain; 
+        }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; border: 2px solid #1e293b; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Responsive Masonry Grid */
+        .masonry-grid { column-gap: 1.25rem; column-count: 1; }
+        @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 768px) { .masonry-grid { column-count: 3; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 4; } }
+        @media (min-width: 1280px) { .masonry-grid { column-count: 5; } }
+        
+        /* Media Card Styling */
+        .media-card {
+            break-inside: avoid-column; margin-bottom: 1.25rem; background-color: #1e293b; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.05);
+            overflow: hidden; position: relative; 
+        }
+        .media-card .media-preview-container {
+            width: 100%; min-height: 150px; 
+            background-color: #0f172a;
+            border-bottom: 1px solid #334155; 
+            position: relative; 
+            cursor: pointer; /* For lightbox for images */
+        }
+        .media-card .media-preview { /* img or video element */
+            width: 100%; height: auto; display: block; object-fit: cover; min-height: 150px;
+        }
+        
+        /* Video Specific Styles */
+        .media-card .video-grid-preview { 
+             cursor: default; /* Default cursor for video interaction */
+        }
+        .media-card .grid-video-controls-container {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1));
+            padding: 8px 10px;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .media-card:hover .grid-video-controls-container,
+        .media-card .grid-video-controls-container.active { 
+            opacity: 1; visibility: visible;
+        }
+        .media-card .grid-video-timeline {
+            width: 100%; height: 8px; background-color: rgba(255,255,255,0.2);
+            border-radius: 4px; cursor: pointer; appearance: none; 
+            padding: 0; margin: 0;
+        }
+        .media-card .grid-video-timeline::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 14px; height: 14px; background-color: #3b82f6; border-radius: 50%; cursor: pointer;
+            border: 2px solid white;
+        }
+        .media-card .grid-video-timeline::-moz-range-thumb {
+            width: 14px; height: 14px; background-color: #3b82f6; border-radius: 50%; cursor: pointer; border: 2px solid white;
+        }
+        .media-card .grid-video-play-pause-btn {
+            color: white; background: none; border: none; cursor: pointer; font-size: 1.1rem;
+            padding: 4px; line-height: 1; text-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        
+        /* Card Details Styles */
+        .media-card .details-block { padding: 0.75rem; }
+        .media-card .info-text { font-size: 0.75rem; text-align: center; word-break: break-all; color: #94a3b8; line-height: 1.4; }
+        .media-card .path-text { font-size: 0.875rem; color: #e2e8f0; font-weight: 500; margin-bottom: 0.25rem; }
+        
+        /* Modal Styles */
+        .modal { display: flex; transition: opacity 0.25s ease; }
+        .modal-content { 
+            background-color: #1e293b; border: 1px solid #334155; 
+            transition: transform 0.25s ease, opacity 0.25s ease; 
+            max-height: 90vh; display: flex; flex-direction: column;
+        }
+        .modal-body-scrollable { overflow-y: auto; }
+        
+        /* Message/Notification Box */
+        #message-box {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            padding: 1rem 1.5rem; border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.15);
+            z-index: 1001; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease; font-weight: 500;
+        }
+        #message-box.show { opacity: 1; visibility: visible; }
+        #message-box.success { background-color: #10b981; color: #f0fdf4; border: 1px solid #059669; }
+        #message-box.error { background-color: #ef4444; color: #fef2f2; border: 1px solid #dc2626;}
+        #message-box.info { background-color: #3b82f6; color: #eff6ff; border: 1px solid #2563eb;}
+        
+        /* Collage Preview Styles */
+        #collagePreviewContainer {
+            min-height: 200px; max-height: 50vh; overflow: auto;    
+            background-color: #334155; border: 1px solid #475569; 
+            border-radius: 0.5rem; display: flex; align-items: flex-start; 
+            justify-content: center; padding: 0.5rem; 
+        }
+        #dynamicPreviewCanvas { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 0.25rem; }
+        
+        /* Button Styles */
+        .btn {
+            font-weight: 600; padding: 0.75rem 1.25rem; border-radius: 0.5rem; 
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1), inset 0 1px 0 0 rgba(255,255,255,0.05); 
+            transition: all 0.2s ease-in-out; display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.5rem; cursor: pointer; border: 1px solid transparent; 
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background-color: #2563eb; color: white; border-color: #1d4ed8; }
+        .btn-primary:not(:disabled):hover { background-color: #1d4ed8; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1), inset 0 1px 0 0 rgba(255,255,255,0.07); }
+        .btn-danger { background-color: #dc2626; color: white; border-color: #b91c1c; }
+        .btn-danger:not(:disabled):hover { background-color: #b91c1c; }
+        .btn-success { background-color: #16a34a; color: white; border-color: #15803d; }
+        .btn-success:not(:disabled):hover { background-color: #15803d; }
+        .btn-secondary { background-color: #475569; color: #e2e8f0; border-color: #334155; }
+        .btn-secondary:not(:disabled):hover { background-color: #334155; }
+        .btn-info { /* For Imgur button */
+            background-color: #0ea5e9; /* sky-500 */ color: white; border-color: #0284c7; /* sky-600 */
+        }
+        .btn-info:not(:disabled):hover { background-color: #0284c7; }
+        .btn-preset {
+            background-color: #334155; color: #cbd5e1; border-color: #475569; 
+            padding: 0.5rem 0.75rem; font-size: 0.875rem;
+        }
+        .btn-preset:not(:disabled):hover { background-color: #475569; }
+        .btn-preset.active { background-color: #2563eb; color:white; border-color: #1d4ed8;}
+        
+        /* Form Input Styles */
+        .form-input-dark {
+            background-color: #334155; border: 1px solid #475569; color: #e2e8f0; 
+            border-radius: 0.375rem; padding: 0.5rem 0.75rem; width: 100%;
+        }
+        .form-input-dark:focus {
+            outline: 2px solid transparent; outline-offset: 2px; border-color: #2563eb; 
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+        }
+        .form-label-dark { display: block; font-size: 0.875rem; font-weight: 500; color: #94a3b8; margin-bottom: 0.25rem; }
+        input[type="color"].form-input-dark { padding: 0.25rem; height: 2.5rem; }
+        
+        /* Lightbox (Image Viewer) Styles */
+        #lightboxModal { z-index: 1000; }
+        #lightboxModal .modal-content { 
+            width: auto; max-width: 95vw; max-height: 95vh; padding: 0; 
+            overflow: hidden; 
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3), 0 8px 10px -6px rgba(0,0,0,0.2);
+        }
+        #lightboxMediaOuterContainer { 
+            width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+            padding: 1rem; overflow: auto; 
+        }
+        #lightboxMediaInnerContainer { display: flex; align-items: center; justify-content: center; }
+        #lightboxMediaInnerContainer img { /* Only images in lightbox now */
+            max-width: 100%; max-height: 100%; object-fit: contain; display: block; border-radius: 0.5rem;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); 
+        }
+        #lightboxCloseBtn {
+            position: absolute; top: 0.75rem; right: 0.75rem; font-size: 1.5rem; color: #9ca3af; 
+            background: rgba(30, 41, 59, 0.8); border-radius: 50%; width: 2.5rem; height: 2.5rem;
+            display: flex; align-items: center; justify-content: center;
+            line-height: 1; z-index: 10; border: 1px solid rgba(71, 85, 105, 0.5); 
+        }
+        #lightboxCloseBtn:hover { color: #e5e7eb; background: rgba(51, 65, 85, 0.9); }
+
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-300 p-4 md:p-8">
+
+    <div class="container mx-auto max-w-7xl">
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-100">Image Collage Creator</h1>
+            <p class="text-slate-400 mt-3 text-lg">Craft beautiful masonry collages from your images & videos.</p>
+        </header>
+
+        <main>
+            <div class="flex flex-wrap justify-center items-center gap-3 mb-10">
+                 <label class="btn btn-primary">
+                     <i class="fas fa-images"></i> <span>Add Files</span>
+                     <input type="file" id="fileMediaInput" multiple accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime,.mov,.heic,.heif,.avif" class="hidden">
+                 </label>
+                 <label class="btn btn-primary">
+                     <i class="fas fa-folder-open"></i> <span>Add Folder(s)</span>
+                     <input type="file" id="folderMediaInput" webkitdirectory directory multiple class="hidden">
+                 </label>
+                 <button id="clearImagesBtn" class="btn btn-danger hidden">
+                     <i class="fas fa-trash-alt"></i>
+                     <span>Clear All</span>
+                 </button>
+                 <button id="downloadCollageBtn" class="btn btn-success" disabled>
+                     <i class="fas fa-download"></i>
+                     <span>Download Collage</span>
+                 </button>
+                 <button id="shareToImgurBtn" class="btn btn-info hidden">
+                     <i class="fab fa-imgur"></i> <span>Share & Get Links</span>
+                 </button>
+            </div>
+
+            <div id="image-grid-placeholder" class="text-center text-slate-500 py-12 text-xl">
+                 <i class="fas fa-photo-video fa-3x mb-4 text-slate-600"></i><br>
+                 Your selected images and videos will appear here.
+            </div>
+            <div id="image-grid" class="masonry-grid">
+                 <!-- Dynamically populated media cards will go here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Download Options Modal -->
+    <div id="downloadModal" class="modal fixed inset-0 bg-black bg-opacity-75 items-center justify-center p-4 opacity-0 pointer-events-none z-50">
+        <div class="modal-content p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-3xl transform scale-95">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-slate-100">Collage Options</h2>
+                <button id="closeDownloadModalBtn" class="text-slate-400 hover:text-slate-200 text-2xl">&times;</button>
+            </div>
+            
+            <div class="modal-body-scrollable pr-1">
+                <div class="mb-6"> 
+                    <label class="form-label-dark">Presets:</label>
+                    <div id="presetButtonsContainer" class="flex flex-wrap gap-2">
+                        <!-- Preset buttons will be generated here -->
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6">
+                    <div>
+                        <label for="collageWidth" class="form-label-dark">Width (px):</label>
+                        <input type="number" id="collageWidth" value="1920" min="100" class="form-input-dark">
+                    </div>
+                    <div>
+                        <label for="numColumns" class="form-label-dark">Columns:</label>
+                        <input type="number" id="numColumns" value="4" min="1" max="20" class="form-input-dark">
+                    </div>
+                    <div>
+                        <label for="imageGap" class="form-label-dark">Gap (px):</label>
+                        <input type="number" id="imageGap" value="10" min="0" class="form-input-dark">
+                    </div>
+                    <div>
+                        <label for="collageBgColorInput" class="form-label-dark">Background Color:</label>
+                        <input type="color" id="collageBgColorInput" value="#a0d2eb" class="form-input-dark w-full">
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-medium text-slate-300 mb-2">Preview:</h3>
+                <div id="collagePreviewContainer" class="mb-6">
+                    <p class="text-center text-slate-500 py-4">Adjust options to generate preview.</p>
+                </div>
+            </div>
+
+            <div class="mt-auto flex justify-end space-x-3 pt-6 border-t border-slate-700"> 
+                <button id="cancelDownloadBtn" class="btn btn-secondary">Cancel</button>
+                <button id="generateDownloadBtn" class="btn btn-primary">
+                    <span id="generateBtnText">Generate & Download</span>
+                    <i id="generateSpinner" class="fas fa-spinner fa-spin hidden"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal for Image Viewing -->
+    <div id="lightboxModal" class="modal fixed inset-0 bg-black bg-opacity-80 items-center justify-center p-0 opacity-0 pointer-events-none"> 
+        <div id="lightboxContentWrapper" class="modal-content relative rounded-lg shadow-xl transform scale-95"> 
+            <button id="lightboxCloseBtn">&times;</button>
+            <div id="lightboxMediaOuterContainer">
+                <div id="lightboxMediaInnerContainer">
+                    <!-- Lightbox content (image) will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Message/Notification Box -->
+    <div id="message-box"></div>
+
+    <script>
+        // --- DOM Elements ---
+        const fileMediaInput = document.getElementById('fileMediaInput');
+        const folderMediaInput = document.getElementById('folderMediaInput');
+        const clearImagesBtn = document.getElementById('clearImagesBtn');
+        const imageGrid = document.getElementById('image-grid');
+        const imageGridPlaceholder = document.getElementById('image-grid-placeholder');
+        const downloadCollageBtn = document.getElementById('downloadCollageBtn');
+        const shareToImgurBtn = document.getElementById('shareToImgurBtn');
+        
+        const downloadModal = document.getElementById('downloadModal');
+        const closeDownloadModalBtn = document.getElementById('closeDownloadModalBtn');
+        const collageWidthInput = document.getElementById('collageWidth');
+        const numColumnsInput = document.getElementById('numColumns');
+        const imageGapInput = document.getElementById('imageGap');
+        const collageBgColorInput = document.getElementById('collageBgColorInput');
+        const cancelDownloadBtn = document.getElementById('cancelDownloadBtn');
+        const generateDownloadBtn = document.getElementById('generateDownloadBtn');
+        const generateBtnText = document.getElementById('generateBtnText');
+        const generateSpinner = document.getElementById('generateSpinner');
+        const collagePreviewContainer = document.getElementById('collagePreviewContainer');
+        const presetButtonsContainer = document.getElementById('presetButtonsContainer');
+
+        const lightboxModal = document.getElementById('lightboxModal');
+        const lightboxContentWrapper = document.getElementById('lightboxContentWrapper');
+        const lightboxCloseBtn = document.getElementById('lightboxCloseBtn');
+        const lightboxMediaInnerContainer = document.getElementById('lightboxMediaInnerContainer');
+
+        const messageBox = document.getElementById('message-box');
+
+        // --- State & Constants ---
+        let imageDataList = []; 
+        const IMGUR_CLIENT_ID = '2e7bbd20f391204'; // Your Imgur Client ID
+        const PRESETS = [
+            { name: '1080px | 2 Col', width: 1080, cols: 2, gap: 10 },
+            { name: '1080px | 3 Col', width: 1080, cols: 3, gap: 10 },
+            { name: '1920px | 4 Col', width: 1920, cols: 4, gap: 15 },
+            { name: '1920px | 3 Col', width: 1920, cols: 3, gap: 15 }
+        ];
+
+        // --- Utility Functions ---
+        function showMessage(message, type = 'info', duration = 3500) {
+            messageBox.textContent = message;
+            messageBox.className = ''; 
+            messageBox.classList.add('show', type);
+            setTimeout(() => messageBox.classList.remove('show'), duration);
+        }
+        function debounce(func, delay) {
+            let timeout;
+            return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); };
+        }
+        function getCommonBasePath(paths) { 
+            if (!paths || paths.length === 0) return "";
+            if (paths.length === 1) {
+                const parts = paths[0].split('/');
+                return parts.length > 1 ? parts.slice(0, -1).join('/') + '/' : "";
+            }
+            const sortedPaths = [...paths].sort((a, b) => a.localeCompare(b));
+            const firstPathParts = sortedPaths[0].split('/').slice(0, -1); 
+            let commonPartsCount = 0;
+            for (let i = 0; i < firstPathParts.length; i++) {
+                const currentPrefixPart = firstPathParts[i];
+                if (sortedPaths.every(p => p.split('/')[i] === currentPrefixPart)) commonPartsCount++;
+                else break;
+            }
+            return commonPartsCount > 0 ? firstPathParts.slice(0, commonPartsCount).join('/') + '/' : "";
+        }
+        function getAspectRatioType(width, height) { 
+            if (width === 0 || height === 0) return 'Unknown';
+            const ratio = width / height;
+            if (Math.abs(ratio - 1) < 0.05) return 'Square';
+            if (ratio > 1) return 'Wide';
+            return 'Tall';
+        }
+        
+        // --- Media Handling & Grid Rendering ---
+        fileMediaInput.addEventListener('change', (event) => handleMediaSelection(event, 'file'));
+        folderMediaInput.addEventListener('change', (event) => handleMediaSelection(event, 'folder'));
+        clearImagesBtn.addEventListener('click', () => { 
+            imageDataList = [];
+            renderMainPreviewGrid();
+            updateButtonsAndPlaceholder();
+            showMessage('All media cleared.', 'info');
+            fileMediaInput.value = '';
+            folderMediaInput.value = '';
+        });
+
+        async function handleMediaSelection(event, selectionMethod) {
+            const files = Array.from(event.target.files);
+            if (files.length === 0) return;
+            const mediaFiles = files.filter(file => /\.(jpe?g|png|gif|webp|bmp|avif|heic|heif|mp4|webm|ogg|mov)$/i.test(file.name));
+            if (mediaFiles.length === 0) { 
+                showMessage('No supported image or video files found.', 'error');
+                event.target.value = ''; 
+                return; 
+            }
+            
+            imageGridPlaceholder.innerHTML = '<i class="fas fa-spinner fa-spin fa-2x text-slate-500"></i><p class="mt-2 text-slate-500">Processing media...</p>';
+            imageGridPlaceholder.style.display = 'flex';
+            imageGridPlaceholder.classList.add('flex-col', 'items-center', 'justify-center');
+
+            const newMediaBatchPromises = mediaFiles.map(file => {
+                return new Promise(async (resolveOuter) => {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const dataURL = e.target.result;
+                        const originalRelativePath = (selectionMethod === 'folder' && file.webkitRelativePath) ? file.webkitRelativePath : file.name;
+                        const fileType = file.type.startsWith('video/') ? 'video' : 'image';
+                        
+                        let mediaData = {
+                            dataURL, originalRelativePath, displayPath: '', 
+                            width: 0, height: 0, aspectRatioType: 'Unknown', type: fileType,
+                            videoFrameDataURL: null, currentVideoFrameForCollage: null 
+                        };
+
+                        try {
+                            if (fileType === 'image') {
+                                const tempImg = new Image();
+                                await new Promise((imgResolve, imgReject) => {
+                                    tempImg.onload = () => {
+                                        mediaData.width = tempImg.naturalWidth; mediaData.height = tempImg.naturalHeight;
+                                        mediaData.aspectRatioType = getAspectRatioType(tempImg.naturalWidth, tempImg.naturalHeight);
+                                        imgResolve();
+                                    };
+                                    tempImg.onerror = (err) => { console.error("Image load error for dimensions:", originalRelativePath, err); imgReject(err); };
+                                    tempImg.src = dataURL;
+                                });
+                            } else if (fileType === 'video') {
+                                const video = document.createElement('video');
+                                video.muted = true; video.preload = 'metadata';
+                                try {
+                                    await new Promise((vidResolve, vidReject) => {
+                                        video.onloadedmetadata = () => {
+                                            mediaData.width = video.videoWidth; mediaData.height = video.videoHeight;
+                                            mediaData.aspectRatioType = getAspectRatioType(video.videoWidth, video.videoHeight);
+                                            video.currentTime = 0.01; 
+                                            video.onseeked = () => {
+                                                try {
+                                                    const canvas = document.createElement('canvas');
+                                                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                                                    const ctx = canvas.getContext('2d'); ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                                                    mediaData.videoFrameDataURL = canvas.toDataURL('image/jpeg', 0.8);
+                                                    mediaData.currentVideoFrameForCollage = mediaData.videoFrameDataURL; 
+                                                    vidResolve();
+                                                } catch (drawErr) { console.error("Error drawing video frame:", originalRelativePath, drawErr); vidReject(drawErr); }
+                                            };
+                                            video.onerror = (errEvent) => { console.error("Video operation error (e.g. seek):", originalRelativePath, video.error || errEvent); vidReject(video.error || errEvent);};
+                                        };
+                                        video.onerror = (errEvent) => { console.error("Video metadata load error:", originalRelativePath, video.error || errEvent); vidReject(video.error || errEvent); }; 
+                                        video.src = dataURL;
+                                    });
+                                } catch (videoProcessingError) {
+                                    console.error("Video processing failed for:", originalRelativePath, videoProcessingError);
+                                }
+                            }
+                            if (mediaData.width > 0 && mediaData.height > 0) {
+                                resolveOuter(mediaData);
+                            } else {
+                                console.warn("Media item processed but resulted in no dimensions:", originalRelativePath);
+                                resolveOuter(null);
+                            }
+                        } catch (err) { 
+                            console.error("Overall error processing media item in reader.onload:", originalRelativePath, err);
+                            resolveOuter(null); 
+                        }
+                    };
+                    reader.onerror = (err) => {
+                        console.error("FileReader error for:", file.name, err);
+                        resolveOuter(null); 
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            const newMediaData = (await Promise.all(newMediaBatchPromises)).filter(item => item !== null);
+            
+            if (newMediaData.length > 0) {
+                imageDataList.push(...newMediaData);
+                const allOriginalPaths = imageDataList.map(item => item.originalRelativePath);
+                const commonBasePath = getCommonBasePath(allOriginalPaths);
+                imageDataList.forEach(item => { 
+                    let dp = item.originalRelativePath;
+                    if (commonBasePath && dp.startsWith(commonBasePath)) dp = dp.substring(commonBasePath.length);
+                    item.displayPath = dp || item.originalRelativePath.split('/').pop(); 
+                });
+                showMessage(`${newMediaData.length} new media item(s) added. Total: ${imageDataList.length}.`, 'success');
+            } else if (mediaFiles.length > 0) {
+                 showMessage('Could not process any of the selected media files properly.', 'error');
+            }
+            renderMainPreviewGrid();
+            updateButtonsAndPlaceholder();
+            event.target.value = ''; 
+        }
+        
+        function renderMainPreviewGrid() {
+            imageGrid.innerHTML = ''; 
+            if (imageDataList.length === 0) { updateButtonsAndPlaceholder(); return; }
+
+            imageDataList.forEach((mediaData, index) => {
+                const card = document.createElement('div');
+                card.className = 'media-card';
+
+                const previewContainer = document.createElement('div');
+                previewContainer.className = 'media-preview-container';
+                
+                let mediaElement; 
+                if (mediaData.type === 'video') {
+                    mediaElement = document.createElement('video');
+                    mediaElement.className = 'media-preview video-grid-preview';
+                    mediaElement.src = mediaData.dataURL;
+                    mediaElement.muted = true;
+                    mediaElement.loop = false; 
+                    mediaElement.preload = "metadata";
+                    mediaElement.poster = mediaData.videoFrameDataURL || ''; // Use initial frame as poster
+
+                    const controlsContainer = document.createElement('div');
+                    controlsContainer.className = 'grid-video-controls-container';
+                    
+                    const playPauseBtn = document.createElement('button');
+                    playPauseBtn.className = 'grid-video-play-pause-btn';
+                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    
+                    const timeline = document.createElement('input');
+                    timeline.type = 'range';
+                    timeline.className = 'grid-video-timeline';
+                    timeline.min = 0; timeline.max = 100; timeline.value = 0; 
+                    timeline.step = 0.1;
+
+                    playPauseBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (mediaElement.paused) { mediaElement.play(); } 
+                        else { mediaElement.pause(); }
+                    };
+                    mediaElement.onplay = () => { playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>'; controlsContainer.classList.add('active');};
+                    mediaElement.onpause = () => {
+                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                        controlsContainer.classList.remove('active');
+                        if (mediaElement.videoWidth > 0 && mediaElement.videoHeight > 0) {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = mediaElement.videoWidth; canvas.height = mediaElement.videoHeight;
+                            const ctx = canvas.getContext('2d'); ctx.drawImage(mediaElement, 0, 0, canvas.width, canvas.height);
+                            mediaData.currentVideoFrameForCollage = canvas.toDataURL('image/jpeg', 0.85);
+                            mediaElement.poster = mediaData.currentVideoFrameForCollage; // Update poster
+                        }
+                    };
+                    mediaElement.ontimeupdate = () => {
+                        if (mediaElement.duration && isFinite(mediaElement.duration)) {
+                            timeline.value = mediaElement.currentTime; // Use actual time for value
+                        }
+                    };
+                    mediaElement.onloadedmetadata = () => { 
+                        if(mediaElement.duration && isFinite(mediaElement.duration)) {
+                            timeline.max = mediaElement.duration;
+                             if (!mediaData.videoFrameDataURL && mediaElement.videoWidth > 0 && mediaElement.readyState >= 1) { // readyState >= HAVE_METADATA
+                                 mediaElement.currentTime = 0.01; 
+                                 setTimeout(() => { 
+                                     try {
+                                         const canvas = document.createElement('canvas');
+                                         canvas.width = mediaElement.videoWidth; canvas.height = mediaElement.videoHeight;
+                                         const ctx = canvas.getContext('2d'); ctx.drawImage(mediaElement, 0, 0, canvas.width, canvas.height);
+                                         mediaData.videoFrameDataURL = canvas.toDataURL('image/jpeg', 0.8);
+                                         mediaData.currentVideoFrameForCollage = mediaData.videoFrameDataURL;
+                                         mediaElement.poster = mediaData.videoFrameDataURL;
+                                     } catch(e){ console.error("Error capturing initial frame on loadedmetadata:", e)}
+                                 }, 100);
+                             }
+                        }
+                    };
+
+                    timeline.oninput = (e) => { 
+                        e.stopPropagation();
+                        if (isFinite(parseFloat(timeline.value))) {
+                            mediaElement.currentTime = parseFloat(timeline.value);
+                        }
+                    };
+                    const captureFrameOnSeekEnd = () => {
+                        if (mediaElement.videoWidth > 0 && mediaElement.videoHeight > 0) {
+                            const canvas = document.createElement('canvas');
+                            canvas.width = mediaElement.videoWidth; canvas.height = mediaElement.videoHeight;
+                            const ctx = canvas.getContext('2d'); ctx.drawImage(mediaElement, 0, 0, canvas.width, canvas.height);
+                            mediaData.currentVideoFrameForCollage = canvas.toDataURL('image/jpeg', 0.85);
+                            mediaElement.poster = mediaData.currentVideoFrameForCollage;
+                        }
+                    };
+                    timeline.addEventListener('change', captureFrameOnSeekEnd); 
+                    mediaElement.addEventListener('seeked', captureFrameOnSeekEnd); 
+
+                    controlsContainer.appendChild(playPauseBtn);
+                    controlsContainer.appendChild(timeline);
+                    previewContainer.appendChild(controlsContainer);
+
+                } else { // Image
+                    mediaElement = document.createElement('img');
+                    mediaElement.className = 'media-preview';
+                    mediaElement.src = mediaData.dataURL;
+                    previewContainer.addEventListener('click', () => openLightbox(index));
+                }
+                mediaElement.alt = mediaData.displayPath;
+                mediaElement.onerror = () => { 
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'p-4 text-center text-red-400 h-[150px] flex items-center justify-center';
+                    errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>Preview Error`;
+                    if(mediaElement.parentNode) mediaElement.parentNode.replaceChild(errorDiv, mediaElement);
+                };
+                previewContainer.appendChild(mediaElement);
+                card.appendChild(previewContainer);
+
+                const detailsBlock = document.createElement('div'); 
+                detailsBlock.className = 'details-block';
+                const pathText = document.createElement('p');
+                pathText.className = 'info-text path-text';
+                pathText.textContent = mediaData.displayPath;
+                detailsBlock.appendChild(pathText);
+                
+                const dimensionsText = document.createElement('p'); 
+                dimensionsText.className = 'info-text';
+                dimensionsText.textContent = `${mediaData.aspectRatioType} - ${mediaData.width}x${mediaData.height}px`;
+                detailsBlock.appendChild(dimensionsText);
+
+                card.appendChild(detailsBlock);
+                imageGrid.appendChild(card);
+            });
+        }
+
+        function updateButtonsAndPlaceholder() { 
+            if (imageDataList.length > 0) {
+                imageGridPlaceholder.style.display = 'none';
+                downloadCollageBtn.disabled = false;
+                shareToImgurBtn.classList.remove('hidden'); // Show Imgur button
+                clearImagesBtn.classList.remove('hidden');
+            } else {
+                imageGridPlaceholder.innerHTML = `
+                    <i class="fas fa-photo-video fa-3x mb-4 text-slate-600"></i><br>
+                    Your selected images and videos will appear here.`;
+                imageGridPlaceholder.style.display = 'flex';
+                imageGridPlaceholder.classList.add('flex-col', 'items-center', 'justify-center');
+                imageGrid.innerHTML = ''; 
+                downloadCollageBtn.disabled = true;
+                shareToImgurBtn.classList.add('hidden'); // Hide Imgur button
+                clearImagesBtn.classList.add('hidden');
+            }
+        }
+
+        // --- Lightbox (Full Size Viewer - Primarily for Images) ---
+        function openLightbox(index) {
+            const mediaItem = imageDataList[index];
+            if (!mediaItem || mediaItem.type === 'video') return; 
+
+            lightboxMediaInnerContainer.innerHTML = ''; 
+            const img = document.createElement('img');
+            img.src = mediaItem.dataURL; img.alt = mediaItem.displayPath;
+            lightboxMediaInnerContainer.appendChild(img);
+            
+            lightboxModal.classList.remove('opacity-0', 'pointer-events-none');
+            lightboxContentWrapper.classList.remove('scale-95'); lightboxContentWrapper.classList.add('scale-100');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() { 
+            lightboxModal.classList.add('opacity-0', 'pointer-events-none');
+            lightboxContentWrapper.classList.add('scale-95'); lightboxContentWrapper.classList.remove('scale-100');
+            lightboxMediaInnerContainer.innerHTML = ''; 
+            document.body.style.overflow = '';
+        }
+        lightboxCloseBtn.addEventListener('click', closeLightbox);
+        lightboxModal.addEventListener('click', (event) => { if (event.target === lightboxModal) closeLightbox(); });
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && !lightboxModal.classList.contains('pointer-events-none')) closeLightbox(); });
+
+        // --- Collage Generation Core Logic (Canvas) ---
+        const CARD_BACKGROUND_COLOR_CANVAS = '#f8fafc'; 
+        const CARD_BORDER_COLOR_CANVAS = '#e2e8f0'; 
+        const CARD_SHADOW_COLOR_CANVAS = 'rgba(0,0,0,0.12)';
+        const CARD_SHADOW_OFFSET_X_CANVAS = 4;
+        const CARD_SHADOW_OFFSET_Y_CANVAS = 6;
+        const CARD_SHADOW_BLUR_CANVAS = 10;
+        const IMAGE_TO_TEXT_GAP_CANVAS = 12; 
+        const TEXT_LINE_HEIGHT_CANVAS_FACTOR = 1.4; 
+
+        async function populateCollageOnCanvas(canvas, targetWidth, numCols, gap, bgColor, currentMediaList) {
+            const ctx = canvas.getContext('2d');
+            if (currentMediaList.length === 0) throw new Error("No media available.");
+            const columnWidth = (targetWidth - (numCols + 1) * gap) / numCols; 
+            if (columnWidth <= 20) throw new Error('Column width too small.');
+
+            const loadedMedia = await Promise.all(
+                currentMediaList.map(item => new Promise((resolve) => {
+                    const element = new Image();
+                    element.onload = () => resolve({
+                        element, path: item.displayPath, aspectRatioType: item.aspectRatioType,
+                        imgWidth: item.width, imgHeight: item.height, originalAspectRatio: item.height / item.width 
+                    });
+                    element.onerror = (e) => {
+                        console.error("Error loading image for canvas:", item.displayPath, e);
+                        resolve(null); 
+                    };
+                    element.src = item.type === 'video' ? (item.currentVideoFrameForCollage || item.videoFrameDataURL) : item.dataURL;
+                }))
+            );
+            
+            const validLoadedMedia = loadedMedia.filter(m => m !== null && m.element && m.originalAspectRatio > 0);
+            if (validLoadedMedia.length === 0) throw new Error('None of the media could be loaded for the collage.');
+
+            const columnCurrentHeights = Array(numCols).fill(gap); 
+            const drawOperations = [];
+            const TEXT_FONT_SIZE_CANVAS = Math.max(10, Math.min(16, columnWidth * 0.06));
+            const SINGLE_LINE_TEXT_HEIGHT = TEXT_FONT_SIZE_CANVAS * TEXT_LINE_HEIGHT_CANVAS_FACTOR;
+            const TEXT_BLOCK_CONTENT_HEIGHT = SINGLE_LINE_TEXT_HEIGHT * 2; // Path + (Ratio - Dims)
+            const TEXT_BLOCK_PADDING_CANVAS = IMAGE_TO_TEXT_GAP_CANVAS * 0.7;
+            const TEXT_BLOCK_HEIGHT_ON_CANVAS = TEXT_BLOCK_CONTENT_HEIGHT + IMAGE_TO_TEXT_GAP_CANVAS + TEXT_BLOCK_PADDING_CANVAS;
+
+            validLoadedMedia.forEach(media => { 
+                 const scaledMediaHeightOnCanvas = media.originalAspectRatio * columnWidth;
+                const cardHeightOnCanvas = scaledMediaHeightOnCanvas + TEXT_BLOCK_HEIGHT_ON_CANVAS;
+                let shortestColumnIndex = 0; 
+                for (let i = 1; i < numCols; i++) { if (columnCurrentHeights[i] < columnCurrentHeights[shortestColumnIndex]) shortestColumnIndex = i; }
+                const x = gap + shortestColumnIndex * (columnWidth + gap);
+                const y = columnCurrentHeights[shortestColumnIndex];
+                drawOperations.push({
+                    mediaElement: media.element, path: media.path, aspectRatioType: media.aspectRatioType,
+                    imgWidthPx: media.imgWidth, imgHeightPx: media.imgHeight,
+                    x, y, cardWidth: columnWidth, mediaHeightOnCanvas: scaledMediaHeightOnCanvas, cardHeight: cardHeightOnCanvas 
+                });
+                columnCurrentHeights[shortestColumnIndex] += cardHeightOnCanvas + gap;
+            });
+
+            const canvasHeight = Math.max(0, ...columnCurrentHeights) ; 
+            if (canvasHeight <= 0) throw new Error('Calculated canvas height is zero.');
+            canvas.width = targetWidth; canvas.height = canvasHeight;
+            ctx.fillStyle = bgColor; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            drawOperations.forEach(op => { 
+                ctx.save();
+                ctx.shadowColor = CARD_SHADOW_COLOR_CANVAS; ctx.shadowOffsetX = CARD_SHADOW_OFFSET_X_CANVAS;
+                ctx.shadowOffsetY = CARD_SHADOW_OFFSET_Y_CANVAS; ctx.shadowBlur = CARD_SHADOW_BLUR_CANVAS;
+                ctx.fillStyle = CARD_BACKGROUND_COLOR_CANVAS; 
+                ctx.fillRect(op.x, op.y, op.cardWidth, op.cardHeight);
+                ctx.restore(); 
+                
+                ctx.strokeStyle = CARD_BORDER_COLOR_CANVAS; ctx.lineWidth = 1.5; 
+                ctx.strokeRect(op.x + 0.5, op.y + 0.5, op.cardWidth -1, op.cardHeight -1);
+                ctx.drawImage(op.mediaElement, op.x, op.y, op.cardWidth, op.mediaHeightOnCanvas);
+                
+                ctx.fillStyle = '#1e293b'; 
+                ctx.font = `500 ${TEXT_FONT_SIZE_CANVAS}px Inter`; 
+                ctx.textAlign = 'center';
+                const textStartX = op.x + op.cardWidth / 2;
+                let textCurrentY = op.y + op.mediaHeightOnCanvas + IMAGE_TO_TEXT_GAP_CANVAS + (TEXT_FONT_SIZE_CANVAS * 0.8);
+                ctx.fillText(op.path, textStartX, textCurrentY, op.cardWidth - (gap > 0 ? gap*0.7 : 6) );
+                textCurrentY += SINGLE_LINE_TEXT_HEIGHT;
+                ctx.font = `${TEXT_FONT_SIZE_CANVAS * 0.9}px Inter`; 
+                ctx.fillStyle = '#475569'; 
+                ctx.fillText(`${op.aspectRatioType} - ${op.imgWidthPx}x${op.imgHeightPx}px`, textStartX, textCurrentY, op.cardWidth - (gap > 0 ? gap*0.7 : 6));
+            });
+            return canvas;
+        }
+
+        // --- Modal Handling & Preview & Presets ---
+        function initializePresets() {
+            presetButtonsContainer.innerHTML = '';
+            PRESETS.forEach(preset => {
+                const button = document.createElement('button');
+                button.className = 'btn btn-preset'; button.textContent = preset.name;
+                button.addEventListener('click', () => {
+                    collageWidthInput.value = preset.width; numColumnsInput.value = preset.cols; imageGapInput.value = preset.gap;
+                    document.querySelectorAll('#presetButtonsContainer .btn-preset').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active'); debouncedUpdateCollagePreview();
+                });
+                presetButtonsContainer.appendChild(button);
+            });
+        }
+        const debouncedUpdateCollagePreview = debounce(updateCollagePreview, 450);
+        [collageWidthInput, numColumnsInput, imageGapInput, collageBgColorInput].forEach(input => {
+            input.addEventListener('input', () => {
+                document.querySelectorAll('#presetButtonsContainer .btn-preset').forEach(btn => btn.classList.remove('active'));
+                debouncedUpdateCollagePreview();
+            });
+        });
+        
+        async function updateCollagePreview() {
+            collagePreviewContainer.innerHTML = '<div class="flex flex-col items-center justify-center h-full w-full"><i class="fas fa-spinner fa-spin fa-2x text-slate-400"></i><p class="mt-2 text-slate-400">Generating preview...</p></div>';
+            const targetWidth = parseInt(collageWidthInput.value); const numCols = parseInt(numColumnsInput.value);
+            const gap = parseInt(imageGapInput.value); const bgColor = collageBgColorInput.value; 
+            if (isNaN(targetWidth) || targetWidth <= 50 || isNaN(numCols) || numCols <= 0 || isNaN(gap) || gap < 0) { 
+                collagePreviewContainer.innerHTML = '<p class="text-center text-red-400 p-4">Invalid parameters.</p>'; return; 
+            }
+            if (imageDataList.length === 0) { 
+                collagePreviewContainer.innerHTML = '<p class="text-center text-slate-500 p-4">No media loaded.</p>'; return; 
+            }
+            try {
+                const previewCanvas = document.createElement('canvas'); previewCanvas.id = 'dynamicPreviewCanvas';
+                await populateCollageOnCanvas(previewCanvas, targetWidth, numCols, gap, bgColor, imageDataList);
+                collagePreviewContainer.innerHTML = ''; collagePreviewContainer.appendChild(previewCanvas);
+            } catch (error) { 
+                console.error("Error generating preview:", error);
+                collagePreviewContainer.innerHTML = `<p class="text-center text-red-400 p-4 break-all">Preview Error: ${error.message}</p>`;
+            }
+        }
+        downloadCollageBtn.addEventListener('click', () => {
+            if (imageDataList.length === 0) { showMessage('No media loaded...', 'error'); return; }
+            downloadModal.classList.remove('opacity-0', 'pointer-events-none');
+            downloadModal.querySelector('.modal-content').classList.remove('scale-95');
+            downloadModal.querySelector('.modal-content').classList.add('scale-100');
+            document.body.style.overflow = 'hidden'; initializePresets(); updateCollagePreview(); 
+        });
+        closeDownloadModalBtn.addEventListener('click', closeDownloadModal);
+        cancelDownloadBtn.addEventListener('click', closeDownloadModal);
+        function closeDownloadModal() {
+            downloadModal.classList.add('opacity-0', 'pointer-events-none');
+            downloadModal.querySelector('.modal-content').classList.add('scale-95');
+            downloadModal.querySelector('.modal-content').classList.remove('scale-100');
+            generateBtnText.classList.remove('hidden'); generateSpinner.classList.add('hidden');
+            generateDownloadBtn.disabled = false;
+            collagePreviewContainer.innerHTML = '<p class="text-center text-slate-500 py-4">Adjust options...</p>';
+            document.body.style.overflow = '';
+        }
+
+        // --- Collage Download ---
+        generateDownloadBtn.addEventListener('click', handleDownloadCollage);
+        async function handleDownloadCollage() {
+            const targetWidth = parseInt(collageWidthInput.value); const numCols = parseInt(numColumnsInput.value);
+            const gap = parseInt(imageGapInput.value); const bgColor = collageBgColorInput.value;
+            if (isNaN(targetWidth) || targetWidth <= 0 || isNaN(numCols) || numCols <= 0 || isNaN(gap) || gap < 0) { 
+                showMessage('Please enter valid parameters for the collage.', 'error'); return; 
+            }
+            if (imageDataList.length === 0) { 
+                showMessage('No media available to generate collage.', 'error'); closeDownloadModal(); return; 
+            }
+            generateBtnText.classList.add('hidden'); generateSpinner.classList.remove('hidden'); generateDownloadBtn.disabled = true;
+            try {
+                const canvas = document.createElement('canvas');
+                await populateCollageOnCanvas(canvas, targetWidth, numCols, gap, bgColor, imageDataList);
+                if (canvas.width <=0 || canvas.height <= 0) { 
+                    showMessage('Generated collage has invalid dimensions.', 'error'); return; 
+                }
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.92); 
+                const link = document.createElement('a'); link.download = `image_collage_${Date.now()}.jpg`; link.href = dataUrl;
+                document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                showMessage('Collage downloaded successfully!', 'success');
+            } catch (error) { 
+                console.error('Error generating collage for download:', error);
+                showMessage(`Download Error: ${error.message}`, 'error');
+            } finally { closeDownloadModal(); }
+        }
+        
+        // --- Imgur Upload ---
+        async function uploadToImgur(base64Data, title = "Collage Media") {
+            const base64Payload = base64Data.split(',')[1]; // Remove the data URI prefix
+            const formData = new FormData();
+            formData.append('image', base64Payload);
+            formData.append('type', 'base64');
+            formData.append('title', title);
+            // formData.append('description', 'Uploaded via Collage Generator'); // Optional
+
+            try {
+                const response = await fetch('https://api.imgur.com/3/image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Client-ID ${IMGUR_CLIENT_ID}`,
+                    },
+                    body: formData,
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Imgur API Error: ${errorData.data.error || response.statusText}`);
+                }
+                const result = await response.json();
+                return result.data.link;
+            } catch (error) {
+                console.error('Imgur Upload Error:', error);
+                showMessage(`Imgur Upload Failed: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        function downloadCSV(data, filename = `imgur_links_${Date.now()}.csv`) {
+            const header = "Original Filename,Individual Imgur Link,Collage Imgur Link\n";
+            const csvRows = data.map(row => 
+                `"${row.originalFilename.replace(/"/g, '""')}","${row.individualLink || ''}","${row.collageLink || ''}"`
+            );
+            const csvString = header + csvRows.join("\n");
+            
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        shareToImgurBtn.addEventListener('click', async () => {
+            if (imageDataList.length === 0) {
+                showMessage('No media to share.', 'info');
+                return;
+            }
+            shareToImgurBtn.disabled = true;
+            const originalBtnText = shareToImgurBtn.querySelector('span').textContent;
+            shareToImgurBtn.querySelector('span').textContent = 'Sharing...';
+            shareToImgurBtn.querySelector('i').classList.remove('fa-imgur');
+            shareToImgurBtn.querySelector('i').classList.add('fa-spinner', 'fa-spin');
+
+            const csvData = [];
+            let uploadedCount = 0;
+
+            // 1. Upload individual media
+            showMessage('Uploading individual media to Imgur...', 'info', 10000);
+            for (let i = 0; i < imageDataList.length; i++) {
+                const item = imageDataList[i];
+                const dataToUpload = item.type === 'video' ? (item.currentVideoFrameForCollage || item.videoFrameDataURL) : item.dataURL;
+                if (!dataToUpload) {
+                    csvData.push({ originalFilename: item.displayPath, individualLink: 'Error: No frame data', collageLink: '' });
+                    continue;
+                }
+                const imgurLink = await uploadToImgur(dataToUpload, item.displayPath);
+                csvData.push({ originalFilename: item.displayPath, individualLink: imgurLink || 'Upload Failed', collageLink: '' });
+                if (imgurLink) uploadedCount++;
+                shareToImgurBtn.querySelector('span').textContent = `Sharing (${i+1}/${imageDataList.length})...`;
+            }
+            showMessage(`${uploadedCount}/${imageDataList.length} individual items uploaded. Now uploading collage...`, 'info', 10000);
+
+            // 2. Generate and upload collage
+            let collageImgurLink = null;
+            try {
+                const targetWidth = parseInt(collageWidthInput.value);
+                const numCols = parseInt(numColumnsInput.value);
+                const gap = parseInt(imageGapInput.value);
+                const bgColor = collageBgColorInput.value;
+                
+                const collageCanvas = document.createElement('canvas');
+                await populateCollageOnCanvas(collageCanvas, targetWidth, numCols, gap, bgColor, imageDataList);
+                const collageDataUrl = collageCanvas.toDataURL('image/jpeg', 0.92);
+                collageImgurLink = await uploadToImgur(collageDataUrl, `Collage-${Date.now()}`);
+                if (collageImgurLink) {
+                    showMessage('Collage uploaded successfully!', 'success');
+                } else {
+                    showMessage('Collage upload to Imgur failed.', 'error');
+                }
+            } catch (error) {
+                showMessage(`Error generating/uploading collage: ${error.message}`, 'error');
+            }
+
+            // 3. Update CSV data with collage link and download
+            csvData.forEach(row => row.collageLink = collageImgurLink || 'Upload Failed');
+            downloadCSV(csvData);
+
+            shareToImgurBtn.disabled = false;
+            shareToImgurBtn.querySelector('span').textContent = originalBtnText;
+            shareToimgurBtn.querySelector('i').classList.add('fa-imgur');
+            shareToImgurBtn.querySelector('i').classList.remove('fa-spinner', 'fa-spin');
+        });
+
+
+        // Initial UI setup
+        updateButtonsAndPlaceholder();
+    </script>
+</body>
+</html>
