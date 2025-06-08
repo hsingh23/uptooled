@@ -2,10 +2,9 @@
   "name": "uptooled",
   "version": "1.0.0",
   "description": "Tools gallery",
-  "main": "generate-tools.js",
+  "main": "generate.js",
   "scripts": {
-    "generate": "node generate-tools.js",
-    "generate:external": "node generate-external-sites.js"
+    "generate": "node generate.js"
   },
   "keywords": [],
   "author": "",
