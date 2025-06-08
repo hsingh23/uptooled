@@ -3,7 +3,6 @@ async function init() {
   const resTools = await fetch('tools.json?v=' + new Date().getTime());
   const localTools = await resTools.json();
 
-
   let externalSites = []; // Default to empty array
   try {
     const resExternal = await fetch('external-sites.json?v=' + new Date().getTime());
@@ -18,11 +17,17 @@ async function init() {
 
   const allTools = [
     ...localTools.map(tool => ({ ...tool, isExternal: false, id: tool.file })),
-    ...externalSites.map(site => ({
+    ...externalSites.filter(site => { // Add filter
+      if (site && typeof site.url === 'string' && site.url.trim() !== '') {
+        return true;
+      }
+      console.warn('Filtered out external site due to missing or invalid URL:', site);
+      return false;
+    }).map(site => ({
       ...site,
-      file: site.url, // Use 'url' as 'file' for external sites for iframe loading
+      file: site.url,
       isExternal: true,
-      id: site.url // Ensure a unique ID, using URL for external sites
+      id: site.url
     }))
   ];
 
@@ -145,22 +150,44 @@ async function init() {
   }
 
   function selectTool(tool, updateHash = true) {
-    dom.frameEl.src = tool.file; // Use dom object
-    dom.viewerTitleEl.textContent = tool.title; // Use dom object
-    dom.viewerDescEl.textContent = tool.description || ''; // Use dom object
-    dom.viewerKeysEl.textContent = // Use dom object
-      tool.keywords && tool.keywords.length
+    console.log('Selecting tool:', tool); // Log the entire tool object
+
+    if (tool && typeof tool.file === 'string' && tool.file.trim() !== '') {
+      if (tool.isExternal) {
+        if (!tool.file.startsWith('http://') && !tool.file.startsWith('https://')) {
+          console.error('External tool URL does not start with http(s):', tool.file);
+          // Optionally handle this more gracefully in the UI
+        }
+      }
+      dom.frameEl.src = tool.file;
+      console.log(`Set iframe src to: "${tool.file}" for tool: "${tool.title}"`);
+    } else {
+      console.error('Invalid or empty tool.file for tool:', tool.title, tool);
+      dom.frameEl.src = 'about:blank'; // Set to a blank page to indicate error
+      dom.viewerTitleEl.textContent = tool.title || "Error";
+      dom.viewerDescEl.textContent = "Could not load this tool: Invalid file path or URL.";
+      dom.viewerKeysEl.textContent = "";
+      showViewer(); // Make sure viewer is shown to display the error
+      if (updateHash) {
+         location.hash = encodeURIComponent(tool.id || tool.title || 'error');
+      }
+      return; // Stop further processing for this invalid tool
+    }
+
+    dom.viewerTitleEl.textContent = tool.title;
+    dom.viewerDescEl.textContent = tool.description || '';
+    dom.viewerKeysEl.textContent =
+      tool.keywords && Array.isArray(tool.keywords) && tool.keywords.length // Added Array.isArray check
         ? 'Keywords: ' + tool.keywords.join(', ')
         : '';
     showViewer();
     if (updateHash) {
-      location.hash = encodeURIComponent(tool.id); // Use new id property
+      location.hash = encodeURIComponent(tool.id);
     }
   }
 
   function filter() {
     const q = dom.searchEl.value.trim(); // Use dom object
-
     const filtered = q ? allTools.filter(t => matches(t, q)) : allTools;
     renderList(filtered);
     if (filtered.length) {
@@ -188,7 +215,6 @@ async function init() {
     const id = decodeURIComponent(location.hash.slice(1)); // id from hash
     if (id) {
       const tool = allTools.find(t => t.id === id); // Use allTools and id
-
       if (tool) selectTool(tool, false);
     } else {
       showGrid();
@@ -201,7 +227,6 @@ async function init() {
   const startId = decodeURIComponent(location.hash.slice(1)); // id from hash
   if (startId) {
     const tool = allTools.find(t => t.id === startId); // Use allTools and id
-
     if (tool) {
       selectTool(tool, false);
     } else {

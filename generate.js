@@ -37,20 +37,15 @@ function parseCSV(data) {
 
 async function fetchSite(url, useCache, cacheDir) {
   const cacheFile = path.join(cacheDir, sanitizeFilename(url) + '.html');
-  let html = '';
+  let html;
   if (useCache && fs.existsSync(cacheFile)) {
     html = fs.readFileSync(cacheFile, 'utf8');
   } else {
-    try {
-      const res = await fetch(url);
-      html = await res.text();
-      if (useCache) {
-        fs.mkdirSync(cacheDir, { recursive: true });
-        fs.writeFileSync(cacheFile, html);
-      }
-    } catch (err) {
-      console.error('Failed to fetch', url, err);
-      return { file: url, title: url, description: '', keywords: [] };
+    const res = await fetch(url);
+    html = await res.text();
+    if (useCache) {
+      fs.mkdirSync(cacheDir, { recursive: true });
+      fs.writeFileSync(cacheFile, html);
     }
   }
   const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
@@ -59,7 +54,7 @@ async function fetchSite(url, useCache, cacheDir) {
   const description = descMatch ? descMatch[1].trim() : '';
   const keyMatch = html.match(/<meta[^>]+name=['"]keywords['"][^>]+content=['"]([^'"]*)['"][^>]*>/i);
   const keywords = keyMatch ? keyMatch[1].split(',').map(k => k.trim()).filter(Boolean) : [];
-  return { file: url, title, description, keywords };
+  return { url, title, description, keywords };
 }
 
 async function generateExternalSites() {

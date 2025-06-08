@@ -7,7 +7,6 @@
   <meta name="keywords" content="tools, gallery, productivity">
   <title>Tool Gallery</title>
   <link rel="preload" href="tools.json" as="fetch" crossorigin>
-  <link rel="preload" href="external-sites.json" as="fetch" crossorigin>
   <link rel="preload" href="index.js" as="script">
   <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,7 +34,8 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow-y: auto; /* Allow main content to scroll if viewer is too tall */
+      overflow-y: auto; /* This is key */
+      position: relative; /* Added for robustness with potential future positioned children */
     }
     /* Ensure search input takes full width and has consistent styling */
     #sidebar .mui-textfield { /* Target textfield within sidebar */
@@ -75,17 +75,39 @@
         height: 100%; /* Take full height of #main's flex space */
     }
     #viewer-controls {
-      padding: 0.75rem 1.5rem; /* Adjust padding */
+      padding: 0.75rem 1.25rem; /* Consistent padding */
       border-bottom: 1px solid #e0e0e0;
-      background-color: #f8f9fa; /* Light background for controls */
+      background-color: #f8f9fa;
       display: flex;
       align-items: center;
+      gap: 0.75rem; /* Use gap for spacing between flex items */
       flex-shrink: 0; /* Prevent controls from shrinking */
     }
-    #viewer-controls .mui-btn { /* Style MUI buttons used here */
-        margin-right: 0.5rem;
-        text-transform: none; /* Optional: remove uppercase from MUI buttons */
-        font-family: 'Inter', sans-serif; /* Ensure button font matches */
+    #viewer-controls .mui-btn {
+      font-family: 'Inter', sans-serif;
+      text-transform: none;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 5px;
+      line-height: 1.5;
+      border: 1px solid #ced4da;
+      background-color: #ffffff;
+      color: #343a40;
+      transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, color 0.15s ease-in-out;
+    }
+
+    #viewer-controls .mui-btn:hover {
+      background-color: #e9ecef;
+      border-color: #adb5bd;
+      color: #212529;
+    }
+
+    #viewer-controls .mui-btn:focus,
+    #viewer-controls .mui-btn:active {
+      background-color: #dee2e6;
+      border-color: #adb5bd;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Focus ring */
+      outline: none;
     }
     #tool-frame {
       flex-grow: 1; /* Allow iframe to take available space */
@@ -188,19 +210,52 @@
     @media (max-width: 768px) { /* Adjust breakpoint as needed */
       #sidebar {
         width: 100%; /* Full width on smaller screens */
-        height: auto; /* Auto height */
+        /* height: auto; Let content dictate height up to max-height */
         border-right: none;
         border-bottom: 1px solid #e0e0e0; /* Border at bottom */
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        max-height: 40vh; /* Sidebar content will scroll if it exceeds this */
+        flex-shrink: 0; /* Prevent sidebar from shrinking if its content is small */
+        /* overflow-y: auto; is already on #sidebar from desktop styles, ensure it applies */
       }
       body {
         flex-direction: column; /* Stack sidebar and main content */
       }
       #main {
-        overflow-y: auto; /* Ensure main content scrolls independently */
+        /* overflow-y: auto; is inherited from desktop, still applies */
+        flex: 1; /* Main takes remaining vertical space */
+        min-height: 0; /* Crucial for flex children that need to scroll */
       }
       #grid-view {
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Adjust for smaller screens */
+      }
+
+      /* Card adjustments for mobile */
+      .tool-card {
+        /* min-height: 260px; */ /* Optional: ensure a minimum overall card height */
+      }
+
+      .card-preview-area {
+        height: 160px; /* Reduced height for preview area on mobile */
+      }
+
+      .card-preview-area .external-icon {
+        font-size: 40px; /* Adjust icon size if needed */
+      }
+
+      .tool-card-content {
+        padding: 0.85rem; /* Adjust padding on mobile */
+      }
+
+      .tool-card h3 {
+        font-size: 1.05rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .tool-card p { /* Description */
+        font-size: 0.88rem;
+        line-height: 1.45;
+        /* Relying on -webkit-line-clamp: 3; for height control */
       }
     }
   </style>
