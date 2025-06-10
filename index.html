@@ -30,6 +30,8 @@
       border-right: 1px solid var(--card-border-color, #ddd);
       overflow-y: auto;
       padding: var(--spacing);
+      display: flex;
+      flex-direction: column;
     }
     main {
       flex: 1;
@@ -42,80 +44,70 @@
       display: grid;
       gap: var(--spacing);
       padding: var(--spacing);
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     }
-    .tool-card {
+    article.tool-card {
+      padding: 0;
       --card-padding: 0;
       cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
-      overflow: hidden; /* Ensures rounded corners on children */
+      overflow: hidden;
     }
-    .tool-card:hover {
+    article.tool-card:hover {
         transform: translateY(-5px);
         box-shadow: var(--card-box-shadow, 0 5px 15px rgba(0,0,0,0.1));
     }
+    .card-window {
+        background: var(--card-background-color);
+        border: 1px solid var(--card-border-color);
+        border-radius: var(--border-radius);
+        padding: 0;
+        box-shadow: var(--card-box-shadow, 0 2px 5px rgba(0,0,0,0.05));
+    }
+    .card-window-header {
+        height: 30px;
+        background: var(--muted-bg-color);
+        border-bottom: 1px solid var(--card-border-color);
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+        gap: 6px;
+    }
+    .card-window-header span {
+        display: block; width: 12px; height: 12px; border-radius: 50%;
+        background: var(--muted-border-color);
+    }
+    .card-window-header span:nth-child(1) { background-color: #ff5f56; }
+    .card-window-header span:nth-child(2) { background-color: #ffbd2e; }
+    .card-window-header span:nth-child(3) { background-color: #27c93f; }
+    .card-window-content { height: 220px; }
     .card-frame {
-      width: 100%;
-      height: 220px;
-      border: 0;
-      margin-bottom: 0;
-      object-fit: cover;
+      width: 100%; height: 100%; border: 0; object-fit: cover;
       background-color: var(--muted-border-color);
     }
-    .tool-card > h3, .tool-card > p {
-        padding: 0 var(--spacing);
-        margin-bottom: 0;
-    }
-    .tool-card > h3 {
-        padding-top: var(--spacing);
-        margin-bottom: calc(var(--spacing) / 2);
-    }
-     .tool-card > p {
-        padding-bottom: var(--spacing);
-        color: var(--muted-color);
-        font-size: 0.9rem;
-    }
-    #tool-frame, #viewer-placeholder {
-      flex: 1;
-      border: 0;
-      width: 100%;
-      height: 100%;
-    }
+    .tool-card-body { padding: var(--spacing); padding-top: calc(var(--spacing)/2); }
+    .tool-card-body h3 { margin-bottom: calc(var(--spacing)/3); }
+    .tool-card-body p { color: var(--muted-color); font-size: 0.9rem; }
+    
+    #tool-frame, #viewer-placeholder { flex: 1; border: 0; width: 100%; height: 100%; }
     #viewer { display: none; flex: 1; flex-direction: column; }
     #viewer-controls {
         padding: calc(var(--spacing) / 2) var(--spacing);
         border-bottom: 1px solid var(--card-border-color, #ddd);
-        display: flex;
-        gap: 0.5rem;
-        background-color: var(--card-background-color);
+        display: flex; gap: 0.5rem; background-color: var(--card-background-color);
     }
-    #tool-info {
-        padding: var(--spacing);
-        border-top: 1px solid var(--card-border-color, #ddd);
-        background-color: var(--card-background-color);
-    }
-    #tool-list {
-        padding-left: 0;
-        list-style: none;
-        margin: 0;
-    }
-    #tool-list a {
-        text-decoration: none;
-        display: block;
-        padding: 0.25rem 0;
-    }
-    #tool-list a:hover {
-        color: var(--primary-hover);
-    }
+    #tool-info { padding: var(--spacing); border-top: 1px solid var(--card-border-color, #ddd); background-color: var(--card-background-color); }
+    #tool-info h4 { margin-bottom: 0.5rem; }
+    #related-tools-list { margin: 0; padding-left: var(--spacing); }
+    #tool-list { padding-left: 0; list-style: none; margin: 0; }
+    #tool-list a { text-decoration: none; display: block; padding: 0.25rem 0; }
+    #tool-list a:hover { color: var(--primary-hover); }
+    #theme-toggle { margin-top: auto; }
+
     @media (max-width: 768px) {
       body { flex-direction: column; }
-      aside {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid var(--card-border-color, #ddd);
-        height: auto;
-        max-height: 40vh;
-      }
+      aside { width: 100%; border-right: none; border-bottom: 1px solid var(--card-border-color, #ddd); height: auto; max-height: 40vh; }
+      #theme-toggle { margin-top: var(--spacing); }
     }
   </style>
 </head>
@@ -125,6 +117,7 @@
         <input type="search" id="search" name="search" placeholder="Search tools...">
     </label>
     <ul id="tool-list"></ul>
+    <button id="theme-toggle" class="secondary outline">Toggle Theme</button>
   </aside>
 
   <main id="main">
@@ -142,10 +135,31 @@
         <h3 id="tool-title"></h3>
         <p id="tool-description"></p>
         <small id="tool-keywords"></small>
+        <div id="related-tools-container" style="display: none; margin-top: 1rem;">
+            <h4>Related Tools</h4>
+            <ul id="related-tools-list"></ul>
+        </div>
       </div>
     </div>
   </main>
 
   <script src="index.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const themeToggle = document.getElementById('theme-toggle');
+      if (themeToggle) {
+        const htmlEl = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        htmlEl.setAttribute('data-theme', savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+          const currentTheme = htmlEl.getAttribute('data-theme');
+          const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          htmlEl.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+        });
+      }
+    });
+  </script>
 </body>
 </html>

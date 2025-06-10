@@ -42,7 +42,8 @@ async function init() {
     file: s.file || s.url,
     title: s.title || s.url,
     description: s.description || '',
-    keywords: s.keywords || []
+    keywords: s.keywords || [],
+    related: s.related || []
   })));
 
   await db.open();
@@ -90,8 +91,18 @@ async function init() {
   async function renderGrid(list) {
     gridEl.innerHTML = '';
     for (const tool of list) {
-      const card = document.createElement('div');
+      const card = document.createElement('article');
       card.className = 'tool-card';
+
+      const windowFrame = document.createElement('div');
+      windowFrame.className = 'card-window';
+
+      const windowHeader = document.createElement('div');
+      windowHeader.className = 'card-window-header';
+      windowHeader.innerHTML = '<span></span><span></span><span></span>';
+
+      const windowContent = document.createElement('div');
+      windowContent.className = 'card-window-content';
 
       const img = document.createElement('img');
       img.className = 'card-frame';
@@ -115,15 +126,24 @@ async function init() {
       });
       iframe.src = tool.file;
 
+      windowContent.appendChild(img);
+      windowContent.appendChild(iframe);
+      windowFrame.appendChild(windowHeader);
+      windowFrame.appendChild(windowContent);
+      
+      const cardBody = document.createElement('div');
+      cardBody.className = 'tool-card-body';
+
       const title = document.createElement('h3');
       title.textContent = tool.title;
       const desc = document.createElement('p');
       desc.textContent = tool.description || '';
+      
+      cardBody.appendChild(title);
+      cardBody.appendChild(desc);
 
-      card.appendChild(img);
-      card.appendChild(iframe);
-      card.appendChild(title);
-      card.appendChild(desc);
+      card.appendChild(windowFrame);
+      card.appendChild(cardBody);
       card.addEventListener('click', () => selectTool(tool));
       gridEl.appendChild(card);
     }
@@ -172,6 +192,32 @@ async function init() {
       tool.keywords && tool.keywords.length
         ? 'Keywords: ' + tool.keywords.join(', ')
         : '';
+    
+    const relatedToolsContainer = document.getElementById('related-tools-container');
+    const relatedListEl = document.getElementById('related-tools-list');
+    relatedListEl.innerHTML = '';
+
+    if (tool.related && tool.related.length > 0) {
+        tool.related.forEach(relatedTool => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = '#';
+            a.textContent = relatedTool.title;
+            a.onclick = (e) => {
+                e.preventDefault();
+                const fullRelatedTool = allTools.find(t => t.file === relatedTool.file);
+                if (fullRelatedTool) {
+                    selectTool(fullRelatedTool);
+                }
+            };
+            li.appendChild(a);
+            relatedListEl.appendChild(li);
+        });
+        relatedToolsContainer.style.display = 'block';
+    } else {
+        relatedToolsContainer.style.display = 'none';
+    }
+
     showViewer();
     if (updateHash) {
       location.hash = encodeURIComponent(tool.file);

@@ -1,7 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 
-async function generateTools() {
+function findRelated(currentTool, allToolsList) {
+    if (!currentTool.keywords || currentTool.keywords.length === 0) return [];
+    const related = [];
+    allToolsList.forEach(otherTool => {
+        if (currentTool.file === otherTool.file) return;
+        if (otherTool.keywords && otherTool.keywords.length > 0) {
+            const commonKeywords = currentTool.keywords.filter(k => otherTool.keywords.includes(k));
+            if (commonKeywords.length > 0) {
+                related.push({
+                    file: otherTool.file,
+                    title: otherTool.title
+                });
+            }
+        }
+    });
+    return related.slice(0, 3); // Return max 3 related tools
+}
+
+async function generateTools(allTools) {
   const toolsDir = path.join(__dirname, 'tools');
   const toolFiles = fs.readdirSync(toolsDir).filter(f => f.endsWith('.html'));
   const tools = toolFiles.map(file => {
@@ -15,7 +33,14 @@ async function generateTools() {
     const keywords = keyMatch ? keyMatch[1].split(',').map(k => k.trim()).filter(Boolean) : [];
     return { file: `tools/${file}`, title, description, keywords };
   });
-  fs.writeFileSync(path.join(__dirname, 'tools.json'), JSON.stringify(tools, null, 2) + '\n');
+
+  const updatedTools = tools.map(tool => ({
+      ...tool,
+      related: findRelated(tool, allTools)
+  }));
+
+  fs.writeFileSync(path.join(__dirname, 'tools.json'), JSON.stringify(updatedTools, null, 2) + '\n');
+  return tools; // Return original tools for allTools list
 }
 
 function sanitizeFilename(url) {
@@ -62,10 +87,11 @@ async function fetchSite(url, useCache, cacheDir) {
   return { file: url, title, description, keywords };
 }
 
-async function generateExternalSites() {
+async function generateExternalSites(allTools) {
   const csvPath = path.join(__dirname, 'external-sites.csv');
   if (!fs.existsSync(csvPath)) {
     console.error('external-sites.csv not found');
+    fs.writeFileSync(path.join(__dirname, 'external-sites.json'), '[]\n');
     return [];
   }
   const cacheDir = path.join(__dirname, 'site-cache');
@@ -73,13 +99,24 @@ async function generateExternalSites() {
   const entries = parseCSV(csvData);
   const tasks = entries.map(e => fetchSite(e.url, e.cache, cacheDir));
   const sites = await Promise.all(tasks);
-  fs.writeFileSync(path.join(__dirname, 'external-sites.json'), JSON.stringify(sites, null, 2) + '\n');
+
+  const updatedSites = sites.map(site => ({
+      ...site,
+      related: findRelated(site, allTools)
+  }));
+
+  fs.writeFileSync(path.join(__dirname, 'external-sites.json'), JSON.stringify(updatedSites, null, 2) + '\n');
   return sites;
 }
 
 async function main() {
-  await generateTools();
-  await generateExternalSites();
+  // Pass a combined list to each generator so it can find relations
+  const tempTools = await generateTools([]);
+  const tempSites = await generateExternalSites([]);
+  const allTools = [...tempTools, ...tempSites];
+
+  await generateTools(allTools);
+  await generateExternalSites(allTools);
 }
 
 main().catch(err => {
