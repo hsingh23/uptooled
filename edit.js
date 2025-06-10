@@ -3,15 +3,25 @@
   const ownerInput = document.getElementById('owner');
   const repoInput = document.getElementById('repo');
   const saveAuthBtn = document.getElementById('save-auth');
-  const csvArea = document.getElementById('csv-content');
-  const loadCsvBtn = document.getElementById('load-csv');
-  const saveCsvBtn = document.getElementById('save-csv');
-  const toolPathInput = document.getElementById('tool-path');
-  const toolArea = document.getElementById('tool-content');
-  const loadToolBtn = document.getElementById('load-tool');
-  const saveToolBtn = document.getElementById('save-tool');
+
+  const authSection = document.getElementById('auth-section');
+  const editorSection = document.getElementById('editor-section');
+  const fileList = document.getElementById('file-list');
+  const createFileBtn = document.getElementById('create-file');
+  const newFileInput = document.getElementById('new-file-name');
+  const saveFileBtn = document.getElementById('save-file');
+  const currentPathEl = document.getElementById('current-path');
+  const textArea = document.getElementById('file-content');
 
   const shas = {};
+  let editor;
+  let currentPath = '';
+
+  // Initialize CodeMirror
+  editor = CodeMirror.fromTextArea(textArea, {
+    lineNumbers: true,
+    mode: 'text/plain'
+  });
 
   // Populate from localStorage
   tokenInput.value = localStorage.getItem('gh_token') || '';
@@ -22,7 +32,7 @@
     localStorage.setItem('gh_token', tokenInput.value.trim());
     localStorage.setItem('gh_owner', ownerInput.value.trim());
     localStorage.setItem('gh_repo', repoInput.value.trim());
-    alert('Auth info saved');
+    testAuth();
   });
 
   function authHeaders() {
@@ -36,10 +46,70 @@
     return `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
   }
 
-  async function loadFile(path, area) {
+  async function testAuth() {
+    try {
+      const res = await fetch(repoUrl('external-sites.csv'), { headers: authHeaders() });
+      if (res.ok) {
+        authSection.style.display = 'none';
+        editorSection.style.display = 'flex';
+        await listFiles();
+        loadFile('external-sites.csv');
+      } else {
+        authSection.style.display = 'block';
+        editorSection.style.display = 'none';
+        alert('Authentication failed');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Authentication request failed');
+    }
+  }
+
+  async function listFiles() {
+    fileList.innerHTML = '';
+    const csvItem = document.createElement('li');
+    const csvLink = document.createElement('a');
+    csvLink.href = '#';
+    csvLink.textContent = 'external-sites.csv';
+    csvLink.addEventListener('click', e => { e.preventDefault(); loadFile('external-sites.csv'); });
+    csvItem.appendChild(csvLink);
+    fileList.appendChild(csvItem);
+
+    try {
+      const res = await fetch(repoUrl('tools'), { headers: authHeaders() });
+      if (!res.ok) return;
+      const items = await res.json();
+      items.forEach(it => {
+        if (it.type === 'file') {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = '#';
+          a.textContent = it.name;
+          a.addEventListener('click', e => { e.preventDefault(); loadFile('tools/' + it.name); });
+          li.appendChild(a);
+          fileList.appendChild(li);
+        }
+      });
+    } catch (err) {
+      console.error('Failed to list files', err);
+    }
+  }
+
+  function setModeFromPath(path) {
+    if (path.endsWith('.html')) {
+      editor.setOption('mode', 'htmlmixed');
+    } else {
+      editor.setOption('mode', 'text/plain');
+    }
+  }
+
+  async function loadFile(path) {
+    currentPath = path;
+    currentPathEl.textContent = path;
+    setModeFromPath(path);
     const res = await fetch(repoUrl(path), { headers: authHeaders() });
     if (res.status === 404) {
-      area.value = '';
+      editor.setValue('');
       shas[path] = null;
       return;
     }
@@ -48,20 +118,21 @@
       return;
     }
     const data = await res.json();
-    area.value = atob(data.content.replace(/\n/g, ''));
+    editor.setValue(atob(data.content.replace(/\n/g, '')));
     shas[path] = data.sha;
   }
 
-  async function saveFile(path, area, message) {
+  async function saveCurrentFile() {
+    if (!currentPath) return;
     const body = {
-      message,
-      content: btoa(area.value),
+      message: `Update ${currentPath}`,
+      content: btoa(editor.getValue())
     };
-    if (shas[path]) body.sha = shas[path];
-    const res = await fetch(repoUrl(path), {
+    if (shas[currentPath]) body.sha = shas[currentPath];
+    const res = await fetch(repoUrl(currentPath), {
       method: 'PUT',
       headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
-      body: JSON.stringify(body),
+      body: JSON.stringify(body)
     });
     if (!res.ok) {
       const text = await res.text();
@@ -69,19 +140,31 @@
       return;
     }
     const data = await res.json();
-    shas[path] = data.content.sha;
+    shas[currentPath] = data.content.sha;
     alert('Saved');
   }
 
-  loadCsvBtn.addEventListener('click', () => loadFile('external-sites.csv', csvArea));
-  saveCsvBtn.addEventListener('click', () => saveFile('external-sites.csv', csvArea, 'Update external sites'));
+  saveFileBtn.addEventListener('click', saveCurrentFile);
 
-  loadToolBtn.addEventListener('click', () => {
-    const path = toolPathInput.value.trim();
-    if (path) loadFile(path, toolArea);
+  createFileBtn.addEventListener('click', () => {
+    const name = newFileInput.value.trim();
+    if (!name) return;
+    const path = 'tools/' + name;
+    if (![...fileList.querySelectorAll('a')].some(a => a.textContent === name)) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#';
+      a.textContent = name;
+      a.addEventListener('click', e => { e.preventDefault(); loadFile(path); });
+      li.appendChild(a);
+      fileList.appendChild(li);
+    }
+    newFileInput.value = '';
+    loadFile(path);
   });
-  saveToolBtn.addEventListener('click', () => {
-    const path = toolPathInput.value.trim();
-    if (path) saveFile(path, toolArea, `Update ${path}`);
-  });
+
+  // Try auth on load if token present
+  if (tokenInput.value && ownerInput.value && repoInput.value) {
+    testAuth();
+  }
 })();
