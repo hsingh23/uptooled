@@ -5,8 +5,13 @@ const db = new Dexie('toolScreens');
 db.version(1).stores({ shots: '&file,data,timestamp' });
 
 async function getScreenshot(file) {
-  const rec = await db.shots.get(file);
-  return rec ? rec.data : null;
+  try {
+    const rec = await db.shots.get(file);
+    return rec ? rec.data : null;
+  } catch (e) {
+    console.error("Failed to get screenshot from DB", e);
+    return null;
+  }
 }
 
 async function saveScreenshot(file, data) {
@@ -18,13 +23,75 @@ async function saveScreenshot(file, data) {
 async function captureScreenshot(iframe) {
   try {
     const doc = iframe.contentWindow.document;
-    const canvas = await html2canvas(doc.body);
+    // Give a brief moment for styles to apply, especially in complex tools
+    await new Promise(resolve => setTimeout(resolve, 50)); 
+    const canvas = await html2canvas(doc.body, {
+      useCORS: true,
+      backgroundColor: window.getComputedStyle(doc.body).backgroundColor
+    });
     return canvas.toDataURL('image/png');
   } catch (err) {
     console.warn('Unable to capture screenshot for', iframe.src, err);
     return null;
   }
 }
+
+const screenshotQueue = [];
+let isProcessingQueue = false;
+
+async function processScreenshotQueue() {
+    if (isProcessingQueue || screenshotQueue.length === 0) {
+        return;
+    }
+    isProcessingQueue = true;
+    
+    const { tool, img, iframe } = screenshotQueue.shift();
+
+    try {
+        const existingShot = await getScreenshot(tool.file);
+        if (existingShot) {
+            img.src = existingShot;
+            img.style.display = 'block';
+            iframe.remove(); // No need for the iframe anymore
+        } else {
+            // Only load iframe if no screenshot exists
+            iframe.src = tool.file;
+            iframe.style.display = 'block';
+            await new Promise((resolve, reject) => {
+                iframe.onload = async () => {
+                    try {
+                        const data = await captureScreenshot(iframe);
+                        await saveScreenshot(tool.file, data);
+                        if (data) {
+                            img.src = data;
+                            img.style.display = 'block';
+                        }
+                        iframe.style.display = 'none';
+                        resolve();
+                    } catch (e) {
+                        reject(e);
+                    }
+                };
+                iframe.onerror = reject;
+            });
+        }
+    } catch (e) {
+        console.error(`Failed to process screenshot for ${tool.file}`, e);
+    } finally {
+        isProcessingQueue = false;
+        // Process next item after a short delay
+        setTimeout(processScreenshotQueue, 200);
+    }
+}
+
+
+function enqueueScreenshot(tool, img, iframe) {
+    screenshotQueue.push({ tool, img, iframe });
+    if (!isProcessingQueue) {
+        processScreenshotQueue();
+    }
+}
+
 
 async function init() {
   const res = await fetch('tools.json');
@@ -48,10 +115,12 @@ async function init() {
 
   await db.open();
 
+  // Main UI elements
   const searchEl = document.getElementById('search');
   const listEl = document.getElementById('tool-list');
   const gridEl = document.getElementById('grid-view');
-  const viewerEl = document.getElementById('viewer');
+  const viewerContainerEl = document.getElementById('viewer-container');
+  const viewerTitleEl = document.getElementById('viewer-title');
   const frameEl = document.getElementById('tool-frame');
   const placeholderEl = document.getElementById('viewer-placeholder');
   const titleEl = document.getElementById('tool-title');
@@ -62,14 +131,17 @@ async function init() {
   const infoEl = document.getElementById('tool-info');
   const editFileBtn = document.getElementById('edit-file');
   let selectedTool = null;
+  
+  // Command Palette elements
+  const commandPalette = document.getElementById('commandPalette');
+  const commandPaletteSearch = document.getElementById('commandPalette-search');
+  const commandPaletteResults = document.getElementById('commandPalette-results');
+  let paletteSelectedIndex = -1;
 
   function matches(tool, q) {
     q = q.toLowerCase();
-    return (
-      tool.title.toLowerCase().includes(q) ||
-      tool.description.toLowerCase().includes(q) ||
-      (tool.keywords || []).some(k => k.toLowerCase().includes(q))
-    );
+    const fullText = [tool.title, tool.description, ...(tool.keywords || [])].join(' ').toLowerCase();
+    return fullText.includes(q);
   }
 
   function renderList(list) {
@@ -90,67 +162,61 @@ async function init() {
 
   async function renderGrid(list) {
     gridEl.innerHTML = '';
+    const screenshotTasks = [];
+
     for (const tool of list) {
-      const card = document.createElement('article');
-      card.className = 'tool-card';
+        const card = document.createElement('article');
+        card.className = 'tool-card';
 
-      const windowFrame = document.createElement('div');
-      windowFrame.className = 'card-window';
+        const windowFrame = document.createElement('div');
+        windowFrame.className = 'card-window';
+        const windowHeader = document.createElement('div');
+        windowHeader.className = 'card-window-header';
+        windowHeader.innerHTML = '<span></span><span></span><span></span>';
+        const windowContent = document.createElement('div');
+        windowContent.className = 'card-window-content';
+        
+        const img = document.createElement('img');
+        img.className = 'card-frame';
+        img.style.display = 'block'; // Display by default, can show a placeholder state
+        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; // Transparent 1x1 GIF
+        
+        const iframe = document.createElement('iframe');
+        iframe.className = 'card-frame';
+        iframe.style.display = 'none';
+        iframe.setAttribute('loading', 'lazy');
+        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin'); // Security hardening
 
-      const windowHeader = document.createElement('div');
-      windowHeader.className = 'card-window-header';
-      windowHeader.innerHTML = '<span></span><span></span><span></span>';
-
-      const windowContent = document.createElement('div');
-      windowContent.className = 'card-window-content';
-
-      const img = document.createElement('img');
-      img.className = 'card-frame';
-      img.style.display = 'none';
-
-      const iframe = document.createElement('iframe');
-      iframe.className = 'card-frame';
-      iframe.style.display = 'none';
-
-      const shot = await getScreenshot(tool.file);
-      if (shot) {
-        img.src = shot;
-        img.style.display = 'block';
-      }
-
-      iframe.addEventListener('load', async () => {
-        img.style.display = 'none';
-        iframe.style.display = 'block';
-        const data = await captureScreenshot(iframe);
-        await saveScreenshot(tool.file, data);
-      });
-      iframe.src = tool.file;
-
-      windowContent.appendChild(img);
-      windowContent.appendChild(iframe);
-      windowFrame.appendChild(windowHeader);
-      windowFrame.appendChild(windowContent);
-      
-      const cardBody = document.createElement('div');
-      cardBody.className = 'tool-card-body';
-
-      const title = document.createElement('h3');
-      title.textContent = tool.title;
-      const desc = document.createElement('p');
-      desc.textContent = tool.description || '';
-      
-      cardBody.appendChild(title);
-      cardBody.appendChild(desc);
-
-      card.appendChild(windowFrame);
-      card.appendChild(cardBody);
-      card.addEventListener('click', () => selectTool(tool));
-      gridEl.appendChild(card);
+        screenshotTasks.push({tool, img, iframe});
+        
+        windowContent.appendChild(img);
+        windowContent.appendChild(iframe); // Keep iframe in DOM for loading
+        windowFrame.appendChild(windowHeader);
+        windowFrame.appendChild(windowContent);
+        
+        const cardBody = document.createElement('div');
+        cardBody.className = 'tool-card-body';
+        const title = document.createElement('h5');
+        title.textContent = tool.title;
+        const desc = document.createElement('p');
+        desc.textContent = tool.description || '';
+        
+        cardBody.appendChild(title);
+        cardBody.appendChild(desc);
+        card.appendChild(windowFrame);
+        card.appendChild(cardBody);
+        card.addEventListener('click', () => selectTool(tool));
+        gridEl.appendChild(card);
     }
+    
+    // Start processing queue after a delay
+    setTimeout(() => {
+        screenshotTasks.forEach(task => enqueueScreenshot(task.tool, task.img, task.iframe));
+    }, 10000); // 10-second delay
   }
 
   function showGrid() {
-    viewerEl.style.display = 'none';
+    viewerContainerEl.style.display = 'none';
     gridEl.style.display = 'grid';
     if (location.hash) {
       history.replaceState(null, '', location.pathname);
@@ -159,7 +225,7 @@ async function init() {
 
   function showViewer() {
     gridEl.style.display = 'none';
-    viewerEl.style.display = 'flex';
+    viewerContainerEl.style.display = 'flex';
     if (localStorage.getItem('gh_token')) {
       editFileBtn.style.display = 'inline-block';
     } else {
@@ -186,6 +252,7 @@ async function init() {
     };
 
     frameEl.src = tool.file;
+    viewerTitleEl.textContent = tool.title;
     titleEl.textContent = tool.title;
     descEl.textContent = tool.description || '';
     keysEl.textContent =
@@ -193,26 +260,36 @@ async function init() {
         ? 'Keywords: ' + tool.keywords.join(', ')
         : '';
     
+    // Render related tools
     const relatedToolsContainer = document.getElementById('related-tools-container');
-    const relatedListEl = document.getElementById('related-tools-list');
-    relatedListEl.innerHTML = '';
+    const relatedGridEl = document.getElementById('related-tools-grid');
+    relatedGridEl.innerHTML = '';
 
     if (tool.related && tool.related.length > 0) {
-        tool.related.forEach(relatedTool => {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.href = '#';
-            a.textContent = relatedTool.title;
-            a.onclick = (e) => {
+        for (const relatedTool of tool.related) {
+            const relatedCard = document.createElement('div');
+            relatedCard.className = 'related-tool-card';
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'related-tool-card-info';
+            infoDiv.innerHTML = `<strong>${relatedTool.title}</strong>`;
+            
+            const img = document.createElement('img');
+            img.className = 'related-tool-card-img';
+            const relatedShot = await getScreenshot(relatedTool.file);
+            if (relatedShot) {
+                img.src = relatedShot;
+            }
+            
+            relatedCard.appendChild(infoDiv);
+            relatedCard.appendChild(img);
+            relatedCard.onclick = (e) => {
                 e.preventDefault();
                 const fullRelatedTool = allTools.find(t => t.file === relatedTool.file);
-                if (fullRelatedTool) {
-                    selectTool(fullRelatedTool);
-                }
+                if (fullRelatedTool) selectTool(fullRelatedTool);
             };
-            li.appendChild(a);
-            relatedListEl.appendChild(li);
-        });
+            relatedGridEl.appendChild(relatedCard);
+        }
         relatedToolsContainer.style.display = 'block';
     } else {
         relatedToolsContainer.style.display = 'none';
@@ -224,28 +301,96 @@ async function init() {
     }
   }
 
-  function filter() {
+  function filterAndRender() {
     const q = searchEl.value.trim();
     const filtered = q ? allTools.filter(t => matches(t, q)) : allTools;
     renderList(filtered);
-    if (filtered.length) {
-      renderGrid(filtered);
-      showGrid();
-    } else {
-      gridEl.innerHTML = '<p>No tool found</p>';
-      showGrid();
+    renderGrid(filtered);
+    if (filtered.length === 0) {
+      gridEl.innerHTML = '<p>No tools found.</p>';
+    }
+    showGrid();
+  }
+  
+  // --- Command Palette Logic ---
+  function openCommandPalette() {
+    commandPalette.showModal();
+    commandPaletteSearch.value = '';
+    renderPaletteResults('');
+    commandPaletteSearch.focus();
+  }
+
+  function closeCommandPalette() {
+    commandPalette.close();
+  }
+
+  function renderPaletteResults(query) {
+    const q = query.toLowerCase();
+    const results = q ? allTools.filter(t => matches(t, q)) : allTools;
+    commandPaletteResults.innerHTML = '';
+    paletteSelectedIndex = -1;
+
+    results.slice(0, 50).forEach((tool, index) => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'palette-result';
+        a.dataset.index = index;
+        a.dataset.file = tool.file;
+
+        const titleHtml = q ? tool.title.replace(new RegExp(q, 'gi'), (match) => `<mark>${match}</mark>`) : tool.title;
+        const descHtml = q && tool.description ? tool.description.replace(new RegExp(q, 'gi'), (match) => `<mark>${match}</mark>`) : tool.description;
+
+        a.innerHTML = `<strong>${titleHtml}</strong><br><small>${descHtml || 'No description'}</small>`;
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            selectTool(tool);
+            closeCommandPalette();
+        });
+        commandPaletteResults.appendChild(a);
+    });
+    updatePaletteSelection();
+  }
+
+  function updatePaletteSelection() {
+    const results = commandPaletteResults.querySelectorAll('.palette-result');
+    results.forEach((el, i) => {
+        el.setAttribute('aria-selected', i === paletteSelectedIndex);
+    });
+    if (paletteSelectedIndex !== -1 && results[paletteSelectedIndex]) {
+        results[paletteSelectedIndex].scrollIntoView({ block: 'nearest' });
     }
   }
 
-  searchEl.addEventListener('input', filter);
+  function handlePaletteKeyDown(e) {
+    const results = commandPaletteResults.querySelectorAll('.palette-result');
+    if (results.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        paletteSelectedIndex = (paletteSelectedIndex + 1) % results.length;
+        updatePaletteSelection();
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        paletteSelectedIndex = (paletteSelectedIndex - 1 + results.length) % results.length;
+        updatePaletteSelection();
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (paletteSelectedIndex !== -1 && results[paletteSelectedIndex]) {
+            results[paletteSelectedIndex].click();
+        } else if (results.length > 0) {
+            results[0].click(); // Select first result if none is highlighted
+        }
+    }
+  }
+
+  // --- Event Listeners ---
+  searchEl.addEventListener('input', filterAndRender);
   backBtn.addEventListener('click', showGrid);
   toggleInfoBtn.addEventListener('click', () => {
     if (infoEl.style.display === 'none') {
       infoEl.style.display = 'block';
-      toggleInfoBtn.textContent = 'Hide Info';
     } else {
       infoEl.style.display = 'none';
-      toggleInfoBtn.textContent = 'Show Info';
     }
   });
 
@@ -264,7 +409,21 @@ async function init() {
       showGrid();
     }
   });
+  
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      openCommandPalette();
+    }
+    if (e.key === 'Escape' && commandPalette.open) {
+      closeCommandPalette();
+    }
+  });
 
+  commandPaletteSearch.addEventListener('input', (e) => renderPaletteResults(e.target.value));
+  commandPaletteSearch.addEventListener('keydown', handlePaletteKeyDown);
+
+  // --- Initial Load ---
   renderList(allTools);
   renderGrid(allTools);
 
