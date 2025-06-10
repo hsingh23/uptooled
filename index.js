@@ -4,6 +4,12 @@
 const db = new Dexie('toolScreens');
 db.version(1).stores({ shots: '&file,data,timestamp' });
 
+// track iframes and cards to reuse between grid and viewer
+const iframeMap = new Map();
+const cardMap = new Map();
+let currentFrame = null;
+let currentCardEl = null;
+
 async function getScreenshot(file) {
   const rec = await db.shots.get(file);
   return rec ? rec.data : null;
@@ -18,8 +24,15 @@ async function saveScreenshot(file, data) {
 async function captureScreenshot(iframe) {
   try {
     const doc = iframe.contentWindow.document;
-    const canvas = await html2canvas(doc.body);
-    return canvas.toDataURL('image/png');
+    // wait a bit for fonts/styles to settle to avoid jank
+    await new Promise(r => setTimeout(r, 5000));
+    const canvas = await html2canvas(doc.body, {
+      windowWidth: 450,
+      windowHeight: 220,
+      width: 450,
+      height: 220
+    });
+    return canvas.toDataURL('image/jpeg', 0.8);
   } catch (err) {
     console.warn('Unable to capture screenshot for', iframe.src, err);
     return null;
@@ -52,7 +65,6 @@ async function init() {
   const gridEl = document.getElementById('grid-view');
   const viewerEl = document.getElementById('viewer');
   const frameEl = document.getElementById('tool-frame');
-  const placeholderEl = document.getElementById('viewer-placeholder');
   const titleEl = document.getElementById('tool-title');
   const descEl = document.getElementById('tool-description');
   const keysEl = document.getElementById('tool-keywords');
@@ -98,34 +110,38 @@ async function init() {
       img.className = 'card-frame';
       img.style.display = 'none';
 
-      const iframe = document.createElement('iframe');
-      iframe.className = 'card-frame';
-      iframe.style.display = 'none';
+      let iframe = iframeMap.get(tool.file);
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.className = 'card-frame';
+        iframe.style.display = 'none';
+        iframe.addEventListener('load', async () => {
+          img.style.display = 'none';
+          iframe.style.display = 'block';
+          const data = await captureScreenshot(iframe);
+          await saveScreenshot(tool.file, data);
+        });
+        iframe.src = tool.file;
+        iframeMap.set(tool.file, iframe);
+      }
+
+      cardMap.set(tool.file, card);
 
       const shot = await getScreenshot(tool.file);
-      if (shot) {
+      if (shot && iframe.style.display === 'none') {
         img.src = shot;
         img.style.display = 'block';
       }
 
-      iframe.addEventListener('load', async () => {
-        img.style.display = 'none';
-        iframe.style.display = 'block';
-        const data = await captureScreenshot(iframe);
-        await saveScreenshot(tool.file, data);
-      });
-      iframe.src = tool.file;
-
+      card.appendChild(img);
+      card.appendChild(iframe);
       const title = document.createElement('h3');
       title.textContent = tool.title;
       const desc = document.createElement('p');
       desc.textContent = tool.description || '';
-
-      card.appendChild(img);
-      card.appendChild(iframe);
       card.appendChild(title);
       card.appendChild(desc);
-      card.addEventListener('click', () => selectTool(tool));
+      card.addEventListener('click', () => selectTool(tool, iframe, card));
       gridEl.appendChild(card);
     }
   }
@@ -133,6 +149,14 @@ async function init() {
   function showGrid() {
     viewerEl.style.display = 'none';
     gridEl.style.display = 'grid';
+    if (currentFrame && currentCardEl) {
+      const img = currentCardEl.querySelector('img.card-frame');
+      if (img) img.style.display = 'none';
+      currentCardEl.insertBefore(currentFrame, img ? img.nextSibling : currentCardEl.firstChild);
+      currentFrame.style.display = 'block';
+      currentFrame = null;
+      currentCardEl = null;
+    }
     if (location.hash) {
       history.replaceState(null, '', location.pathname);
     }
@@ -148,25 +172,27 @@ async function init() {
     }
   }
 
-  async function selectTool(tool, updateHash = true) {
+  async function selectTool(tool, iframe = null, card = null, updateHash = true) {
     selectedTool = tool;
-    frameEl.style.display = 'none';
-    const shot = await getScreenshot(tool.file);
-    if (shot) {
-      placeholderEl.src = shot;
-      placeholderEl.style.display = 'block';
-    } else {
-      placeholderEl.style.display = 'none';
+
+    if (!iframe) iframe = iframeMap.get(tool.file);
+    if (!card) card = cardMap.get(tool.file);
+
+    if (currentFrame && currentCardEl && currentFrame !== iframe) {
+      const imgPrev = currentCardEl.querySelector('img.card-frame');
+      if (imgPrev) imgPrev.style.display = 'none';
+      currentCardEl.insertBefore(currentFrame, imgPrev ? imgPrev.nextSibling : currentCardEl.firstChild);
+      currentFrame.style.display = 'block';
     }
 
-    frameEl.onload = async () => {
-      placeholderEl.style.display = 'none';
-      frameEl.style.display = 'block';
-      const data = await captureScreenshot(frameEl);
-      await saveScreenshot(tool.file, data);
-    };
+    currentFrame = iframe;
+    currentCardEl = card;
 
-    frameEl.src = tool.file;
+    frameEl.innerHTML = '';
+    if (iframe) {
+      frameEl.appendChild(iframe);
+      iframe.style.display = 'block';
+    }
     titleEl.textContent = tool.title;
     descEl.textContent = tool.description || '';
     keysEl.textContent =

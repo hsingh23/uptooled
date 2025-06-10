@@ -49,20 +49,20 @@
     }
     .card-frame {
       width: 100%;
+      max-width: 450px;
       height: 220px;
       border: 0;
       margin-bottom: 0.5rem;
       object-fit: cover;
+      object-position: center top;
     }
     #tool-frame {
       flex: 1;
       border: 0;
       width: 100%;
-    }
-    #viewer-placeholder {
-      flex: 1;
-      width: 100%;
-      object-fit: cover;
+      max-width: 450px;
+      max-height: 220px;
+      aspect-ratio: 450 / 220;
     }
     #tool-info {
       padding: 1rem;
@@ -93,8 +93,7 @@
         <button id="toggle-info" class="mui-btn mui-btn--small">Hide Info</button>
         <button id="edit-file" class="mui-btn mui-btn--small" style="display:none;">Edit File</button>
       </div>
-      <img id="viewer-placeholder" style="display:none; width:100%; flex:1; object-fit:cover;"/>
-      <iframe id="tool-frame" style="display:none;"></iframe>
+      <div id="tool-frame"></div>
       <div id="tool-info">
         <h3 id="tool-title"></h3>
         <p id="tool-description"></p>
