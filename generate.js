@@ -15,28 +15,6 @@ async function generateTools() {
     const keywords = keyMatch ? keyMatch[1].split(',').map(k => k.trim()).filter(Boolean) : [];
     return { file: `tools/${file}`, title, description, keywords };
   });
-  // determine related tools based on shared keyword tokens
-  const wordSets = tools.map(t =>
-    new Set(
-      t.keywords
-        .flatMap(k => k.toLowerCase().split(/\s+/))
-        .filter(Boolean)
-    )
-  );
-  tools.forEach((tool, idx) => {
-    const scores = tools
-      .map((t, j) => {
-        if (j === idx) return { file: t.file, count: 0 };
-        let count = 0;
-        for (const w of wordSets[idx]) if (wordSets[j].has(w)) count++;
-        return { file: t.file, count };
-      })
-      .filter(s => s.count > 0)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 3)
-      .map(s => s.file);
-    tool.related = scores;
-  });
   fs.writeFileSync(path.join(__dirname, 'tools.json'), JSON.stringify(tools, null, 2) + '\n');
 }
 
