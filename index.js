@@ -56,6 +56,7 @@ async function init() {
   const titleEl = document.getElementById('tool-title');
   const descEl = document.getElementById('tool-description');
   const keysEl = document.getElementById('tool-keywords');
+  const relatedEl = document.getElementById('tool-related');
   const backBtn = document.getElementById('back-button');
   const toggleInfoBtn = document.getElementById('toggle-info');
   const infoEl = document.getElementById('tool-info');
@@ -172,6 +173,24 @@ async function init() {
       tool.keywords && tool.keywords.length
         ? 'Keywords: ' + tool.keywords.join(', ')
         : '';
+    relatedEl.innerHTML = '';
+    if (tool.related && tool.related.length) {
+      relatedEl.appendChild(document.createTextNode('Similar: '));
+      tool.related.forEach((file, idx) => {
+        const relTool = allTools.find(t => t.file === file);
+        if (relTool) {
+          const link = document.createElement('a');
+          link.href = '#';
+          link.textContent = relTool.title;
+          link.addEventListener('click', e => {
+            e.preventDefault();
+            selectTool(relTool);
+          });
+          if (idx > 0) relatedEl.appendChild(document.createTextNode(', '));
+          relatedEl.appendChild(link);
+        }
+      });
+    }
     showViewer();
     if (updateHash) {
       location.hash = encodeURIComponent(tool.file);
