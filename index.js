@@ -59,6 +59,8 @@ async function init() {
   const backBtn = document.getElementById('back-button');
   const toggleInfoBtn = document.getElementById('toggle-info');
   const infoEl = document.getElementById('tool-info');
+  const editFileBtn = document.getElementById('edit-file');
+  let selectedTool = null;
 
   function matches(tool, q) {
     q = q.toLowerCase();
@@ -138,9 +140,15 @@ async function init() {
   function showViewer() {
     gridEl.style.display = 'none';
     viewerEl.style.display = 'flex';
+    if (localStorage.getItem('gh_token')) {
+      editFileBtn.style.display = 'inline-block';
+    } else {
+      editFileBtn.style.display = 'none';
+    }
   }
 
   async function selectTool(tool, updateHash = true) {
+    selectedTool = tool;
     frameEl.style.display = 'none';
     const shot = await getScreenshot(tool.file);
     if (shot) {
@@ -192,6 +200,12 @@ async function init() {
     } else {
       infoEl.style.display = 'none';
       toggleInfoBtn.textContent = 'Show Info';
+    }
+  });
+
+  editFileBtn.addEventListener('click', () => {
+    if (selectedTool) {
+      location.href = `edit.html?file=${encodeURIComponent(selectedTool.file)}`;
     }
   });
 
