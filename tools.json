@@ -12,11 +12,16 @@
       "visual calendar",
       "project schedule",
       "free tool"
+    ],
+    "related": [
+      "tools/Masonry Image Collage Generator.html",
+      "tools/Image Resizer and Cropper.html",
+      "tools/Poster Creator.html"
     ]
   },
   {
     "file": "tools/Image Resizer and Cropper.html",
-    "title": "Free Image Resizer & Cropper - Online Tool",
+    "title": "Image Resizer and Cropper",
     "description": "A free online tool to resize, crop, and edit images for any purpose. Perfect for creating favicons, app icons (Chrome extensions, web apps), and social media assets. Features zoom, pan, and custom background colors.",
     "keywords": [
       "image resizer",
@@ -29,11 +34,16 @@
       "jpeg resizer",
       "chrome extension icons",
       "web app icons"
+    ],
+    "related": [
+      "tools/Masonry Image Collage Generator.html",
+      "tools/Poster Creator.html",
+      "tools/Calendar Timeline Visualizer.html"
     ]
   },
   {
     "file": "tools/Masonry Image Collage Generator.html",
-    "title": "Free Masonry Image Collage Generator | Create & Download Collages",
+    "title": "Masonry Image Collage Generator",
     "description": "Easily create, customize, and download beautiful masonry-style image and video collages online for free. No sign-up required. Upload your files, adjust layouts, and share your creation.",
     "keywords": [
       "image collage",
@@ -46,6 +56,11 @@
       "picture collage",
       "download collage",
       "create collage"
+    ],
+    "related": [
+      "tools/Image Resizer and Cropper.html",
+      "tools/Calendar Timeline Visualizer.html",
+      "tools/Poster Creator.html"
     ]
   },
   {
@@ -59,6 +74,11 @@
       "custom poster",
       "online editor",
       "typography design"
+    ],
+    "related": [
+      "tools/Image Resizer and Cropper.html",
+      "tools/Calendar Timeline Visualizer.html",
+      "tools/Masonry Image Collage Generator.html"
     ]
   }
 ]
