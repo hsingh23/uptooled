@@ -22,7 +22,9 @@ async function captureScreenshot(iframe) {
     win.scrollTo(0, 0);
     const canvas = await html2canvas(doc.body, {
       windowWidth: 450,
+      windowHeight: 250,
       width: 450,
+      height: 250,
       scrollX: 0,
       scrollY: 0
     });
