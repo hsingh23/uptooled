@@ -58,7 +58,20 @@ async function init() {
   const keysEl = document.getElementById('tool-keywords');
   const backBtn = document.getElementById('back-button');
   const toggleInfoBtn = document.getElementById('toggle-info');
+  const editBtn = document.getElementById('edit-button');
   const infoEl = document.getElementById('tool-info');
+
+  function hasGhAuth() {
+    return (
+      localStorage.getItem('gh_token') &&
+      localStorage.getItem('gh_owner') &&
+      localStorage.getItem('gh_repo')
+    );
+  }
+
+  if (hasGhAuth()) {
+    editBtn.style.display = 'inline-block';
+  }
 
   function matches(tool, q) {
     q = q.toLowerCase();
@@ -193,6 +206,12 @@ async function init() {
       infoEl.style.display = 'none';
       toggleInfoBtn.textContent = 'Show Info';
     }
+  });
+
+  editBtn.addEventListener('click', () => {
+    const file = decodeURIComponent(location.hash.slice(1));
+    const url = file ? `edit.html#${encodeURIComponent(file)}` : 'edit.html';
+    location.href = url;
   });
 
   window.addEventListener('hashchange', () => {

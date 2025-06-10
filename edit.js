@@ -12,6 +12,7 @@
   const saveFileBtn = document.getElementById('save-file');
   const currentPathEl = document.getElementById('current-path');
   const textArea = document.getElementById('file-content');
+  const startPath = decodeURIComponent(location.hash.slice(1));
 
   const shas = {};
   let editor;
@@ -53,7 +54,7 @@
         authSection.style.display = 'none';
         editorSection.style.display = 'flex';
         await listFiles();
-        loadFile('external-sites.csv');
+        loadFile(startPath || 'external-sites.csv');
       } else {
         authSection.style.display = 'block';
         editorSection.style.display = 'none';
