@@ -20,6 +20,14 @@ async function captureScreenshot(iframe) {
     const win = iframe.contentWindow;
     const doc = win.document;
     win.scrollTo(0, 0);
+    if (doc.fonts && doc.fonts.ready) {
+      try {
+        await doc.fonts.ready;
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    await new Promise(res => setTimeout(res, 5000));
     const canvas = await html2canvas(doc.body, {
       windowWidth: 450,
       windowHeight: 250,
