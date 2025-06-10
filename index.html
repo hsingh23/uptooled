@@ -11,14 +11,18 @@
   <link rel="preload" href="index.js" as="script">
   <script src="https://unpkg.com/dexie@latest/dist/dexie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://unpkg.com/@webcomponents/webcomponentsjs@2/webcomponents-loader.js"></script>
+  <script type="module">
+    import 'https://unpkg.com/@polymer/app-layout/app-layout.js?module';
+  </script>
   <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
   <style>
-    body {
+    html, body {
       margin: 0;
-      display: flex;
-      height: 100vh;
-      overflow-x: hidden;
-      overflow-y: auto;
+      height: 100%;
+    }
+    app-drawer-layout {
+      height: 100%;
     }
     #sidebar {
       width: 250px;
@@ -68,8 +72,10 @@
       padding: 1rem;
       border-top: 1px solid #ddd;
     }
+    app-drawer-layout:not([narrow]) [drawer-toggle] {
+      display: none;
+    }
     @media (max-width: 600px) {
-      body { flex-direction: column; }
       #sidebar {
         width: 100%;
         border-right: none;
@@ -78,30 +84,44 @@
     }
   </style>
 </head>
-<body>
-  <div id="sidebar">
-    <div class="mui-textfield">
-      <input type="text" id="search" placeholder="Search tools">
-    </div>
-    <ul id="tool-list" class="mui-list--unstyled"></ul>
-  </div>
-  <div id="main">
-    <div id="grid-view"></div>
-    <div id="viewer" style="display:none; flex:1; flex-direction:column;">
-      <div id="viewer-controls" style="padding:0.5rem; border-bottom:1px solid #ddd;">
-        <button id="back-button" class="mui-btn mui-btn--small">Back</button>
-        <button id="toggle-info" class="mui-btn mui-btn--small">Hide Info</button>
-        <button id="edit-file" class="mui-btn mui-btn--small" style="display:none;">Edit File</button>
+<body unresolved>
+  <app-drawer-layout fullbleed>
+    <app-drawer slot="drawer">
+      <div id="sidebar">
+        <div class="mui-textfield">
+          <input type="text" id="search" placeholder="Search tools">
+        </div>
+        <ul id="tool-list" class="mui-list--unstyled"></ul>
       </div>
-      <img id="viewer-placeholder" style="display:none; width:100%; flex:1; object-fit:cover;"/>
-      <iframe id="tool-frame" style="display:none;"></iframe>
-      <div id="tool-info">
-        <h3 id="tool-title"></h3>
-        <p id="tool-description"></p>
-        <small id="tool-keywords"></small>
+    </app-drawer>
+
+    <app-header-layout has-scrolling-region>
+      <app-header slot="header" fixed>
+        <app-toolbar>
+          <button drawer-toggle class="mui-btn mui-btn--small">Menu</button>
+          <div main-title>Tool Gallery</div>
+        </app-toolbar>
+      </app-header>
+
+      <div id="main">
+        <div id="grid-view"></div>
+        <div id="viewer" style="display:none; flex:1; flex-direction:column;">
+          <div id="viewer-controls" style="padding:0.5rem; border-bottom:1px solid #ddd;">
+            <button id="back-button" class="mui-btn mui-btn--small">Back</button>
+            <button id="toggle-info" class="mui-btn mui-btn--small">Hide Info</button>
+            <button id="edit-file" class="mui-btn mui-btn--small" style="display:none;">Edit File</button>
+          </div>
+          <img id="viewer-placeholder" style="display:none; width:100%; flex:1; object-fit:cover;"/>
+          <iframe id="tool-frame" style="display:none;"></iframe>
+          <div id="tool-info">
+            <h3 id="tool-title"></h3>
+            <p id="tool-description"></p>
+            <small id="tool-keywords"></small>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
+    </app-header-layout>
+  </app-drawer-layout>
   <script src="index.js" defer></script>
 
 </body>

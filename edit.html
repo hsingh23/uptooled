@@ -6,17 +6,25 @@
   <title>Edit Repository Files</title>
   <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+  <script src="https://unpkg.com/@webcomponents/webcomponentsjs@2/webcomponents-loader.js"></script>
+  <script type="module">
+    import 'https://unpkg.com/@polymer/app-layout/app-layout.js?module';
+  </script>
   <style>
-    body { margin:0; height:100vh; display:flex; overflow:hidden; }
+    html, body { margin:0; height:100%; }
     #auth-section { padding:1rem; width:100%; }
-    #editor-section { flex:1; display:flex; }
+    #editor-section { height:100%; }
+    app-drawer-layout { height:100%; }
     #sidebar { width:220px; border-right:1px solid #ddd; padding:1rem; overflow-y:auto; }
     #main { flex:1; display:flex; flex-direction:column; padding:1rem; }
     #file-content { height:100%; }
     .CodeMirror { height:100%; }
+    app-drawer-layout:not([narrow]) [drawer-toggle] {
+      display:none;
+    }
   </style>
 </head>
-<body>
+<body unresolved>
   <div id="auth-section">
     <h1>Edit Repository Files</h1>
     <div class="mui-textfield">
@@ -26,24 +34,34 @@
     <button id="save-auth" class="mui-btn mui-btn--primary">Save Auth</button>
   </div>
 
-  <div id="editor-section" style="display:none;">
-    <div id="sidebar">
-      <ul id="file-list" class="mui-list--unstyled"></ul>
-      <div class="mui-textfield" style="margin-top:1rem;">
-        <input type="text" id="new-file-name" placeholder="New file name.html">
+  <app-drawer-layout id="editor-section" style="display:none;" fullbleed>
+    <app-drawer slot="drawer">
+      <div id="sidebar">
+        <ul id="file-list" class="mui-list--unstyled"></ul>
+        <div class="mui-textfield" style="margin-top:1rem;">
+          <input type="text" id="new-file-name" placeholder="New file name.html">
+        </div>
+        <button id="create-file" class="mui-btn mui-btn--small mui-btn--primary">Create</button>
       </div>
-      <button id="create-file" class="mui-btn mui-btn--small mui-btn--primary">Create</button>
-    </div>
-    <div id="main">
-      <h2 id="current-path"></h2>
-      <textarea id="file-content"></textarea>
-      <div style="margin-top:0.5rem;">
-        <button id="save-file" class="mui-btn mui-btn--primary">Save</button>
-        <button id="rename-file" class="mui-btn mui-btn--small">Rename</button>
-        <button id="delete-file" class="mui-btn mui-btn--danger mui-btn--small">Delete</button>
+    </app-drawer>
+    <app-header-layout has-scrolling-region>
+      <app-header slot="header" fixed>
+        <app-toolbar>
+          <button drawer-toggle class="mui-btn mui-btn--small">Menu</button>
+          <div main-title>Edit Files</div>
+        </app-toolbar>
+      </app-header>
+      <div id="main">
+        <h2 id="current-path"></h2>
+        <textarea id="file-content"></textarea>
+        <div style="margin-top:0.5rem;">
+          <button id="save-file" class="mui-btn mui-btn--primary">Save</button>
+          <button id="rename-file" class="mui-btn mui-btn--small">Rename</button>
+          <button id="delete-file" class="mui-btn mui-btn--danger mui-btn--small">Delete</button>
+        </div>
       </div>
-    </div>
-  </div>
+    </app-header-layout>
+  </app-drawer-layout>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/xml/xml.min.js"></script>
