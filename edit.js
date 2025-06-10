@@ -18,6 +18,7 @@
   const shas = {};
   let editor;
   let currentPath = '';
+  const requestedFile = new URLSearchParams(location.search).get('file');
 
   // Initialize CodeMirror
   editor = CodeMirror.fromTextArea(textArea, {
@@ -80,7 +81,11 @@
     hideAuth();
     const listed = await listFiles();
     if (listed) {
-      loadFile('external-sites.csv');
+      if (requestedFile) {
+        loadFile(requestedFile);
+      } else {
+        loadFile('external-sites.csv');
+      }
     }
   }
 
