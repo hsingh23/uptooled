@@ -9,6 +9,8 @@
   <link rel="preload" href="tools.json" as="fetch" crossorigin>
   <link rel="preload" href="external-sites.json" as="fetch" crossorigin>
   <link rel="preload" href="index.js" as="script">
+  <script src="https://unpkg.com/dexie@latest/dist/dexie.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
   <style>
     body {
@@ -50,11 +52,17 @@
       height: 220px;
       border: 0;
       margin-bottom: 0.5rem;
+      object-fit: cover;
     }
     #tool-frame {
       flex: 1;
       border: 0;
       width: 100%;
+    }
+    #viewer-placeholder {
+      flex: 1;
+      width: 100%;
+      object-fit: cover;
     }
     #tool-info {
       padding: 1rem;
@@ -84,7 +92,8 @@
         <button id="back-button" class="mui-btn mui-btn--small">Back</button>
         <button id="toggle-info" class="mui-btn mui-btn--small">Hide Info</button>
       </div>
-      <iframe id="tool-frame"></iframe>
+      <img id="viewer-placeholder" style="display:none; width:100%; flex:1; object-fit:cover;"/>
+      <iframe id="tool-frame" style="display:none;"></iframe>
       <div id="tool-info">
         <h3 id="tool-title"></h3>
         <p id="tool-description"></p>
