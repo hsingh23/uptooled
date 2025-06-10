@@ -1,49 +1,133 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Repository Files</title>
-  <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
   <style>
-    body { margin:0; height:100vh; display:flex; overflow:hidden; }
-    #auth-section { padding:1rem; width:100%; }
-    #editor-section { flex:1; display:flex; }
-    #sidebar { width:220px; border-right:1px solid #ddd; padding:1rem; overflow-y:auto; }
-    #main { flex:1; display:flex; flex-direction:column; padding:1rem; }
-    #file-content { height:100%; }
-    .CodeMirror { height:100%; }
+    :root {
+      --spacing: 1rem;
+    }
+    html, body { height: 100%; }
+    body { margin:0; display:flex; flex-direction: column; }
+    main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    #auth-section {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        flex: 1;
+        padding: var(--spacing);
+    }
+    #auth-section article {
+        width: 100%;
+        max-width: 450px;
+    }
+    #editor-section {
+        flex: 1;
+        display: none; /* Hidden by default */
+        height: 100%;
+    }
+    .grid {
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        height: 100%;
+    }
+    aside {
+        border-right: 1px solid var(--card-border-color, #ddd);
+        padding: var(--spacing);
+        overflow-y: auto;
+    }
+    #main-editor {
+        display: flex;
+        flex-direction: column;
+        padding: var(--spacing);
+        overflow: hidden;
+    }
+    #file-content-wrapper {
+        flex: 1;
+        overflow: hidden;
+        border: 1px solid var(--card-border-color, #ddd);
+        border-radius: var(--border-radius);
+    }
+    .CodeMirror { height: 100%; }
+    #file-list {
+        padding-left: 0;
+        list-style: none;
+        margin: 0;
+    }
+    #file-list a {
+        text-decoration: none;
+        display: block;
+        padding: 0.25rem 0;
+    }
+    #file-list a:hover {
+        color: var(--primary-hover);
+    }
+    #file-list a[aria-current] {
+        font-weight: bold;
+        color: var(--primary);
+    }
+    .button-group {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+    }
+    /* Dark mode support for CodeMirror */
+    [data-theme="dark"] .CodeMirror { background: var(--card-background-color); color: var(--color); }
+    [data-theme="dark"] .CodeMirror-gutters { background: var(--card-background-color); border-right: 1px solid var(--card-border-color); }
+    [data-theme="dark"] #file-content-wrapper { border-color: var(--card-border-color); }
   </style>
 </head>
 <body>
-  <div id="auth-section">
-    <h1>Edit Repository Files</h1>
-    <div class="mui-textfield">
-      <input type="text" id="token" placeholder="GitHub Token">
-    </div>
-    <p>Editing repository: <strong>hsingh23/uptooled</strong></p>
-    <button id="save-auth" class="mui-btn mui-btn--primary">Save Auth</button>
-  </div>
+  <main>
+    <section id="auth-section">
+      <article>
+        <h1>Edit Repository Files</h1>
+        <p>Enter your GitHub Personal Access Token to view and edit files.</p>
+        <form>
+          <label for="token">
+            GitHub Token
+            <input type="password" id="token" name="token" placeholder="ghp_..." required>
+          </label>
+          <p><small>Editing repository: <strong>hsingh23/uptooled</strong></small></p>
+          <button id="save-auth" type="button">Save & Authenticate</button>
+        </form>
+      </article>
+    </section>
 
-  <div id="editor-section" style="display:none;">
-    <div id="sidebar">
-      <ul id="file-list" class="mui-list--unstyled"></ul>
-      <div class="mui-textfield" style="margin-top:1rem;">
-        <input type="text" id="new-file-name" placeholder="New file name.html">
+    <div id="editor-section">
+      <div class="grid">
+        <aside>
+          <h5>Files</h5>
+          <ul id="file-list"></ul>
+          <hr>
+          <form>
+              <label for="new-file-name">New file</label>
+              <input type="text" id="new-file-name" name="new-file-name" placeholder="tools/new-tool.html">
+              <button id="create-file" type="button" class="outline secondary">Create</button>
+          </form>
+        </aside>
+        <div id="main-editor">
+          <h5 id="current-path" style="margin-bottom: 0.5rem;"></h5>
+          <div id="file-content-wrapper">
+            <textarea id="file-content"></textarea>
+          </div>
+          <div class="button-group">
+            <button id="save-file">Save</button>
+            <button id="rename-file" class="secondary outline">Rename</button>
+            <button id="delete-file" class="contrast outline">Delete</button>
+          </div>
+        </div>
       </div>
-      <button id="create-file" class="mui-btn mui-btn--small mui-btn--primary">Create</button>
     </div>
-    <div id="main">
-      <h2 id="current-path"></h2>
-      <textarea id="file-content"></textarea>
-      <div style="margin-top:0.5rem;">
-        <button id="save-file" class="mui-btn mui-btn--primary">Save</button>
-        <button id="rename-file" class="mui-btn mui-btn--small">Rename</button>
-        <button id="delete-file" class="mui-btn mui-btn--danger mui-btn--small">Delete</button>
-      </div>
-    </div>
-  </div>
+  </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/xml/xml.min.js"></script>

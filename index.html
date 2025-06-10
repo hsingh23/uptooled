@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,89 +11,132 @@
   <link rel="preload" href="index.js" as="script">
   <script src="https://unpkg.com/dexie@latest/dist/dexie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <style>
+    :root {
+      --spacing: 1rem;
+    }
+    html, body {
+      height: 100%;
+    }
     body {
       margin: 0;
       display: flex;
-      height: 100vh;
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow: hidden;
     }
-    #sidebar {
-      width: 250px;
-      border-right: 1px solid #ddd;
+    aside {
+      width: 280px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--card-border-color, #ddd);
       overflow-y: auto;
-      padding: 1rem;
+      padding: var(--spacing);
     }
-    #main {
+    main {
       flex: 1;
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
+      background-color: var(--background-color);
     }
     #grid-view {
       display: grid;
-      gap: 1rem;
-      padding: 1rem;
+      gap: var(--spacing);
+      padding: var(--spacing);
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
-    @media (min-width: 1000px) {
-      #grid-view {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
     .tool-card {
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 1rem;
+      --card-padding: 0;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      overflow: hidden; /* Ensures rounded corners on children */
+    }
+    .tool-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--card-box-shadow, 0 5px 15px rgba(0,0,0,0.1));
     }
     .card-frame {
       width: 100%;
       height: 220px;
       border: 0;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0;
       object-fit: cover;
+      background-color: var(--muted-border-color);
     }
-    #tool-frame {
+    .tool-card > h3, .tool-card > p {
+        padding: 0 var(--spacing);
+        margin-bottom: 0;
+    }
+    .tool-card > h3 {
+        padding-top: var(--spacing);
+        margin-bottom: calc(var(--spacing) / 2);
+    }
+     .tool-card > p {
+        padding-bottom: var(--spacing);
+        color: var(--muted-color);
+        font-size: 0.9rem;
+    }
+    #tool-frame, #viewer-placeholder {
       flex: 1;
       border: 0;
       width: 100%;
+      height: 100%;
     }
-    #viewer-placeholder {
-      flex: 1;
-      width: 100%;
-      object-fit: cover;
+    #viewer { display: none; flex: 1; flex-direction: column; }
+    #viewer-controls {
+        padding: calc(var(--spacing) / 2) var(--spacing);
+        border-bottom: 1px solid var(--card-border-color, #ddd);
+        display: flex;
+        gap: 0.5rem;
+        background-color: var(--card-background-color);
     }
     #tool-info {
-      padding: 1rem;
-      border-top: 1px solid #ddd;
+        padding: var(--spacing);
+        border-top: 1px solid var(--card-border-color, #ddd);
+        background-color: var(--card-background-color);
     }
-    @media (max-width: 600px) {
+    #tool-list {
+        padding-left: 0;
+        list-style: none;
+        margin: 0;
+    }
+    #tool-list a {
+        text-decoration: none;
+        display: block;
+        padding: 0.25rem 0;
+    }
+    #tool-list a:hover {
+        color: var(--primary-hover);
+    }
+    @media (max-width: 768px) {
       body { flex-direction: column; }
-      #sidebar {
+      aside {
         width: 100%;
         border-right: none;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid var(--card-border-color, #ddd);
+        height: auto;
+        max-height: 40vh;
       }
     }
   </style>
 </head>
 <body>
-  <div id="sidebar">
-    <div class="mui-textfield">
-      <input type="text" id="search" placeholder="Search tools">
-    </div>
-    <ul id="tool-list" class="mui-list--unstyled"></ul>
-  </div>
-  <div id="main">
+  <aside>
+    <label for="search">
+        <input type="search" id="search" name="search" placeholder="Search tools...">
+    </label>
+    <ul id="tool-list"></ul>
+  </aside>
+
+  <main id="main">
     <div id="grid-view"></div>
-    <div id="viewer" style="display:none; flex:1; flex-direction:column;">
-      <div id="viewer-controls" style="padding:0.5rem; border-bottom:1px solid #ddd;">
-        <button id="back-button" class="mui-btn mui-btn--small">Back</button>
-        <button id="toggle-info" class="mui-btn mui-btn--small">Hide Info</button>
-        <button id="edit-file" class="mui-btn mui-btn--small" style="display:none;">Edit File</button>
+
+    <div id="viewer">
+      <div id="viewer-controls">
+        <button id="back-button" class="secondary outline">Back</button>
+        <button id="toggle-info" class="secondary outline">Hide Info</button>
+        <button id="edit-file" class="secondary outline" style="display:none;">Edit File</button>
       </div>
-      <img id="viewer-placeholder" style="display:none; width:100%; flex:1; object-fit:cover;"/>
+      <img id="viewer-placeholder" style="display:none;"/>
       <iframe id="tool-frame" style="display:none;"></iframe>
       <div id="tool-info">
         <h3 id="tool-title"></h3>
@@ -101,8 +144,8 @@
         <small id="tool-keywords"></small>
       </div>
     </div>
-  </div>
-  <script src="index.js" defer></script>
+  </main>
 
+  <script src="index.js" defer></script>
 </body>
 </html>
