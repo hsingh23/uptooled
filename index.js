@@ -18,7 +18,12 @@ async function saveScreenshot(file, data) {
 async function captureScreenshot(iframe) {
   try {
     const doc = iframe.contentWindow.document;
-    const canvas = await html2canvas(doc.body);
+    const canvas = await html2canvas(doc.body, {
+      width: 450,
+      height: 220,
+      windowWidth: 450,
+      windowHeight: 220,
+    });
     return canvas.toDataURL('image/png');
   } catch (err) {
     console.warn('Unable to capture screenshot for', iframe.src, err);
