@@ -1,8 +1,8 @@
 (function() {
   const tokenInput = document.getElementById('token');
-  const ownerInput = document.getElementById('owner');
-  const repoInput = document.getElementById('repo');
   const saveAuthBtn = document.getElementById('save-auth');
+  const OWNER = 'hsingh23';
+  const REPO = 'uptooled';
 
   const authSection = document.getElementById('auth-section');
   const editorSection = document.getElementById('editor-section');
@@ -10,6 +10,8 @@
   const createFileBtn = document.getElementById('create-file');
   const newFileInput = document.getElementById('new-file-name');
   const saveFileBtn = document.getElementById('save-file');
+  const renameFileBtn = document.getElementById('rename-file');
+  const deleteFileBtn = document.getElementById('delete-file');
   const currentPathEl = document.getElementById('current-path');
   const textArea = document.getElementById('file-content');
 
@@ -25,13 +27,9 @@
 
   // Populate from localStorage
   tokenInput.value = localStorage.getItem('gh_token') || '';
-  ownerInput.value = localStorage.getItem('gh_owner') || '';
-  repoInput.value = localStorage.getItem('gh_repo') || '';
 
   saveAuthBtn.addEventListener('click', () => {
     localStorage.setItem('gh_token', tokenInput.value.trim());
-    localStorage.setItem('gh_owner', ownerInput.value.trim());
-    localStorage.setItem('gh_repo', repoInput.value.trim());
     testAuth();
   });
 
@@ -41,9 +39,7 @@
   }
 
   function repoUrl(path) {
-    const owner = ownerInput.value.trim();
-    const repo = repoInput.value.trim();
-    return `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`;
+    return `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(path)}`;
   }
 
   async function testAuth() {
@@ -144,7 +140,69 @@
     alert('Saved');
   }
 
+  async function deleteCurrentFile() {
+    if (!currentPath) return;
+    if (!confirm(`Delete ${currentPath}?`)) return;
+    const res = await fetch(repoUrl(currentPath), {
+      method: 'DELETE',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+      body: JSON.stringify({
+        message: `Delete ${currentPath}`,
+        sha: shas[currentPath]
+      })
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      alert('Delete failed: ' + text);
+      return;
+    }
+    const item = [...fileList.querySelectorAll('a')].find(a => a.textContent === currentPath.split('/').pop());
+    if (item) item.parentElement.remove();
+    editor.setValue('');
+    currentPathEl.textContent = '';
+    delete shas[currentPath];
+    currentPath = '';
+    alert('Deleted');
+  }
+
+  async function renameCurrentFile() {
+    if (!currentPath) return;
+    const currentName = currentPath.split('/').pop();
+    const newName = prompt('New file name', currentName);
+    if (!newName || newName === currentName) return;
+    const newPath = currentPath.replace(currentName, newName);
+    const body = {
+      message: `Rename ${currentPath} to ${newPath}`,
+      content: btoa(editor.getValue()),
+      sha: shas[currentPath],
+      path: newPath
+    };
+    const res = await fetch(repoUrl(currentPath), {
+      method: 'PUT',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      alert('Rename failed: ' + text);
+      return;
+    }
+    const data = await res.json();
+    const link = [...fileList.querySelectorAll('a')].find(a => a.textContent === currentName);
+    if (link) {
+      link.textContent = newName;
+      link.onclick = e => { e.preventDefault(); loadFile(newPath); };
+    }
+    delete shas[currentPath];
+    shas[newPath] = data.content.sha;
+    currentPath = newPath;
+    currentPathEl.textContent = newPath;
+    alert('Renamed');
+  }
+
   saveFileBtn.addEventListener('click', saveCurrentFile);
+  deleteFileBtn.addEventListener('click', deleteCurrentFile);
+  renameFileBtn.addEventListener('click', renameCurrentFile);
 
   createFileBtn.addEventListener('click', () => {
     const name = newFileInput.value.trim();
@@ -164,7 +222,7 @@
   });
 
   // Try auth on load if token present
-  if (tokenInput.value && ownerInput.value && repoInput.value) {
+  if (tokenInput.value) {
     testAuth();
   }
 })();
