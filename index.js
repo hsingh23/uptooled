@@ -36,7 +36,7 @@ async function captureScreenshot(iframe) {
       scrollX: 0,
       scrollY: 0
     });
-    return canvas.toDataURL('image/png');
+    return canvas.toDataURL('image/jpeg', 0.8);
   } catch (err) {
     console.warn('Unable to capture screenshot for', iframe.src, err);
     return null;
