@@ -5,38 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Repository Files</title>
   <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
   <style>
-    body { padding: 1rem; }
-    textarea { width: 100%; height: 300px; font-family: monospace; }
+    body { margin:0; height:100vh; display:flex; overflow:hidden; }
+    #auth-section { padding:1rem; width:100%; }
+    #editor-section { flex:1; display:flex; }
+    #sidebar { width:220px; border-right:1px solid #ddd; padding:1rem; overflow-y:auto; }
+    #main { flex:1; display:flex; flex-direction:column; padding:1rem; }
+    #file-content { height:100%; }
+    .CodeMirror { height:100%; }
   </style>
 </head>
 <body>
-  <h1>Edit Repository Files</h1>
-
-  <div class="mui-textfield">
-    <input type="text" id="token" placeholder="GitHub Token">
+  <div id="auth-section">
+    <h1>Edit Repository Files</h1>
+    <div class="mui-textfield">
+      <input type="text" id="token" placeholder="GitHub Token">
+    </div>
+    <div class="mui-textfield">
+      <input type="text" id="owner" placeholder="Owner">
+    </div>
+    <div class="mui-textfield">
+      <input type="text" id="repo" placeholder="Repository">
+    </div>
+    <button id="save-auth" class="mui-btn mui-btn--primary">Save Auth</button>
   </div>
-  <div class="mui-textfield">
-    <input type="text" id="owner" placeholder="Owner">
-  </div>
-  <div class="mui-textfield">
-    <input type="text" id="repo" placeholder="Repository">
-  </div>
-  <button id="save-auth" class="mui-btn mui-btn--primary">Save Auth</button>
 
-  <h2>external-sites.csv</h2>
-  <button id="load-csv" class="mui-btn">Load CSV</button>
-  <button id="save-csv" class="mui-btn mui-btn--primary">Save CSV</button>
-  <textarea id="csv-content" placeholder="CSV content will appear here"></textarea>
-
-  <h2>Tool File</h2>
-  <div class="mui-textfield">
-    <input type="text" id="tool-path" placeholder="tools/MyTool.html">
+  <div id="editor-section" style="display:none;">
+    <div id="sidebar">
+      <ul id="file-list" class="mui-list--unstyled"></ul>
+      <div class="mui-textfield" style="margin-top:1rem;">
+        <input type="text" id="new-file-name" placeholder="New file name.html">
+      </div>
+      <button id="create-file" class="mui-btn mui-btn--small mui-btn--primary">Create</button>
+    </div>
+    <div id="main">
+      <h2 id="current-path"></h2>
+      <textarea id="file-content"></textarea>
+      <div style="margin-top:0.5rem;">
+        <button id="save-file" class="mui-btn mui-btn--primary">Save</button>
+      </div>
+    </div>
   </div>
-  <button id="load-tool" class="mui-btn">Load File</button>
-  <button id="save-tool" class="mui-btn mui-btn--primary">Save File</button>
-  <textarea id="tool-content" placeholder="Tool HTML content"></textarea>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/htmlmixed/htmlmixed.min.js"></script>
   <script src="edit.js" defer></script>
 </body>
 </html>
