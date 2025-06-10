@@ -6,12 +6,15 @@
   <title>Edit Repository Files</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/one-dark.min.css">
   <style>
     :root {
-      --spacing: 1rem;
+      --font-size: 14px;
+      --spacing: 0.75rem;
     }
+    html { font-size: var(--font-size); }
     html, body { height: 100%; }
-    body { margin:0; display:flex; flex-direction: column; }
+    body { margin:0; display:flex; flex-direction: column; overflow: hidden; }
     main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
     #auth-section {
@@ -22,25 +25,39 @@
     #editor-section { flex: 1; display: none; height: 100%; }
     .grid { display: grid; grid-template-columns: 250px 1fr; height: 100%; }
     aside {
-        border-right: 1px solid var(--card-border-color, #ddd); padding: var(--spacing);
+        border-right: 1px solid var(--card-border-color); padding: var(--spacing);
         overflow-y: auto; display: flex; flex-direction: column;
     }
     #main-editor { display: flex; flex-direction: column; padding: var(--spacing); overflow: hidden; }
     #file-content-wrapper {
-        flex: 1; overflow: hidden; border: 1px solid var(--card-border-color, #ddd);
+        flex: 1; overflow: hidden; border: 1px solid var(--card-border-color);
         border-radius: var(--border-radius);
     }
-    .CodeMirror { height: 100%; }
+    .CodeMirror { height: 100%; font-size: 13px; }
     #file-list { padding-left: 0; list-style: none; margin: 0; }
-    #file-list a { text-decoration: none; display: block; padding: 0.25rem 0; }
+    #file-list a { text-decoration: none; display: block; padding: 0.1rem 0; font-size: 0.95em; }
     #file-list a:hover { color: var(--primary-hover); }
     #file-list a[aria-current] { font-weight: bold; color: var(--primary); }
     .button-group { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-top: 0.5rem; }
-    #theme-toggle { margin-top: auto; }
+    #theme-toggle { margin-top: auto; padding-top: var(--spacing); }
 
-    [data-theme="dark"] .CodeMirror { background: var(--card-background-color); color: var(--color); }
-    [data-theme="dark"] .CodeMirror-gutters { background: var(--card-background-color); border-right: 1px solid var(--card-border-color); }
-    [data-theme="dark"] #file-content-wrapper { border-color: var(--card-border-color); }
+    /* Dark Theme Improvements */
+    [data-theme="dark"] {
+        --background-color: #121212;
+        --color: #e0e0e0;
+        --card-background-color: #1e1e1e;
+        --card-border-color: #333;
+        --muted-bg-color: #2a2a2a;
+        --muted-color: #a0a0a0;
+        --primary: #58a6ff;
+        --primary-inverse: #0d1117;
+    }
+    /* CodeMirror Dark Theme */
+    .cm-s-one-dark.CodeMirror { background: #282c34; color: #abb2bf; }
+    .cm-s-one-dark .CodeMirror-gutters { background: #282c34; border-right-color: #333; }
+    .cm-s-one-dark .CodeMirror-cursor { border-left-color: #528bff; }
+    .cm-s-one-dark .CodeMirror-activeline-background { background: rgba(255, 255, 255, 0.05); }
+    .cm-s-one-dark .CodeMirror-selected { background: rgba(255, 255, 255, 0.1); }
   </style>
 </head>
 <body>
@@ -97,16 +114,24 @@
   <script>
       document.addEventListener('DOMContentLoaded', () => {
         const themeToggle = document.getElementById('theme-toggle');
+        const editorEl = document.querySelector('.CodeMirror');
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            if (editorEl) {
+                editorEl.CodeMirror.setOption('theme', theme === 'dark' ? 'one-dark' : 'default');
+            }
+        }
+
         if (themeToggle) {
-            const htmlEl = document.documentElement;
             const savedTheme = localStorage.getItem('theme') || 'light';
-            htmlEl.setAttribute('data-theme', savedTheme);
+            applyTheme(savedTheme);
 
             themeToggle.addEventListener('click', () => {
-                const currentTheme = htmlEl.getAttribute('data-theme');
+                const currentTheme = document.documentElement.getAttribute('data-theme');
                 const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                htmlEl.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
             });
         }
       });
