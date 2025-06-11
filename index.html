@@ -12,13 +12,10 @@
   <script src="https://unpkg.com/dexie@latest/dist/dexie.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
+  <link rel="stylesheet" href="pure-dashboard-layout.css">
   <style>
     body {
       margin: 0;
-      display: flex;
-      height: 100vh;
-      overflow-x: hidden;
-      overflow-y: auto;
     }
     #sidebar {
       width: 250px;
@@ -79,6 +76,8 @@
   </style>
 </head>
 <body>
+  <div id="dashboard-container"></div>
+  <div id="app" style="display:none;">
   <div id="sidebar">
     <div class="mui-textfield">
       <input type="text" id="search" placeholder="Search tools">
@@ -103,7 +102,20 @@
       </div>
     </div>
   </div>
+  </div>
+  <script src="pure-dashboard-layout.js"></script>
   <script src="index.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const layout = new PureDashboardLayout('#dashboard-container', {
+        branding: { title: 'Tool Gallery', homeUrl: 'index.html' }
+      });
+      layout.render();
+      const app = document.getElementById('app');
+      layout.getContentArea().appendChild(app);
+      app.style.display = 'flex';
+    });
+  </script>
 
 </body>
 </html>

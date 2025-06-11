@@ -6,8 +6,9 @@
   <title>Edit Repository Files</title>
   <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+  <link rel="stylesheet" href="pure-dashboard-layout.css">
   <style>
-    body { margin:0; height:100vh; display:flex; overflow:hidden; }
+    body { margin:0; }
     #auth-section { padding:1rem; width:100%; }
     #editor-section { flex:1; display:flex; }
     #sidebar { width:220px; border-right:1px solid #ddd; padding:1rem; overflow-y:auto; }
@@ -29,6 +30,8 @@
   </style>
 </head>
 <body>
+  <div id="dashboard-container"></div>
+  <div id="app" style="display:none;">
   <div id="auth-section">
     <h1>Edit Repository Files</h1>
     <div class="mui-textfield">
@@ -57,12 +60,25 @@
     </div>
   </div>
   <div id="popup"></div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/css/css.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="pure-dashboard-layout.js"></script>
   <script src="edit.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const layout = new PureDashboardLayout('#dashboard-container', {
+        branding: { title: 'Editor', homeUrl: 'edit.html' }
+      });
+      layout.render();
+      const app = document.getElementById('app');
+      layout.getContentArea().appendChild(app);
+      app.style.display = 'block';
+    });
+  </script>
 </body>
 </html>
