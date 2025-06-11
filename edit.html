@@ -11,7 +11,7 @@
     body { margin:0; }
     #auth-section { padding:1rem; width:100%; }
     #editor-section { flex:1; display:flex; }
-    #sidebar { width:220px; border-right:1px solid #ddd; padding:1rem; overflow-y:auto; }
+    #sidebar { padding:1rem; overflow-y:auto; }
     #main { flex:1; display:flex; flex-direction:column; padding:1rem; }
     #file-content { height:100%; }
     .CodeMirror { height:100%; }
@@ -76,6 +76,12 @@
       });
       layout.render();
       const app = document.getElementById('app');
+      const sidebar = document.getElementById('sidebar');
+      const nav = layout.elements.sidebar.querySelector('.sidebar-navigation');
+      if (sidebar && nav) {
+        nav.innerHTML = '';
+        nav.appendChild(sidebar);
+      }
       layout.getContentArea().appendChild(app);
       app.style.display = 'block';
     });

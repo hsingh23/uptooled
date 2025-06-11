@@ -28,7 +28,7 @@ class PureDashboardLayout {
             availableThemes: [{ name: 'light' }, { name: 'dark' }]
         },
         sidebarWidth: 240,
-        collapsedSidebarWidth: 60,
+        collapsedSidebarWidth: 0,
         mobileBottomTabs: false
     };
 

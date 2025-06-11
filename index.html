@@ -18,10 +18,8 @@
       margin: 0;
     }
     #sidebar {
-      width: 250px;
-      border-right: 1px solid #ddd;
-      overflow-y: auto;
       padding: 1rem;
+      overflow-y: auto;
     }
     #main {
       flex: 1;
@@ -67,11 +65,6 @@
     }
     @media (max-width: 600px) {
       body { flex-direction: column; }
-      #sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-      }
     }
   </style>
 </head>
@@ -108,10 +101,26 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const layout = new PureDashboardLayout('#dashboard-container', {
-        branding: { title: 'Tool Gallery', homeUrl: 'index.html' }
+        branding: { title: 'Tool Gallery', homeUrl: 'index.html' },
+        callbacks: {
+          renderToolbarActions: (container) => {
+            const back = document.getElementById('back-button');
+            const info = document.getElementById('toggle-info');
+            if (back && info) {
+              container.appendChild(back);
+              container.appendChild(info);
+            }
+          }
+        }
       });
       layout.render();
       const app = document.getElementById('app');
+      const sidebar = document.getElementById('sidebar');
+      const nav = layout.elements.sidebar.querySelector('.sidebar-navigation');
+      if (sidebar && nav) {
+        nav.innerHTML = '';
+        nav.appendChild(sidebar);
+      }
       layout.getContentArea().appendChild(app);
       app.style.display = 'flex';
     });

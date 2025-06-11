@@ -10,7 +10,7 @@
     --active-nav-item-text: #ffffff;
     --nav-item-hover-bg: #f3f4f6;
     --sidebar-width: 240px;
-    --collapsed-sidebar-width: 60px;
+    --collapsed-sidebar-width: 0px;
     --header-height: 64px;
     --primary-color: #3b82f6;
     --border-color: #e5e7eb;
@@ -78,7 +78,11 @@ html, body {
     position: relative;
     z-index: 900;
 }
-.pure-dashboard-sidebar.sidebar-collapsed { width: var(--collapsed-sidebar-width); }
+.pure-dashboard-sidebar.sidebar-collapsed {
+    width: var(--collapsed-sidebar-width);
+    overflow: hidden;
+    border-right: none;
+}
 .sidebar-navigation { flex:1; padding:16px 0; overflow-y:auto; overflow-x:hidden; }
 .sidebar-navigation ul { list-style:none; margin:0; padding:0; }
 .nav-item { margin:0; padding:0; }
@@ -107,4 +111,20 @@ html, body {
     .header-branding .branding-title { display:none; }
     .mobile-bottom-tabs { display:block; }
     .content-wrapper { padding-bottom:80px; }
+}
+
+/* Dark mode button colors */
+[data-theme="dark"] .mui-btn {
+    background-color: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+}
+[data-theme="dark"] .mui-btn:hover { background-color: #4b5563; }
+[data-theme="dark"] .mui-btn--primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+[data-theme="dark"] .mui-btn--danger {
+    background-color: #b91c1c;
+    border-color: #b91c1c;
 }
