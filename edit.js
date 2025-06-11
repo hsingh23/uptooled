@@ -14,6 +14,7 @@
   const deleteFileBtn = document.getElementById('delete-file');
   const currentPathEl = document.getElementById('current-path');
   const textArea = document.getElementById('file-content');
+  const popupEl = document.getElementById('popup');
 
   const shas = {};
   let editor;
@@ -39,8 +40,22 @@
     return token ? { Authorization: `token ${token}` } : {};
   }
 
+  function showPopup(msg) {
+    if (!popupEl) return alert(msg);
+    popupEl.textContent = msg;
+    popupEl.style.display = 'block';
+    clearTimeout(showPopup._t);
+    showPopup._t = setTimeout(() => {
+      popupEl.style.display = 'none';
+    }, 4000);
+  }
+
   function repoUrl(path) {
-    return `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(path)}`;
+    const encoded = path
+      .split('/')
+      .map(seg => encodeURIComponent(seg))
+      .join('/');
+    return `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encoded}`;
   }
 
   function showAuth() {
@@ -55,10 +70,12 @@
 
   async function apiRequest(path, options = {}) {
     const opts = Object.assign({}, options);
-    opts.headers = Object.assign({}, authHeaders(), options.headers || {});
+    const allow404 = !!opts.allow404;
+    delete opts.allow404;
+    opts.headers = Object.assign({}, authHeaders(), opts.headers || {});
     try {
       const res = await fetch(repoUrl(path), opts);
-      if (!res.ok) {
+      if (!res.ok && !(allow404 && res.status === 404)) {
         if (res.status === 401 || res.status === 403) {
           if (confirm('GitHub authentication failed. Update token?')) {
             showAuth();
@@ -66,12 +83,12 @@
           }
         }
         const text = await res.text();
-        alert(`Request failed (${res.status}): ${text}`);
+        showPopup(`Request failed (${res.status}): ${text}`);
         return null;
       }
       return res;
     } catch (err) {
-      alert('Network error: ' + err.message);
+      showPopup('Network error: ' + err.message);
       console.error(err);
       return null;
     }
@@ -128,7 +145,7 @@
     currentPath = path;
     currentPathEl.textContent = path;
     setModeFromPath(path);
-    const res = await apiRequest(path);
+    const res = await apiRequest(path, { allow404: true });
     if (!res) return;
     if (res.status === 404) {
       editor.setValue('');
@@ -155,7 +172,7 @@
     if (!res) return;
     const data = await res.json();
     shas[currentPath] = data.content.sha;
-    alert('Saved');
+    showPopup('Saved');
   }
 
   async function deleteCurrentFile() {
@@ -176,7 +193,7 @@
     currentPathEl.textContent = '';
     delete shas[currentPath];
     currentPath = '';
-    alert('Deleted');
+    showPopup('Deleted');
   }
 
   async function renameCurrentFile() {
@@ -207,7 +224,7 @@
     shas[newPath] = data.content.sha;
     currentPath = newPath;
     currentPathEl.textContent = newPath;
-    alert('Renamed');
+    showPopup('Renamed');
   }
 
   saveFileBtn.addEventListener('click', saveCurrentFile);
