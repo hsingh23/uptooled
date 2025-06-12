@@ -58,6 +58,7 @@ async function init() {
   const keysEl = document.getElementById('tool-keywords');
   const relatedEl = document.getElementById('tool-related');
   const backBtn = document.getElementById('back-button');
+  const showInfoBtn = document.getElementById('show-info');
   const toggleInfoBtn = document.getElementById('toggle-info');
   const infoEl = document.getElementById('tool-info');
   const editFileBtn = document.getElementById('edit-file');
@@ -133,6 +134,15 @@ async function init() {
   function showGrid() {
     viewerEl.style.display = 'none';
     gridEl.style.display = 'grid';
+    backBtn.style.display = 'none';
+    showInfoBtn.style.display = 'none';
+    if (window.dashboardLayout) {
+      if (window.dashboardLayout.isMobile && window.dashboardLayout.sidebarOpen) {
+        window.dashboardLayout.toggleSidebar();
+      } else if (!window.dashboardLayout.isMobile && window.dashboardLayout.isSidebarCollapsed) {
+        window.dashboardLayout.toggleSidebar();
+      }
+    }
     if (location.hash) {
       history.replaceState(null, '', location.pathname);
     }
@@ -141,6 +151,14 @@ async function init() {
   function showViewer() {
     gridEl.style.display = 'none';
     viewerEl.style.display = 'flex';
+    backBtn.style.display = 'inline-block';
+    if (window.dashboardLayout) {
+      if (window.dashboardLayout.isMobile && window.dashboardLayout.sidebarOpen) {
+        window.dashboardLayout.toggleSidebar();
+      } else if (!window.dashboardLayout.isMobile && !window.dashboardLayout.isSidebarCollapsed) {
+        window.dashboardLayout.toggleSidebar();
+      }
+    }
     if (localStorage.getItem('gh_token')) {
       editFileBtn.style.display = 'inline-block';
     } else {
@@ -150,6 +168,8 @@ async function init() {
 
   async function selectTool(tool, updateHash = true) {
     selectedTool = tool;
+    infoEl.style.display = 'block';
+    showInfoBtn.style.display = 'none';
     frameEl.style.display = 'none';
     const shot = await getScreenshot(tool.file);
     if (shot) {
@@ -213,13 +233,13 @@ async function init() {
   searchEl.addEventListener('input', filter);
   backBtn.addEventListener('click', showGrid);
   toggleInfoBtn.addEventListener('click', () => {
-    if (infoEl.style.display === 'none') {
-      infoEl.style.display = 'block';
-      toggleInfoBtn.textContent = 'Hide Info';
-    } else {
-      infoEl.style.display = 'none';
-      toggleInfoBtn.textContent = 'Show Info';
-    }
+    infoEl.style.display = 'none';
+    showInfoBtn.style.display = 'inline-block';
+  });
+
+  showInfoBtn.addEventListener('click', () => {
+    infoEl.style.display = 'block';
+    showInfoBtn.style.display = 'none';
   });
 
   editFileBtn.addEventListener('click', () => {
