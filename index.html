@@ -82,7 +82,7 @@
     <div id="viewer" style="display:none; flex:1; flex-direction:column;">
       <div id="viewer-controls" style="padding:0.5rem; border-bottom:1px solid #ddd;">
         <button id="back-button" class="mui-btn mui-btn--small">Back</button>
-        <button id="toggle-info" class="mui-btn mui-btn--small">Hide Info</button>
+        <button id="show-info" class="mui-btn mui-btn--small" style="display:none;">Show Info</button>
         <button id="edit-file" class="mui-btn mui-btn--small" style="display:none;">Edit File</button>
       </div>
       <img id="viewer-placeholder" style="display:none; width:100%; flex:1; object-fit:cover;"/>
@@ -92,6 +92,7 @@
         <p id="tool-description"></p>
         <small id="tool-keywords"></small>
         <p id="tool-related" style="margin-top:0.5rem;"></p>
+        <button id="toggle-info" class="mui-btn mui-btn--small">Hide Info</button>
       </div>
     </div>
   </div>
@@ -105,15 +106,14 @@
         callbacks: {
           renderToolbarActions: (container) => {
             const back = document.getElementById('back-button');
-            const info = document.getElementById('toggle-info');
-            if (back && info) {
-              container.appendChild(back);
-              container.appendChild(info);
-            }
+            const showInfo = document.getElementById('show-info');
+            if (back) container.appendChild(back);
+            if (showInfo) container.appendChild(showInfo);
           }
         }
       });
       layout.render();
+      window.dashboardLayout = layout;
       const app = document.getElementById('app');
       const sidebar = document.getElementById('sidebar');
       const nav = layout.elements.sidebar.querySelector('.sidebar-navigation');
