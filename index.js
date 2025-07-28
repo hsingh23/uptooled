@@ -17,9 +17,26 @@ async function saveScreenshot(file, data) {
 
 async function captureScreenshot(iframe) {
   try {
-    const doc = iframe.contentWindow.document;
-    const canvas = await html2canvas(doc.body);
-    return canvas.toDataURL('image/png');
+    const win = iframe.contentWindow;
+    const doc = win.document;
+    win.scrollTo(0, 0);
+    if (doc.fonts && doc.fonts.ready) {
+      try {
+        await doc.fonts.ready;
+      } catch (e) {
+        /* ignore */
+      }
+    }
+    await new Promise(res => setTimeout(res, 5000));
+    const canvas = await html2canvas(doc.body, {
+      windowWidth: 450,
+      windowHeight: 250,
+      width: 450,
+      height: 250,
+      scrollX: 0,
+      scrollY: 0
+    });
+    return canvas.toDataURL('image/jpeg', 0.8);
   } catch (err) {
     console.warn('Unable to capture screenshot for', iframe.src, err);
     return null;
