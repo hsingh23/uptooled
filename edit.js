@@ -90,9 +90,18 @@
   
   // Listen for color scheme changes
   if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: light)').addListener(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+    const handleColorSchemeChange = () => {
       editor.setOption('theme', getColorScheme() === 'light' ? 'solarized light' : 'solarized dark');
-    });
+    };
+    
+    // Use addEventListener instead of deprecated addListener
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleColorSchemeChange);
+    } else {
+      // Fallback for older browsers
+      mediaQuery.addListener(handleColorSchemeChange);
+    }
   }
   
   // Populate from localStorage
