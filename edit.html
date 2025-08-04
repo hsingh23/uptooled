@@ -7,26 +7,150 @@
   <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
   <style>
-    body { margin:0; height:100vh; display:flex; overflow:hidden; }
-    #auth-section { padding:1rem; width:100%; }
-    #editor-section { flex:1; display:flex; }
-    #sidebar { width:220px; border-right:1px solid #ddd; padding:1rem; overflow-y:auto; }
-    #main { flex:1; display:flex; flex-direction:column; padding:1rem; }
-    #file-content { height:100%; }
-    .CodeMirror { height:100%; }
-    #popup {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: rgba(0,0,0,0.85);
-      color: #fff;
-      padding: 0.75rem 1rem;
-      border-radius: 4px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      display: none;
-      z-index: 1000;
+  :root {
+    --bg: #0b0f14;
+    --surface: #0f1520;
+    --panel: #121a27;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --border: #1f2937;
+    --primary: #60a5fa;
+    --danger: #ef4444;
+    --card-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f7f9fc;
+      --surface: #ffffff;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --danger: #dc2626;
+      --card-shadow: 0 8px 24px rgba(0,0,0,0.08);
     }
-  </style>
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--bg), var(--surface));
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+      Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  }
+  #auth-section {
+    padding: 2rem;
+    width: 100%;
+    max-width: 740px;
+    margin: 0 auto;
+  }
+  #auth-section h1 { margin-top: 0; }
+  .mui-textfield input#token {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    height: 44px;
+  }
+  #save-auth {
+    border-radius: 10px;
+    background: var(--primary);
+    color: white;
+  }
+
+  #editor-section {
+    flex: 1;
+    display: flex;
+    gap: 0;
+  }
+  #sidebar {
+    width: 280px;
+    border-right: 1px solid var(--border);
+    padding: 1rem;
+    overflow-y: auto;
+    background: var(--panel);
+  }
+  #sidebar .mui-textfield input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    height: 40px;
+    padding: 0.5rem 0.75rem;
+  }
+  #create-file {
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+  }
+  #file-list li a {
+    color: var(--text);
+    text-decoration: none;
+    display: block;
+    padding: 0.4rem 0.3rem;
+    border-radius: 8px;
+  }
+  #file-list li a:hover {
+    background: rgba(255,255,255,0.05);
+  }
+
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+  #current-path {
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .CodeMirror {
+    height: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    background: #0b0f14;
+    color: #e5e7eb;
+  }
+  #main > div.actions {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+  #save-file {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 8px;
+  }
+  #rename-file, #delete-file {
+    border-radius: 8px;
+  }
+  #delete-file {
+    background: var(--danger);
+    color: #fff;
+  }
+  #popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(17,24,39,0.95);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    display: none;
+    z-index: 1000;
+  }
+</style>
 </head>
 <body>
   <div id="auth-section">
@@ -49,7 +173,7 @@
     <div id="main">
       <h2 id="current-path"></h2>
       <textarea id="file-content"></textarea>
-      <div style="margin-top:0.5rem;">
+      <div class="actions">
         <button id="save-file" class="mui-btn mui-btn--primary">Save</button>
         <button id="rename-file" class="mui-btn mui-btn--small">Rename</button>
         <button id="delete-file" class="mui-btn mui-btn--danger mui-btn--small">Delete</button>

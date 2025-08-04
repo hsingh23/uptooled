@@ -106,13 +106,19 @@ async function init() {
       if (shot) {
         img.src = shot;
         img.style.display = 'block';
-      }
-
-      iframe.addEventListener('load', async () => {
-        img.style.display = 'none';
+      } else {
+        // If no shot yet, start loading iframe for capture
         iframe.style.display = 'block';
+      }
+      iframe.addEventListener('load', async () => {
+        // Once iframe loads, capture and cache, then swap to image to reduce CPU
         const data = await captureScreenshot(iframe);
         await saveScreenshot(tool.file, data);
+        if (data) {
+          img.src = data;
+          img.style.display = 'block';
+          iframe.style.display = 'none';
+        }
       });
       iframe.src = tool.file;
 

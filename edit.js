@@ -21,6 +21,26 @@
   let currentPath = '';
   const requestedFile = new URLSearchParams(location.search).get('file');
 
+  function base64EncodeUtf8(str) {
+    // UTF-8 safe base64 encoding
+    const utf8Bytes = new TextEncoder().encode(str);
+    let binary = '';
+    utf8Bytes.forEach(b => {
+      binary += String.fromCharCode(b);
+    });
+    return btoa(binary);
+  }
+
+  function base64DecodeUtf8(b64) {
+    // UTF-8 safe base64 decoding
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new TextDecoder().decode(bytes);
+  }
+
   // Initialize CodeMirror
   editor = CodeMirror.fromTextArea(textArea, {
     lineNumbers: true,
@@ -72,7 +92,11 @@
     const opts = Object.assign({}, options);
     const allow404 = !!opts.allow404;
     delete opts.allow404;
-    opts.headers = Object.assign({}, authHeaders(), opts.headers || {});
+    opts.headers = Object.assign(
+      { Accept: 'application/vnd.github.v3+json' },
+      authHeaders(),
+      opts.headers || {}
+    );
     try {
       const res = await fetch(repoUrl(path), opts);
       if (!res.ok && !(allow404 && res.status === 404)) {
@@ -136,6 +160,12 @@
   function setModeFromPath(path) {
     if (path.endsWith('.html')) {
       editor.setOption('mode', 'htmlmixed');
+    } else if (path.endsWith('.js')) {
+      editor.setOption('mode', 'javascript');
+    } else if (path.endsWith('.css')) {
+      editor.setOption('mode', 'css');
+    } else if (path.endsWith('.json')) {
+      editor.setOption('mode', { name: 'javascript', json: true });
     } else {
       editor.setOption('mode', 'text/plain');
     }
@@ -153,7 +183,7 @@
       return;
     }
     const data = await res.json();
-    editor.setValue(atob(data.content.replace(/\n/g, '')));
+    editor.setValue(base64DecodeUtf8(data.content.replace(/\n/g, '')));
     shas[path] = data.sha;
   }
 
@@ -161,7 +191,7 @@
     if (!currentPath) return;
     const body = {
       message: `Update ${currentPath}`,
-      content: btoa(editor.getValue())
+      content: base64EncodeUtf8(editor.getValue())
     };
     if (shas[currentPath]) body.sha = shas[currentPath];
     const res = await apiRequest(currentPath, {
@@ -204,7 +234,7 @@
     const newPath = currentPath.replace(currentName, newName);
     const body = {
       message: `Rename ${currentPath} to ${newPath}`,
-      content: btoa(editor.getValue()),
+      content: base64EncodeUtf8(editor.getValue()),
       sha: shas[currentPath],
       path: newPath
     };
