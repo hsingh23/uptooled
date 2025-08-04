@@ -3,7 +3,6 @@
   const saveAuthBtn = document.getElementById('save-auth');
   const OWNER = 'hsingh23';
   const REPO = 'uptooled';
-
   const authSection = document.getElementById('auth-section');
   const editorSection = document.getElementById('editor-section');
   const fileList = document.getElementById('file-list');
@@ -15,22 +14,22 @@
   const currentPathEl = document.getElementById('current-path');
   const textArea = document.getElementById('file-content');
   const popupEl = document.getElementById('popup');
-
   const shas = {};
   let editor;
   let currentPath = '';
   const requestedFile = new URLSearchParams(location.search).get('file');
-
+  
   function base64EncodeUtf8(str) {
     // UTF-8 safe base64 encoding
     const utf8Bytes = new TextEncoder().encode(str);
     let binary = '';
-    utf8Bytes.forEach(b => {
-      binary += String.fromCharCode(b);
-    });
+    const len = utf8Bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(utf8Bytes[i]);
+    }
     return btoa(binary);
   }
-
+  
   function base64DecodeUtf8(b64) {
     // UTF-8 safe base64 decoding
     const binary = atob(b64);
@@ -40,26 +39,26 @@
     }
     return new TextDecoder().decode(bytes);
   }
-
+  
   // Initialize CodeMirror
   editor = CodeMirror.fromTextArea(textArea, {
     lineNumbers: true,
     mode: 'text/plain'
   });
-
+  
   // Populate from localStorage
   tokenInput.value = localStorage.getItem('gh_token') || '';
-
+  
   saveAuthBtn.addEventListener('click', () => {
     localStorage.setItem('gh_token', tokenInput.value.trim());
     initRepo();
   });
-
+  
   function authHeaders() {
     const token = tokenInput.value.trim();
     return token ? { Authorization: `token ${token}` } : {};
   }
-
+  
   function showPopup(msg) {
     if (!popupEl) return alert(msg);
     popupEl.textContent = msg;
@@ -69,7 +68,7 @@
       popupEl.style.display = 'none';
     }, 4000);
   }
-
+  
   function repoUrl(path) {
     const encoded = path
       .split('/')
@@ -77,17 +76,17 @@
       .join('/');
     return `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encoded}`;
   }
-
+  
   function showAuth() {
     authSection.style.display = 'block';
     editorSection.style.display = 'none';
   }
-
+  
   function hideAuth() {
     authSection.style.display = 'none';
     editorSection.style.display = 'flex';
   }
-
+  
   async function apiRequest(path, options = {}) {
     const opts = Object.assign({}, options);
     const allow404 = !!opts.allow404;
@@ -117,7 +116,7 @@
       return null;
     }
   }
-
+  
   async function initRepo() {
     hideAuth();
     const listed = await listFiles();
@@ -129,7 +128,7 @@
       }
     }
   }
-
+  
   async function listFiles() {
     fileList.innerHTML = '';
     const csvItem = document.createElement('li');
@@ -139,7 +138,7 @@
     csvLink.addEventListener('click', e => { e.preventDefault(); loadFile('external-sites.csv'); });
     csvItem.appendChild(csvLink);
     fileList.appendChild(csvItem);
-
+    
     const res = await apiRequest('tools');
     if (!res) return false;
     const items = await res.json();
@@ -156,7 +155,7 @@
     });
     return true;
   }
-
+  
   function setModeFromPath(path) {
     if (path.endsWith('.html')) {
       editor.setOption('mode', 'htmlmixed');
@@ -166,14 +165,16 @@
       editor.setOption('mode', 'css');
     } else if (path.endsWith('.json')) {
       editor.setOption('mode', { name: 'javascript', json: true });
+    } else if (path.endsWith('.csv')) {
+      editor.setOption('mode', 'text/plain');
     } else {
       editor.setOption('mode', 'text/plain');
     }
   }
-
+  
   async function loadFile(path) {
     currentPath = path;
-    currentPathEl.textContent = path;
+    currentPathEl.querySelector('span').textContent = path;
     setModeFromPath(path);
     const res = await apiRequest(path, { allow404: true });
     if (!res) return;
@@ -186,7 +187,7 @@
     editor.setValue(base64DecodeUtf8(data.content.replace(/\n/g, '')));
     shas[path] = data.sha;
   }
-
+  
   async function saveCurrentFile() {
     if (!currentPath) return;
     const body = {
@@ -204,7 +205,7 @@
     shas[currentPath] = data.content.sha;
     showPopup('Saved');
   }
-
+  
   async function deleteCurrentFile() {
     if (!currentPath) return;
     if (!confirm(`Delete ${currentPath}?`)) return;
@@ -220,12 +221,12 @@
     const item = [...fileList.querySelectorAll('a')].find(a => a.textContent === currentPath.split('/').pop());
     if (item) item.parentElement.remove();
     editor.setValue('');
-    currentPathEl.textContent = '';
+    currentPathEl.querySelector('span').textContent = '';
     delete shas[currentPath];
     currentPath = '';
     showPopup('Deleted');
   }
-
+  
   async function renameCurrentFile() {
     if (!currentPath) return;
     const currentName = currentPath.split('/').pop();
@@ -235,8 +236,7 @@
     const body = {
       message: `Rename ${currentPath} to ${newPath}`,
       content: base64EncodeUtf8(editor.getValue()),
-      sha: shas[currentPath],
-      path: newPath
+      sha: shas[currentPath]
     };
     const res = await apiRequest(currentPath, {
       method: 'PUT',
@@ -253,14 +253,13 @@
     delete shas[currentPath];
     shas[newPath] = data.content.sha;
     currentPath = newPath;
-    currentPathEl.textContent = newPath;
+    currentPathEl.querySelector('span').textContent = newPath;
     showPopup('Renamed');
   }
-
+  
   saveFileBtn.addEventListener('click', saveCurrentFile);
   deleteFileBtn.addEventListener('click', deleteCurrentFile);
   renameFileBtn.addEventListener('click', renameCurrentFile);
-
   createFileBtn.addEventListener('click', () => {
     const name = newFileInput.value.trim();
     if (!name) return;
@@ -277,7 +276,7 @@
     newFileInput.value = '';
     loadFile(path);
   });
-
+  
   // Initialize on load
   if (tokenInput.value) {
     initRepo();
