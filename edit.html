@@ -150,6 +150,45 @@
     display: none;
     z-index: 1000;
   }
+
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    #editor-section {
+      flex-direction: column;
+    }
+    #sidebar {
+      width: 100%;
+      max-height: 40vh;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    #main {
+      height: 60vh;
+      padding: 0.75rem;
+    }
+    #current-path {
+      font-size: 0.95rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .CodeMirror {
+      border-radius: 8px;
+    }
+    .actions {
+      position: sticky;
+      bottom: 0;
+      background: var(--panel);
+      padding: 0.5rem 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.5rem;
+    }
+    .mui-btn { height: 36px; line-height: 36px; }
+  }
+
+  /* Improve iOS scroll behavior */
+  #sidebar, .CodeMirror { -webkit-overflow-scrolling: touch; }
 </style>
 </head>
 <body>

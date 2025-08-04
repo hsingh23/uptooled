@@ -15,6 +15,14 @@ async function saveScreenshot(file, data) {
   }
 }
 
+async function saveFailure(file) {
+  await db.shots.put({ file: file + '#failed', data: '1', timestamp: Date.now() });
+}
+
+async function hasFailure(file) {
+  return !!(await db.shots.get(file + '#failed'));
+}
+
 async function captureScreenshot(iframe) {
   try {
     const doc = iframe.contentWindow.document;
@@ -22,6 +30,7 @@ async function captureScreenshot(iframe) {
     return canvas.toDataURL('image/png');
   } catch (err) {
     console.warn('Unable to capture screenshot for', iframe.src, err);
+    await saveFailure(iframe.src);
     return null;
   }
 }
@@ -61,7 +70,17 @@ async function init() {
   const toggleInfoBtn = document.getElementById('toggle-info');
   const infoEl = document.getElementById('tool-info');
   const editFileBtn = document.getElementById('edit-file');
+  const menuBtn = document.getElementById('menu-button');
   let selectedTool = null;
+
+  function isMobile() {
+    return window.matchMedia('(max-width: 768px)').matches;
+  }
+
+  function setSidebarVisible(show) {
+    const sb = document.getElementById('sidebar');
+    sb.style.display = show ? 'block' : 'none';
+  }
 
   function matches(tool, q) {
     q = q.toLowerCase();
@@ -90,9 +109,45 @@ async function init() {
 
   async function renderGrid(list) {
     gridEl.innerHTML = '';
+    const io = new IntersectionObserver(
+      entries => {
+        entries.forEach(async entry => {
+          if (!entry.isIntersecting) return;
+          const card = entry.target;
+          const { file } = card.dataset;
+          const img = card.querySelector('img.card-frame');
+          const iframe = card.querySelector('iframe.card-frame');
+
+          // If we already captured, unobserve
+          if (img.dataset.ready === '1') {
+            io.unobserve(card);
+            return;
+          }
+
+          // Load iframe, capture, swap to image, then unload iframe
+          iframe.style.display = 'block';
+          iframe.onload = async () => {
+            const data = await captureScreenshot(iframe);
+            await saveScreenshot(file, data);
+            if (data) {
+              img.src = data;
+              img.style.display = 'block';
+              img.dataset.ready = '1';
+            }
+            iframe.src = 'about:blank'; // free resources
+            iframe.style.display = 'none';
+            io.unobserve(card);
+          };
+          iframe.src = file;
+        });
+      },
+      { root: gridEl, rootMargin: '200px 0px', threshold: 0.05 }
+    );
+
     for (const tool of list) {
       const card = document.createElement('div');
       card.className = 'tool-card';
+      card.dataset.file = tool.file;
 
       const img = document.createElement('img');
       img.className = 'card-frame';
@@ -102,25 +157,13 @@ async function init() {
       iframe.className = 'card-frame';
       iframe.style.display = 'none';
 
-      const shot = await getScreenshot(tool.file);
-      if (shot) {
-        img.src = shot;
+      const cached = await getScreenshot(tool.file);
+      const failed = await hasFailure(tool.file);
+      if (cached) {
+        img.src = cached;
         img.style.display = 'block';
-      } else {
-        // If no shot yet, start loading iframe for capture
-        iframe.style.display = 'block';
+        img.dataset.ready = '1';
       }
-      iframe.addEventListener('load', async () => {
-        // Once iframe loads, capture and cache, then swap to image to reduce CPU
-        const data = await captureScreenshot(iframe);
-        await saveScreenshot(tool.file, data);
-        if (data) {
-          img.src = data;
-          img.style.display = 'block';
-          iframe.style.display = 'none';
-        }
-      });
-      iframe.src = tool.file;
 
       const title = document.createElement('h3');
       title.textContent = tool.title;
@@ -133,6 +176,9 @@ async function init() {
       card.appendChild(desc);
       card.addEventListener('click', () => selectTool(tool));
       gridEl.appendChild(card);
+
+      // Start observing card for lazy iframe loading only if not ready and not failed
+      if (!cached && !failed) io.observe(card);
     }
   }
 
@@ -142,6 +188,7 @@ async function init() {
     if (location.hash) {
       history.replaceState(null, '', location.pathname);
     }
+    if (isMobile()) setSidebarVisible(true);
   }
 
   function showViewer() {
@@ -155,6 +202,7 @@ async function init() {
   }
 
   async function selectTool(tool, updateHash = true) {
+    if (isMobile()) setSidebarVisible(false);
     selectedTool = tool;
     frameEl.style.display = 'none';
     const shot = await getScreenshot(tool.file);
@@ -216,22 +264,31 @@ async function init() {
     }
   }
 
+  function setInfoVisible(show) {
+    infoEl.style.display = show ? 'block' : 'none';
+    toggleInfoBtn.textContent = show ? 'Hide Info' : 'Show Info';
+  }
+
   searchEl.addEventListener('input', filter);
   backBtn.addEventListener('click', showGrid);
+  
+  setInfoVisible(!isMobile()); // collapsed on mobile by default
+  
   toggleInfoBtn.addEventListener('click', () => {
-    if (infoEl.style.display === 'none') {
-      infoEl.style.display = 'block';
-      toggleInfoBtn.textContent = 'Hide Info';
-    } else {
-      infoEl.style.display = 'none';
-      toggleInfoBtn.textContent = 'Show Info';
-    }
+    const show = infoEl.style.display === 'none';
+    setInfoVisible(show);
   });
 
   editFileBtn.addEventListener('click', () => {
     if (selectedTool) {
       location.href = `edit.html?file=${encodeURIComponent(selectedTool.file)}`;
     }
+  });
+
+  menuBtn.addEventListener('click', () => {
+    const sb = document.getElementById('sidebar');
+    const visible = sb.style.display !== 'none';
+    setSidebarVisible(!visible);
   });
 
   window.addEventListener('hashchange', () => {
