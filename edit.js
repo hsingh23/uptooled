@@ -76,11 +76,24 @@
     return new TextDecoder().decode(bytes);
   }
   
+  // Detect color scheme for theme
+  function getColorScheme() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+  
   // Initialize CodeMirror
   editor = CodeMirror.fromTextArea(textArea, {
     lineNumbers: true,
-    mode: 'text/plain'
+    mode: 'text/plain',
+    theme: getColorScheme() === 'light' ? 'solarized light' : 'solarized dark'
   });
+  
+  // Listen for color scheme changes
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: light)').addListener(() => {
+      editor.setOption('theme', getColorScheme() === 'light' ? 'solarized light' : 'solarized dark');
+    });
+  }
   
   // Populate from localStorage
   tokenInput.value = localStorage.getItem('gh_token') || '';
