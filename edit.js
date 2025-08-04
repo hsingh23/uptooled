@@ -19,6 +19,42 @@
   let currentPath = '';
   const requestedFile = new URLSearchParams(location.search).get('file');
   
+  // Mobile sidebar toggle elements
+  const mobileToggle = document.querySelector('.mobile-file-toggle');
+  const mobileOverlay = document.querySelector('.mobile-overlay');
+  const sidebar = document.getElementById('sidebar');
+  
+  // Mobile sidebar toggle functionality
+  function initMobileToggle() {
+    if (mobileToggle && mobileOverlay && sidebar) {
+      mobileToggle.addEventListener('click', () => {
+        const isOpen = sidebar.classList.contains('mobile-open');
+        
+        if (isOpen) {
+          closeMobileSidebar();
+        } else {
+          openMobileSidebar();
+        }
+      });
+      
+      mobileOverlay.addEventListener('click', closeMobileSidebar);
+    }
+  }
+  
+  function openMobileSidebar() {
+    sidebar.classList.add('mobile-open');
+    mobileOverlay.classList.add('active');
+    mobileToggle.classList.add('open');
+    mobileToggle.innerHTML = '<i class="fas fa-times"></i>';
+  }
+  
+  function closeMobileSidebar() {
+    sidebar.classList.remove('mobile-open');
+    mobileOverlay.classList.remove('active');
+    mobileToggle.classList.remove('open');
+    mobileToggle.innerHTML = '<i class="fas fa-folder"></i>';
+  }
+  
   function base64EncodeUtf8(str) {
     // UTF-8 safe base64 encoding
     const utf8Bytes = new TextEncoder().encode(str);
@@ -119,6 +155,7 @@
   
   async function initRepo() {
     hideAuth();
+    initMobileToggle(); // Initialize mobile sidebar toggle
     const listed = await listFiles();
     if (listed) {
       if (requestedFile) {
@@ -176,6 +213,12 @@
     currentPath = path;
     currentPathEl.querySelector('span').textContent = path;
     setModeFromPath(path);
+    
+    // Close mobile sidebar when file is selected
+    if (window.innerWidth <= 768) {
+      closeMobileSidebar();
+    }
+    
     const res = await apiRequest(path, { allow404: true });
     if (!res) return;
     if (res.status === 404) {
