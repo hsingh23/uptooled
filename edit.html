@@ -835,6 +835,29 @@
     box-shadow: var(--shadow-2);
     background: linear-gradient(135deg, #64748b 0%, #475569 100%);
   }
+  
+  #prettify-main {
+    background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+    color: var(--primary-contrast);
+    border-radius: var(--radius-sm);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 14px;
+    font-weight: 600;
+    height: 44px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-1);
+  }
+  
+  #prettify-main:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-2);
+  }
   </style>
 </head>
 <body>
@@ -878,6 +901,9 @@
         <button id="preview-file" class="mui-btn">
           <i class="fas fa-eye"></i> Preview
         </button>
+        <button id="prettify-main" class="mui-btn">
+          <i class="fas fa-magic"></i> Prettify
+        </button>
         <button id="delete-file" class="mui-btn">
           <i class="fas fa-trash"></i> Delete
         </button>
@@ -917,6 +943,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/htmlmixed/htmlmixed.min.js"></script>
   <script src="https://unpkg.com/prettier@2.8.8/standalone.js"></script>
   <script src="https://unpkg.com/prettier@2.8.8/parser-html.js"></script>
+  <script src="https://unpkg.com/prettier@2.8.8/parser-postcss.js"></script>
   <script src="edit.js" defer></script>
 </body>
 </html>

@@ -20,6 +20,7 @@
   const previewIframe = document.getElementById('preview-iframe');
   const previewClose = document.querySelector('.preview-close');
   const prettifyBtn = document.getElementById('prettify-btn');
+  const prettifyMainBtn = document.getElementById('prettify-main');
   const shas = {};
   let editor;
   let currentPath = '';
@@ -339,7 +340,11 @@
         plugins: prettierPlugins,
         tabWidth: 2,
         useTabs: false,
-        printWidth: 100
+        printWidth: 100,
+        htmlWhitespaceSensitivity: 'css',
+        singleQuote: false,
+        bracketSameLine: false,
+        vueIndentScriptAndStyle: true
       });
       
       editor.setValue(formatted);
@@ -445,6 +450,7 @@
   previewFileBtn.addEventListener('click', openPreviewModal);
   previewClose.addEventListener('click', closePreviewModal);
   prettifyBtn.addEventListener('click', prettifyCode);
+  prettifyMainBtn.addEventListener('click', prettifyCode);
   backToToolsBtn.addEventListener('click', backToTools);
   
   // Close modal when clicking outside
