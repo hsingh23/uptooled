@@ -595,11 +595,35 @@
     .mui-btn { 
       height: 44px; 
       line-height: 44px;
-      padding: 0 1.25rem;
-      font-size: 14px;
+      padding: 0 1rem;
+      font-size: 12px;
       flex: 1;
       border-radius: var(--radius-sm);
       justify-content: center;
+    }
+    
+    .preview-header {
+      padding: 0.75rem 1rem;
+      min-height: 50px;
+    }
+    
+    .preview-title {
+      font-size: 1rem;
+    }
+    
+    #prettify-btn {
+      padding: 0.5rem 0.75rem;
+      font-size: 12px;
+    }
+    
+    .preview-close {
+      width: 36px;
+      height: 36px;
+      font-size: 18px;
+    }
+    
+    .preview-iframe-container {
+      margin: 0.5rem;
     }
     #auth-section {
       padding: 2rem 1.5rem;
@@ -648,6 +672,169 @@
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
+  
+  /* Preview modal */
+  #preview-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    display: none;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+  
+  #preview-modal.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .preview-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .preview-header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 60px;
+  }
+  
+  .preview-title {
+    color: var(--text);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .preview-title i {
+    color: var(--primary);
+  }
+  
+  .preview-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  
+  #prettify-btn {
+    background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+    color: var(--primary-contrast);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  #prettify-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-2);
+  }
+  
+  .preview-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+  
+  .preview-close:hover {
+    background: var(--elev);
+    color: var(--text);
+    transform: scale(1.1);
+  }
+  
+  .preview-iframe-container {
+    flex: 1;
+    background: var(--surface);
+    margin: 1rem;
+    border-radius: var(--radius);
+    border: 2px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  #preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: white;
+  }
+  
+  #preview-file {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--primary-contrast);
+    border-radius: var(--radius-sm);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 14px;
+    font-weight: 600;
+    height: 44px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-1);
+  }
+  
+  #preview-file:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-2);
+  }
+  
+  #back-to-tools {
+    background: linear-gradient(135deg, var(--muted) 0%, #64748b 100%);
+    color: var(--primary-contrast);
+    border-radius: var(--radius-sm);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 14px;
+    font-weight: 600;
+    height: 44px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-1);
+  }
+  
+  #back-to-tools:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-2);
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  }
   </style>
 </head>
 <body>
@@ -688,18 +875,48 @@
         <button id="rename-file" class="mui-btn">
           <i class="fas fa-edit"></i> Rename
         </button>
+        <button id="preview-file" class="mui-btn">
+          <i class="fas fa-eye"></i> Preview
+        </button>
         <button id="delete-file" class="mui-btn">
           <i class="fas fa-trash"></i> Delete
+        </button>
+        <button id="back-to-tools" class="mui-btn">
+          <i class="fas fa-arrow-left"></i> Back to Tools
         </button>
       </div>
     </div>
   </div>
   <div id="popup"></div>
+  <div id="preview-modal">
+    <div class="preview-content">
+      <div class="preview-header">
+        <h3 class="preview-title">
+          <i class="fas fa-eye"></i>
+          Preview
+        </h3>
+        <div class="preview-actions">
+          <button id="prettify-btn">
+            <i class="fas fa-magic"></i>
+            Prettify
+          </button>
+          <button class="preview-close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      <div class="preview-iframe-container">
+        <iframe id="preview-iframe"></iframe>
+      </div>
+    </div>
+  </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/css/css.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://unpkg.com/prettier@2.8.8/standalone.js"></script>
+  <script src="https://unpkg.com/prettier@2.8.8/parser-html.js"></script>
   <script src="edit.js" defer></script>
 </body>
 </html>
