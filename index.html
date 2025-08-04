@@ -13,70 +13,207 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <link rel="stylesheet" href="https://cdn.muicss.com/mui-latest/css/mui.min.css">
   <style>
-    body {
-      margin: 0;
-      display: flex;
-      height: 100vh;
-      overflow-x: hidden;
-      overflow-y: auto;
+  :root {
+    --bg: #ffffff;
+    --surface: #fafafa;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --primary: #2563eb;
+    --primary-contrast: #ffffff;
+    --border: #e5e7eb;
+    --card-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0f14;
+      --surface: #121821;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --primary: #3b82f6;
+      --primary-contrast: #0b0f14;
+      --border: #1f2937;
+      --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
     }
-    #sidebar {
-      width: 250px;
-      border-right: 1px solid #ddd;
-      overflow-y: auto;
-      padding: 1rem;
-    }
-    #main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--bg), var(--surface));
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+      Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  }
+  #sidebar {
+    width: 320px;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+  }
+  @media (prefers-color-scheme: dark) {
+    #sidebar { background: rgba(18, 24, 33, 0.5); }
+  }
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #grid-view {
+    display: grid;
+    gap: 1rem;
+    padding: 1.25rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    overflow: auto;
+  }
+  @media (min-width: 1200px) {
     #grid-view {
-      display: grid;
-      gap: 1rem;
-      padding: 1rem;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
     }
-    @media (min-width: 1000px) {
-      #grid-view {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-    .tool-card {
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 1rem;
-    }
-    .card-frame {
+  }
+  .mui-textfield input#search {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    height: 42px;
+  }
+  .mui-textfield input#search::placeholder {
+    color: var(--muted);
+  }
+  #tool-list {
+    margin-top: 0.75rem;
+  }
+  #tool-list li a {
+    display: block;
+    padding: 0.5rem 0.4rem;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 8px;
+  }
+  #tool-list li a:hover {
+    background: var(--surface);
+  }
+
+  .tool-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .tool-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+  }
+  .card-frame {
+    width: 100%;
+    height: 200px;
+    border: 0;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #0b0f14;
+  }
+  .tool-card h3 {
+    margin: 0.25rem 0 0.1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .tool-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  #viewer {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #viewer-controls {
+    padding: 0.6rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(6px);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  @media (prefers-color-scheme: dark) {
+    #viewer-controls { background: rgba(18,24,33,0.6); }
+  }
+  .mui-btn {
+    border-radius: 8px !important;
+    height: 34px;
+    line-height: 34px;
+    padding: 0 12px;
+  }
+  .mui-btn--primary {
+    background: var(--primary) !important;
+    color: var(--primary-contrast) !important;
+  }
+  #tool-frame {
+    flex: 1;
+    border: 0;
+    width: 100%;
+    background: #0b0f14;
+  }
+  #viewer-placeholder {
+    flex: 1;
+    width: 100%;
+    object-fit: cover;
+    border: 0;
+    border-radius: 0;
+    background: #0b0f14;
+  }
+  #tool-info {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  #tool-title {
+    margin: 0 0 0.25rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  #tool-description {
+    margin: 0.25rem 0;
+    color: var(--muted);
+  }
+  #tool-keywords {
+    color: var(--muted);
+  }
+
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    #sidebar {
       width: 100%;
-      height: 220px;
-      border: 0;
-      margin-bottom: 0.5rem;
-      object-fit: cover;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 3;
     }
-    #tool-frame {
-      flex: 1;
-      border: 0;
-      width: 100%;
-    }
-    #viewer-placeholder {
-      flex: 1;
-      width: 100%;
-      object-fit: cover;
-    }
-    #tool-info {
-      padding: 1rem;
-      border-top: 1px solid #ddd;
-    }
-    @media (max-width: 600px) {
-      body { flex-direction: column; }
-      #sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-      }
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
   <div id="sidebar">
