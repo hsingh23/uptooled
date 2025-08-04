@@ -37,8 +37,8 @@
     ],
     "related": [
       "tools/Masonry Image Collage Generator.html",
-      "tools/Poster Creator.html",
-      "tools/Calendar Timeline Visualizer.html"
+      "tools/colors.html",
+      "tools/Poster Creator.html"
     ]
   },
   {
@@ -60,7 +60,7 @@
     "related": [
       "tools/Image Resizer and Cropper.html",
       "tools/Calendar Timeline Visualizer.html",
-      "tools/Poster Creator.html"
+      "tools/colors.html"
     ]
   },
   {
@@ -80,5 +80,32 @@
       "tools/Calendar Timeline Visualizer.html",
       "tools/Masonry Image Collage Generator.html"
     ]
+  },
+  {
+    "file": "tools/colors.html",
+    "title": "Color Palette Generator - Extract Colors from Images | Privacy First Apps",
+    "description": "Free online color palette generator that extracts colors from images, suggests color harmonies, and exports design schemes. Perfect for designers and developers.",
+    "keywords": [
+      "color palette generator",
+      "color extractor",
+      "image to colors",
+      "color harmony",
+      "color scheme",
+      "design tools",
+      "web design",
+      "color picker"
+    ],
+    "related": [
+      "tools/Image Resizer and Cropper.html",
+      "tools/Masonry Image Collage Generator.html",
+      "tools/Calendar Timeline Visualizer.html"
+    ]
+  },
+  {
+    "file": "tools/test.html",
+    "title": "Geo Location Extractor",
+    "description": "",
+    "keywords": [],
+    "related": []
   }
 ]

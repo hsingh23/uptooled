@@ -1,8 +1,54 @@
 [
   {
     "file": "https://hsingh23.github.io/webcomponents/",
-    "title": "https://hsingh23.github.io/webcomponents/",
-    "description": "",
+    "title": "Webcomponent Hub - Demos",
+    "description": "Explore a collection of web component demos, including animated testimonials, particle typography, and more. Each demo includes a live preview and source code.",
     "keywords": []
+  },
+  {
+    "file": "https://images.mavo.stream/",
+    "title": "ImageScout – Batch Royalty-Free Image Search &amp; Download",
+    "description": "Discover, curate, and download the perfect royalty-free images in seconds with ImageScout. Enter multiple keywords to search top free-image platforms (Unsplash, Pexels, Pixabay, and more), preview and select your favorites, then batch-download with auto-renamed, well-organized filenames.",
+    "keywords": [
+      "royalty-free images",
+      "free stock photos",
+      "image search",
+      "batch download",
+      "multi-query search",
+      "Unsplash",
+      "Pexels",
+      "Pixabay",
+      "Creative Commons",
+      "photo downloader",
+      "image organizer",
+      "stock photography",
+      "bulk image fetcher"
+    ]
+  },
+  {
+    "file": "https://ical-genius.privacyfirstapps.org/",
+    "title": "iCal Genius - Convert Event Text to Calendar Files",
+    "description": "Easily convert event descriptions into downloadable iCal calendar files. Use AI to parse multiple events from text and add them to your calendar instantly.",
+    "keywords": [
+      "ical generator",
+      "calendar events",
+      "text to calendar",
+      "event parser",
+      "calendar file creator",
+      "ics download"
+    ]
+  },
+  {
+    "file": "https://txt-to-srt.netlify.app/",
+    "title": "SRT Subtitle Converter - Convert Text to SRT Files Online",
+    "description": "Free online tool to convert timestamp-based text to SRT subtitle files. Easy copy, download, and mobile-friendly interface for content creators and video editors.",
+    "keywords": [
+      "SRT converter",
+      "subtitle converter",
+      "text to SRT",
+      "subtitle generator",
+      "video subtitles",
+      "captions converter"
+    ]
   }
 ]

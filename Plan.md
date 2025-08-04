@@ -1,526 +1,343 @@
-Below are focused fixes and upgrades you can drop into your project. They address:
-1) The Unicode btoa error when saving in edit.html/edit.js
-2) Substantial UI/UX improvements for both edit and index pages (clean layout, responsive, dark-mode friendly, refined components)
+Got it. Let’s make the mobile UX genuinely usable while keeping desktop nice. Below are targeted, drop‑in changes. If you want full patched files, say “generate patched files.”
 
-Part 1 — Fix: Unicode-safe base64 for GitHub API (btoa error)
-Root cause
-btoa only supports Latin1. When your file content includes non-ASCII characters, btoa throws an “InvalidCharacterError”.
+Key mobile goals
+- One-column, app-like layout
+- Sticky, compact header with search and a menu toggle
+- Touch-friendly targets and spacing
+- Snappy list > details navigation without heavy iframes rendering off-screen
+- Smaller viewer controls, collapsible info panel by default
+- Prevent page jumps and overscroll traps
 
-Solution
-Use UTF-8 safe base64 helpers for both encoding (save) and decoding (load). Replace direct btoa/atob uses with these helpers.
+Index page (index.html + index.js)
+1) Mobile-first layout and sticky top bar
+Replace your style block’s responsive parts with these additions/overrides (keeps your current desktop look):
 
-In edit.js, add these helpers at the top (after variable declarations):
-```javascript
-function base64EncodeUtf8(str) {
-  // UTF-8 safe base64 encoding
-  const utf8Bytes = new TextEncoder().encode(str);
-  let binary = '';
-  utf8Bytes.forEach(b => {
-    binary += String.fromCharCode(b);
-  });
-  return btoa(binary);
-}
-
-function base64DecodeUtf8(b64) {
-  // UTF-8 safe base64 decoding
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return new TextDecoder().decode(bytes);
-}
-```
-
-Then change the two spots:
-
-A) In loadFile(path):
-Replace:
-```javascript
-editor.setValue(atob(data.content.replace(/\n/g, '')));
-```
-With:
-```javascript
-editor.setValue(base64DecodeUtf8(data.content.replace(/\n/g, '')));
-```
-
-B) In saveCurrentFile():
-Replace:
-```javascript
-content: btoa(editor.getValue())
-```
-With:
-```javascript
-content: base64EncodeUtf8(editor.getValue())
-```
-
-C) In renameCurrentFile():
-Replace:
-```javascript
-content: btoa(editor.getValue()),
-```
-With:
-```javascript
-content: base64EncodeUtf8(editor.getValue()),
-```
-
-This eliminates the Unicode error and ensures round‑trip safety.
-
-Part 2 — UI/UX upgrades
-Goals
-- Cleaner, modern layout
-- Better spacing, typography, buttons
-- Responsive grid/cards
-- Consistent color system, subtle shadows, hover states
-- Optional dark mode (auto via prefers-color-scheme)
-- More polished “viewer” experience with improved info panel and controls
-
-2A) index.html style overhaul
-Replace the <style> block in index.html with:
-```html
 <style>
-  :root {
-    --bg: #ffffff;
-    --surface: #fafafa;
-    --text: #1f2937;
-    --muted: #6b7280;
-    --primary: #2563eb;
-    --primary-contrast: #ffffff;
-    --border: #e5e7eb;
-    --card-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-    --radius: 10px;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0b0f14;
-      --surface: #121821;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --primary: #3b82f6;
-      --primary-contrast: #0b0f14;
-      --border: #1f2937;
-      --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-    }
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    height: 100%;
-  }
-  body {
-    margin: 0;
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-    background: linear-gradient(180deg, var(--bg), var(--surface));
-    color: var(--text);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-      Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  }
-  #sidebar {
-    width: 320px;
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(8px);
-  }
-  @media (prefers-color-scheme: dark) {
-    #sidebar { background: rgba(18, 24, 33, 0.5); }
-  }
-  #main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  #grid-view {
-    display: grid;
-    gap: 1rem;
-    padding: 1.25rem;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    overflow: auto;
-  }
-  @media (min-width: 1200px) {
-    #grid-view {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  .mui-textfield input#search {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 0.6rem 0.8rem;
-    height: 42px;
-  }
-  .mui-textfield input#search::placeholder {
-    color: var(--muted);
-  }
-  #tool-list {
-    margin-top: 0.75rem;
-  }
-  #tool-list li a {
-    display: block;
-    padding: 0.5rem 0.4rem;
-    color: var(--text);
-    text-decoration: none;
-    border-radius: 8px;
-  }
-  #tool-list li a:hover {
-    background: var(--surface);
-  }
-
-  .tool-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 0.75rem;
-    box-shadow: var(--card-shadow);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .tool-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 22px rgba(0,0,0,0.12);
-  }
-  .card-frame {
-    width: 100%;
-    height: 200px;
-    border: 0;
-    border-radius: 8px;
-    object-fit: cover;
-    background: #0b0f14;
-  }
-  .tool-card h3 {
-    margin: 0.25rem 0 0.1rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .tool-card p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--muted);
-  }
-
-  #viewer {
-    display: none;
-    flex: 1;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  #viewer-controls {
-    padding: 0.6rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    background: rgba(255,255,255,0.6);
-    backdrop-filter: blur(6px);
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-  @media (prefers-color-scheme: dark) {
-    #viewer-controls { background: rgba(18,24,33,0.6); }
-  }
-  .mui-btn {
-    border-radius: 8px !important;
-    height: 34px;
-    line-height: 34px;
-    padding: 0 12px;
-  }
-  .mui-btn--primary {
-    background: var(--primary) !important;
-    color: var(--primary-contrast) !important;
-  }
-  #tool-frame {
-    flex: 1;
-    border: 0;
-    width: 100%;
-    background: #0b0f14;
-  }
-  #viewer-placeholder {
-    flex: 1;
-    width: 100%;
-    object-fit: cover;
-    border: 0;
-    border-radius: 0;
-    background: #0b0f14;
-  }
-  #tool-info {
-    padding: 1rem 1.25rem;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-  }
-  #tool-title {
-    margin: 0 0 0.25rem;
-    font-size: 1.1rem;
-    font-weight: 700;
-  }
-  #tool-description {
-    margin: 0.25rem 0;
-    color: var(--muted);
-  }
-  #tool-keywords {
-    color: var(--muted);
-  }
-
+  /* Mobile-first refinements */
   @media (max-width: 768px) {
-    body { flex-direction: column; }
-    #sidebar {
-      width: 100%;
-      border-right: none;
-      border-bottom: 1px solid var(--border);
+    body {
+      flex-direction: column;
+      overflow: hidden;
+    }
+    /* App bar */
+    #topbar {
       position: sticky;
       top: 0;
-      z-index: 3;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(8px);
+    }
+    @media (prefers-color-scheme: dark) {
+      #topbar { background: rgba(18,24,33,0.6); }
+    }
+    #menu-button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 10px;
+      height: 36px;
+      width: 42px;
+      display: grid;
+      place-items: center;
+    }
+    #sidebar {
+      width: 100%;
+      max-height: 55vh;
+      padding: 0.75rem;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      display: none; /* hidden until toggled */
+      overflow: auto;
+      background: var(--surface);
+    }
+    #main {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    #grid-view {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      overflow: auto;
+    }
+    .mui-textfield input#search {
+      height: 38px;
+      font-size: 16px; /* prevents iOS zoom on focus */
+      padding: 0.5rem 0.75rem;
+    }
+    #tool-list li a {
+      padding: 0.6rem 0.4rem;
+      font-size: 16px;
+    }
+    /* Viewer */
+    #viewer-controls {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      padding: 0.4rem 0.5rem;
+      gap: 0.4rem;
+    }
+    .mui-btn {
+      height: 32px;
+      line-height: 32px;
+      padding: 0 10px;
+      font-size: 14px;
+    }
+    #tool-info {
+      padding: 0.75rem;
+    }
+    #tool-title {
+      font-size: 1rem;
+    }
+    #tool-description {
+      font-size: 0.95rem;
+    }
+    /* Frames */
+    .card-frame { height: 160px; }
+    #viewer { overflow: auto; }
+    #tool-frame, #viewer-placeholder {
+      min-height: 60vh; /* good touch height */
     }
   }
+
+  /* Improve scroll momentum on iOS */
+  #sidebar, #grid-view, #viewer { -webkit-overflow-scrolling: touch; }
+
+  /* Larger tap targets by default */
+  #tool-list li a { min-height: 40px; display: flex; align-items: center; }
+
+  /* Reduce tap delay on iOS Safari */
+  * { touch-action: manipulation; }
 </style>
-```
 
-2B) index.js small UX improvements
-Keep your logic intact. Two small changes improve perceived speed and stability of thumbnails and the viewer.
+2) Add a mobile top bar container and toggle button
+In index.html, right under <body>, add a compact top bar for mobile:
 
-1) For faster first paint on grid, show screenshot image immediately if available and avoid flicker:
+<div id="topbar" aria-label="Toolbar">
+  <button id="menu-button" aria-label="Toggle list">☰</button>
+  <div class="mui-textfield" style="flex:1;">
+    <input type="text" id="search" placeholder="Search tools" inputmode="search" />
+  </div>
+</div>
 
-Replace the section inside renderGrid where you add listeners with:
-```javascript
-const shot = await getScreenshot(tool.file);
-if (shot) {
-  img.src = shot;
-  img.style.display = 'block';
-} else {
-  // If no shot yet, start loading iframe for capture
-  iframe.style.display = 'block';
+Then move the existing search input out of the sidebar (remove the old search input in #sidebar) to avoid duplication. The #sidebar should just have the <ul id="tool-list">.
+
+3) Sidebar toggle logic and better mobile behavior
+In index.js, add the toggle and auto-close behaviors inside init():
+
+const menuBtn = document.getElementById('menu-button');
+
+function setSidebarVisible(show) {
+  const sb = document.getElementById('sidebar');
+  sb.style.display = show ? 'block' : 'none';
 }
-iframe.addEventListener('load', async () => {
-  // Once iframe loads, capture and cache, then swap to image to reduce CPU
-  const data = await captureScreenshot(iframe);
-  await saveScreenshot(tool.file, data);
-  if (data) {
-    img.src = data;
-    img.style.display = 'block';
-    iframe.style.display = 'none';
-  }
+
+menuBtn.addEventListener('click', () => {
+  const sb = document.getElementById('sidebar');
+  const visible = sb.style.display !== 'none';
+  setSidebarVisible(!visible);
 });
-iframe.src = tool.file;
-```
 
-2) For viewer, similar approach: show placeholder immediately if we have it; after capture, keep the frame but ensure we store a new screenshot.
+// Close sidebar when a tool is selected on mobile
+function isMobile() {
+  return window.matchMedia('(max-width: 768px)').matches;
+}
 
-In selectTool, leave your logic but ensure we don’t set frameEl.style.display = 'none' if we already have a fast placeholder; your current logic is fine—no change required beyond styles.
+Update selectTool to close the sidebar on mobile after choosing an item:
 
-2C) edit.html style overhaul
-Replace the <style> block in edit.html with:
-```html
-<style>
-  :root {
-    --bg: #0b0f14;
-    --surface: #0f1520;
-    --panel: #121a27;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
-    --border: #1f2937;
-    --primary: #60a5fa;
-    --danger: #ef4444;
-    --card-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    --radius: 12px;
+async function selectTool(tool, updateHash = true) {
+  if (isMobile()) setSidebarVisible(false);
+  // ... existing selectTool body ...
+}
+
+Also, when showing the grid, open the list on mobile for quick navigation:
+
+function showGrid() {
+  viewerEl.style.display = 'none';
+  gridEl.style.display = 'grid';
+  if (location.hash) {
+    history.replaceState(null, '', location.pathname);
   }
-  @media (prefers-color-scheme: light) {
-    :root {
-      --bg: #f7f9fc;
-      --surface: #ffffff;
-      --panel: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --primary: #2563eb;
-      --danger: #dc2626;
-      --card-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  if (isMobile()) setSidebarVisible(true);
+}
+
+4) Faster, lighter cards on mobile
+- Only render iframes on-demand to avoid heavy loads while scrolling. Cards show cached screenshot or a lightweight placeholder; iframe loads only after card is in viewport.
+
+In index.js, replace renderGrid with an IntersectionObserver-based lazy loader:
+
+async function renderGrid(list) {
+  gridEl.innerHTML = '';
+  const io = new IntersectionObserver(
+    entries => {
+      entries.forEach(async entry => {
+        if (!entry.isIntersecting) return;
+        const card = entry.target;
+        const { file } = card.dataset;
+        const img = card.querySelector('img.card-frame');
+        const iframe = card.querySelector('iframe.card-frame');
+
+        // If we already captured, unobserve
+        if (img.dataset.ready === '1') {
+          io.unobserve(card);
+          return;
+        }
+
+        // Load iframe, capture, swap to image, then unload iframe
+        iframe.style.display = 'block';
+        iframe.onload = async () => {
+          const data = await captureScreenshot(iframe);
+          await saveScreenshot(file, data);
+          if (data) {
+            img.src = data;
+            img.style.display = 'block';
+            img.dataset.ready = '1';
+          }
+          iframe.src = 'about:blank'; // free resources
+          iframe.style.display = 'none';
+          io.unobserve(card);
+        };
+        iframe.src = file;
+      });
+    },
+    { root: gridEl, rootMargin: '200px 0px', threshold: 0.05 }
+  );
+
+  for (const tool of list) {
+    const card = document.createElement('div');
+    card.className = 'tool-card';
+    card.dataset.file = tool.file;
+
+    const img = document.createElement('img');
+    img.className = 'card-frame';
+    img.style.display = 'none';
+
+    const iframe = document.createElement('iframe');
+    iframe.className = 'card-frame';
+    iframe.style.display = 'none';
+
+    const cached = await getScreenshot(tool.file);
+    if (cached) {
+      img.src = cached;
+      img.style.display = 'block';
+      img.dataset.ready = '1';
     }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    overflow: hidden;
-    background: linear-gradient(180deg, var(--bg), var(--surface));
-    color: var(--text);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-      Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  }
-  #auth-section {
-    padding: 2rem;
-    width: 100%;
-    max-width: 740px;
-    margin: 0 auto;
-  }
-  #auth-section h1 { margin-top: 0; }
-  .mui-textfield input#token {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 0.7rem 0.9rem;
-    height: 44px;
-  }
-  #save-auth {
-    border-radius: 10px;
-    background: var(--primary);
-    color: white;
-  }
 
-  #editor-section {
-    flex: 1;
-    display: flex;
-    gap: 0;
-  }
-  #sidebar {
-    width: 280px;
-    border-right: 1px solid var(--border);
-    padding: 1rem;
-    overflow-y: auto;
-    background: var(--panel);
-  }
-  #sidebar .mui-textfield input {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 10px;
-    height: 40px;
-    padding: 0.5rem 0.75rem;
-  }
-  #create-file {
-    border-radius: 8px;
-    background: var(--primary);
-    color: #fff;
-  }
-  #file-list li a {
-    color: var(--text);
-    text-decoration: none;
-    display: block;
-    padding: 0.4rem 0.3rem;
-    border-radius: 8px;
-  }
-  #file-list li a:hover {
-    background: rgba(255,255,255,0.05);
-  }
+    const title = document.createElement('h3');
+    title.textContent = tool.title;
+    const desc = document.createElement('p');
+    desc.textContent = tool.description || '';
 
-  #main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    gap: 0.5rem;
-  }
-  #current-path {
-    margin: 0 0 0.25rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--muted);
-  }
-  .CodeMirror {
-    height: 100%;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--card-shadow);
-    background: #0b0f14;
-    color: #e5e7eb;
-  }
-  #main > div.actions {
-    margin-top: 0.5rem;
-    display: flex;
-    gap: 0.5rem;
-  }
-  #save-file {
-    background: var(--primary);
-    color: #fff;
-    border-radius: 8px;
-  }
-  #rename-file, #delete-file {
-    border-radius: 8px;
-  }
-  #delete-file {
-    background: var(--danger);
-    color: #fff;
-  }
-  #popup {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(17,24,39,0.95);
-    color: #fff;
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
-    display: none;
-    z-index: 1000;
-  }
-</style>
-```
+    card.appendChild(img);
+    card.appendChild(iframe);
+    card.appendChild(title);
+    card.appendChild(desc);
+    card.addEventListener('click', () => selectTool(tool));
+    gridEl.appendChild(card);
 
-And slightly adjust the action button container in edit.html:
-Replace
-```html
-<div style="margin-top:0.5rem;">
-```
-with
-```html
-<div class="actions">
-```
-
-2D) Minor UX niceties in edit.js
-- Enhance popup messages on save/delete/rename with emojis for quick visual feedback
-- Keep as-is if you prefer minimalist notifications. If you want, update the showPopup lines:
-```javascript
-showPopup('✅ Saved');
-...
-showPopup('🗑️ Deleted');
-...
-showPopup('✏️ Renamed');
-```
-
-Part 3 — Optional robustness tweaks
-1) GitHub API headers
-Add Accept header for v3 to be explicit in apiRequest:
-```javascript
-opts.headers = Object.assign(
-  { Accept: 'application/vnd.github.v3+json' },
-  authHeaders(),
-  opts.headers || {}
-);
-```
-
-2) File mode detection
-You can expand setModeFromPath to include .json, .js, .css for better highlighting:
-```javascript
-function setModeFromPath(path) {
-  if (path.endsWith('.html')) {
-    editor.setOption('mode', 'htmlmixed');
-  } else if (path.endsWith('.js')) {
-    editor.setOption('mode', 'javascript');
-  } else if (path.endsWith('.css')) {
-    editor.setOption('mode', 'css');
-  } else if (path.endsWith('.json')) {
-    editor.setOption('mode', { name: 'javascript', json: true });
-  } else {
-    editor.setOption('mode', 'text/plain');
+    // Start observing card for lazy iframe loading only if not ready
+    if (!cached) io.observe(card);
   }
 }
-```
 
-3) External sites thumbnails in index.js
-Some sites may disallow framing. Your code already handles try/catch in captureScreenshot; the placeholder fallback is fine. If you want to visually indicate unavailable previews, set a neutral background image or message when capture fails.
+This drastically reduces CPU/memory on phones.
 
-Summary of exact code changes to make now
-- edit.js: add base64EncodeUtf8/base64DecodeUtf8 and swap in load/save/rename; optionally add Accept header and enhanced setModeFromPath.
-- index.html: replace style with the larger theme block above.
-- index.js: tweak renderGrid to prefer cached screenshots and swap after capture.
-- edit.html: replace style with the larger theme block above and change the action buttons wrapper to class="actions".
+5) Viewer improvements on mobile
+- Collapse info panel by default on small screens, with a Show Info toggle label reflecting state.
 
-Once you apply these, saving files with any Unicode content will work, and both pages will look considerably more modern and polished. If you want me to produce full patched files with the changes merged verbatim, say “generate patched files,” and I’ll output the complete file contents.
+In index.js, after you define toggleInfoBtn and infoEl:
+
+function setInfoVisible(show) {
+  infoEl.style.display = show ? 'block' : 'none';
+  toggleInfoBtn.textContent = show ? 'Hide Info' : 'Show Info';
+}
+setInfoVisible(!isMobile()); // collapsed on mobile by default
+
+toggleInfoBtn.addEventListener('click', () => {
+  const show = infoEl.style.display === 'none';
+  setInfoVisible(show);
+});
+
+Ensure back button is easy to reach; already sticky with CSS.
+
+6) Prevent autofocus zoom annoyance
+Already handled by setting font-size: 16px on the search input in mobile CSS.
+
+7) Touch target and spacing
+Already increased list item and button sizes in CSS. If you want even larger, bump min-height to 44px.
+
+Edit page (edit.html + edit.js)
+1) Compact stacked layout on phones
+Append these mobile overrides to your existing edit.html styles:
+
+<style>
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    #editor-section {
+      flex-direction: column;
+    }
+    #sidebar {
+      width: 100%;
+      max-height: 40vh;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    #main {
+      height: 60vh;
+      padding: 0.75rem;
+    }
+    #current-path {
+      font-size: 0.95rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .CodeMirror {
+      border-radius: 8px;
+    }
+    .actions {
+      position: sticky;
+      bottom: 0;
+      background: var(--panel);
+      padding: 0.5rem 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 0.5rem;
+    }
+    .mui-btn { height: 36px; line-height: 36px; }
+  }
+
+  /* Improve iOS scroll behavior */
+  #sidebar, .CodeMirror { -webkit-overflow-scrolling: touch; }
+</style>
+
+2) Prevent keyboard from pushing content off-screen
+CodeMirror is already flexible height; the sticky actions bar keeps Save/Rename/Delete accessible when the OS keyboard is open.
+
+3) Unicode save bug already fixed in prior message
+Ensure you added base64EncodeUtf8/base64DecodeUtf8 to edit.js and replaced btoa/atob.
+
+Extra niceties
+- Add rel=noopener to any external links when you render Similar links (security): when creating links in index.js for related tools that are external URLs (starting with http), set link.rel = 'noopener'; link.target = '_blank'; on mobile, you may still want same-tab; choose per preference.
+
+- Reduce viewer frame crashes when sites block iframes: in captureScreenshot, if it throws, do not keep trying repeatedly for the same URL in one session; store a “failed” flag in IndexedDB for that file to skip future attempts until a new session.
+
+Quick snippet to memoize failures (optional):
+
+async function saveFailure(file) {
+  await db.shots.put({ file: file + '#failed', data: '1', timestamp: Date.now() });
+}
+async function hasFailure(file) {
+  return !!(await db.shots.get(file + '#failed'));
+}
+
+Use in renderGrid/load to skip iframe attempt if hasFailure(file) is true. Call saveFailure(file) inside the catch of captureScreenshot.
+
