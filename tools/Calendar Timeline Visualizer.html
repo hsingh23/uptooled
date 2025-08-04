@@ -1,903 +1,1103 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendar Timeline to Image Visualizer</title>
-<!-- SEO Meta Tags -->
-<meta name="description" content="A free, interactive tool to create beautiful, color-coded project timelines. Input your project phases, set durations, and instantly generate a shareable visual calendar. Export to PNG.">
-<meta name="keywords" content="timeline generator, project timeline, gantt chart, project management, roadmap planner, visual calendar, project schedule, free tool">
-<meta name="author" content="Gemini">
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://example.com/">
-<meta property="og:title" content="Calendar Timeline Visualizer">
-<meta property="og:description" content="Create beautiful, color-coded project timelines instantly. Input phases, set durations, and export your visual schedule as a PNG.">
-<meta property="og:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Timeline\nVisualizer">
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://example.com/">
-<meta property="twitter:title" content="Calendar Timeline Visualizer">
-<meta property="twitter:description" content="Create beautiful, color-coded project timelines instantly. Input phases, set durations, and export your visual schedule as a PNG.">
-<meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Timeline\nVisualizer">
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- Libraries for D&D and Exporting -->
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<style>
-body {
-font-family: 'Inter', sans-serif;
-transition: background-color 0.3s, color 0.3s;
-}
-/* Dark mode styles */
-body.dark-mode {
-background-color: #1a202c;
-color: #e2e8f0;
-}
-body.dark-mode .bg-white {
-background-color: #2d3748;
-}
-body.dark-mode .bg-slate-50 {
-background-color: #1a202c;
-}
-body.dark-mode .text-slate-800 {
-color: #e2e8f0;
-}
-body.dark-mode .text-slate-600 {
-color: #cbd5e0;
-}
-body.dark-mode .text-slate-500 {
-color: #a0aec0;
-}
-body.dark-mode .text-slate-700 {
-color: #e2e8f0;
-}
-body.dark-mode .border-slate-200 {
-border-color: #4a5568;
-}
-body.dark-mode .border-slate-300 {
-border-color: #4a5568;
-}
-body.dark-mode input, 
-body.dark-mode select {
-background-color: #2d3748;
-color: #e2e8f0;
-border-color: #4a5568;
-}
-body.dark-mode .bg-slate-200 {
-background-color: #4a5568;
-}
-body.dark-mode .bg-blue-600 {
-background-color: #3182ce;
-}
-body.dark-mode .hover\:bg-blue-700:hover {
-background-color: #2c5282;
-}
-body.dark-mode .bg-green-600 {
-background-color: #38a169;
-}
-body.dark-mode .hover\:bg-green-700:hover {
-background-color: #2f855a;
-}
-/* Custom scrollbar */
-.timeline-container::-webkit-scrollbar { height: 8px; }
-.timeline-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-.timeline-container::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
-.timeline-container::-webkit-scrollbar-thumb:hover { background: #64748b; }
-/* SortableJS styles */
-.sortable-ghost {
-background-color: #e0f2fe;
-opacity: 0.7;
-border: 2px dashed #0284c7;
-}
-.sortable-drag { cursor: grabbing; }
-/* Inline editable title */
-[contenteditable]:focus {
-outline: 2px solid #3b82f6;
-border-radius: 8px;
-box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-}
-.phase-row { cursor: grab; }
-/* Accordion style */
-details > summary { list-style: none; }
-details > summary::-webkit-details-marker { display: none; }
-details .summary-icon { transition: transform 0.2s; }
-details[open] .summary-icon { transform: rotate(45deg); }
-/* Preview modal styles */
-.modal {
-display: none;
-position: fixed;
-z-index: 1000;
-left: 0;
-top: 0;
-width: 100%;
-height: 100%;
-background-color: rgba(0,0,0,0.8);
-backdrop-filter: blur(4px);
-}
-.modal-content {
-background-color: white;
-margin: 2% auto;
-padding: 30px;
-border-radius: 16px;
-width: 95%;
-max-width: 1400px;
-max-height: 90vh;
-overflow: hidden;
-box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-transition: all 0.3s ease;
-}
-body.dark-mode .modal-content {
-background-color: #2d3748;
-}
-.close {
-color: #aaa;
-float: right;
-font-size: 32px;
-font-weight: bold;
-cursor: pointer;
-line-height: 1;
-transition: color 0.2s;
-}
-.close:hover {
-color: #ef4444;
-}
-/* Legend position styles */
-.legend-top { order: -1; margin-bottom: 1.5rem; }
-.legend-bottom { order: 1; margin-top: 1.5rem; }
-.legend-left { 
-order: 0; 
-margin-right: 1.5rem; 
-flex-direction: column !important;
-min-width: 180px;
-}
-.legend-right { 
-order: 1; 
-margin-left: 1.5rem; 
-flex-direction: column !important;
-min-width: 180px;
-}
-.legend-horizontal { flex-direction: row !important; justify-content: center; flex-wrap: wrap; }
-.legend-vertical { flex-direction: column !important; align-items: flex-start; }
-/* Preview container styles */
-.preview-container {
-width: 100%;
-height: 70vh;
-display: flex;
-align-items: center;
-justify-content: center;
-overflow: hidden;
-background: #f8fafc;
-border-radius: 12px;
-border: 2px dashed #cbd5e0;
-}
-body.dark-mode .preview-container {
-background: #1a202c;
-border-color: #4a5568;
-}
-.preview-wrapper {
-transform-origin: center center;
-transition: transform 0.3s ease;
-}
-/* Toggle switch styles */
-.toggle-switch {
-position: relative;
-display: inline-block;
-width: 60px;
-height: 30px;
-}
-.toggle-switch input {
-opacity: 0;
-width: 0;
-height: 0;
-}
-.slider {
-position: absolute;
-cursor: pointer;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background-color: #cbd5e0;
-transition: .4s;
-border-radius: 30px;
-}
-.slider:before {
-position: absolute;
-content: "";
-height: 22px;
-width: 22px;
-left: 4px;
-bottom: 4px;
-background-color: white;
-transition: .4s;
-border-radius: 50%;
-}
-input:checked + .slider {
-background-color: #3b82f6;
-}
-input:checked + .slider:before {
-transform: translateX(30px);
-}
-/* Enhanced button styles */
-.btn-primary {
-background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-transition: all 0.3s ease;
-box-shadow: 0 4px 15px 0 rgba(31, 38, 135, 0.2);
-}
-.btn-primary:hover {
-transform: translateY(-2px);
-box-shadow: 0 7px 20px 0 rgba(31, 38, 135, 0.3);
-}
-.btn-secondary {
-background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-transition: all 0.3s ease;
-box-shadow: 0 4px 15px 0 rgba(245, 87, 108, 0.2);
-}
-.btn-secondary:hover {
-transform: translateY(-2px);
-box-shadow: 0 7px 20px 0 rgba(245, 87, 108, 0.3);
-}
-/* Card hover effects */
-.card-hover {
-transition: all 0.3s ease;
-}
-.card-hover:hover {
-transform: translateY(-4px);
-box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-</style>
-</head>
-<body class="bg-slate-50 text-slate-800">
-<div class="container mx-auto p-4 md:p-8">
-<header class="text-center mb-6">
-<div class="flex justify-between items-center mb-4">
-<div></div>
-<h1 id="main-title" contenteditable="true" class="text-3xl md:text-4xl font-bold text-slate-900 cursor-pointer p-2 rounded-lg">Calendar Timeline to Image Visualizer</h1>
-<div class="flex items-center gap-2">
-<span class="text-sm font-medium">🌙</span>
-<label class="toggle-switch">
-<input type="checkbox" id="darkModeToggle">
-<span class="slider"></span>
-</label>
-<span class="text-sm font-medium">☀️</span>
-</div>
-</div>
-<p class="text-slate-600 mt-2 max-w-2xl mx-auto">Create beautiful, color-coded project timelines. Customize, preview, and export stunning visuals.</p>
-</header>
-<!-- How to Use Guide -->
-<div class="max-w-4xl mx-auto mb-8">
-<details class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 card-hover">
-<summary class="font-semibold text-lg cursor-pointer flex justify-between items-center">
-<span class="flex items-center gap-2">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-</svg>
-How to Use This Tool
-</span>
-<span class="summary-icon text-blue-500 font-bold text-2xl">+</span>
-</summary>
-<div class="mt-4 prose prose-slate max-w-none">
-<ol class="space-y-2">
-<li><strong class="text-blue-600">✏️ Edit Title:</strong> Click the main title to rename your project.</li>
-<li><strong class="text-blue-600">📅 Set Start Date:</strong> Choose starting month and year for your timeline.</li>
-<li><strong class="text-blue-600">⚙️ Configure Export:</strong> Set image width, legend position, and background transparency.</li>
-<li><strong class="text-blue-600">🎨 Define Phases:</strong>
-<ul class="ml-4 mt-1">
-<li>Name each phase and set duration in months</li>
-<li>Click <strong class="text-green-600">"+ Add Phase"</strong> for more steps</li>
-<li><strong class="text-purple-600">Drag ☰ to reorder</strong> phases</li>
-<li>Click <strong class="text-red-600">❌</strong> to remove phases</li>
-</ul>
-</li>
-<li><strong class="text-blue-600">🚀 Generate:</strong> Hit "Generate Timeline" to create your visual</li>
-<li><strong class="text-blue-600">👁️ Preview & Export:</strong> Preview your timeline, then export as PNG</li>
-</ol>
-</div>
-</details>
-</div>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-<!-- ==== INPUT CONTROLS ==== -->
-<div class="lg:col-span-4 bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover">
-<h2 class="text-xl font-bold mb-6 border-b pb-3 flex items-center gap-2">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-</svg>
-Configuration
-</h2>
-<div id="config-form">
-<div class="grid grid-cols-3 gap-4 mb-6">
-<div>
-<label for="startMonth" class="block text-sm font-medium text-slate-700 mb-1">Start Month</label>
-<select id="startMonth" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"></select>
-</div>
-<div>
-<label for="startYear" class="block text-sm font-medium text-slate-700 mb-1">Start Year</label>
-<input type="number" id="startYear" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" value="2025">
-</div>
-<div>
-<label for="unitsPerRow" class="block text-sm font-medium text-slate-700 mb-1">Units per Row</label>
-<input type="number" id="unitsPerRow" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" value="12" min="1">
-</div>
-</div>
-<!-- Export Configuration -->
-<div class="border-t pt-6 mb-6">
-<h3 class="text-lg font-semibold mb-4 text-slate-800 flex items-center gap-2">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-</svg>
-Export Configuration
-</h3>
-<div class="space-y-4">
-<div>
-<label for="imageWidth" class="block text-sm font-medium text-slate-700 mb-1">Image Width (px)</label>
-<input type="number" id="imageWidth" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" value="1200" min="400" max="4000">
-</div>
-<div>
-<label for="legendPosition" class="block text-sm font-medium text-slate-700 mb-1">Legend Position</label>
-<select id="legendPosition" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all">
-<option value="top">📍 Top</option>
-<option value="bottom" selected>📍 Bottom</option>
-<option value="left">📍 Left</option>
-<option value="right">📍 Right</option>
-</select>
-</div>
-<div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-<div class="flex items-center">
-<input type="checkbox" id="transparentBackground" class="mr-2 w-4 h-4 text-blue-600">
-<label for="transparentBackground" class="text-sm font-medium text-slate-700">Transparent Background</label>
-</div>
-<span class="text-xs text-slate-500">Perfect for dark mode!</span>
-</div>
-</div>
-</div>
-<h3 class="text-lg font-semibold mb-4 text-slate-800 flex items-center gap-2">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-</svg>
-Phase Breakdown
-</h3>
-<div id="phases-container" class="space-y-3 mb-4">
-<!-- Draggable phase inputs will be added here -->
-</div>
-<div class="flex justify-between items-center mb-6 p-3 bg-blue-50 rounded-lg">
-<button id="add-phase-btn" class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-</svg>
-+ Add Phase
-</button>
-<div class="text-sm font-medium text-slate-700">
-Total: <span id="total-months-display" class="font-bold text-blue-600">0</span> months
-</div>
-</div>
-<div class="space-y-3">
-<button id="generate-btn" class="w-full btn-primary text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300">
-🚀 Generate Timeline
-</button>
-<button id="preview-btn" class="w-full btn-secondary text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-👁️ Preview Export
-</button>
-</div>
-</div>
-<!-- Error Message Area -->
-<div id="error-message" class="hidden mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
-<p class="font-bold">⚠️ Error</p>
-<p id="error-text"></p>
-</div>
-</div>
-<!-- ==== OUTPUT DISPLAY ==== -->
-<div id="export-area" class="lg:col-span-8 bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover">
-<div class="flex flex-wrap justify-between items-center gap-y-2 border-b pb-4 mb-6">
-<h2 class="text-xl font-bold flex items-center gap-2">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-</svg>
-Timeline Visual
-</h2>
-<div class="flex gap-2">
-<button id="export-png-btn" class="text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1" disabled>
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-</svg>
-Export PNG
-</button>
-</div>
-</div>
-<div class="flex gap-2 mb-6">
-<button class="view-btn bg-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-all" data-view="month">📅 Month View</button>
-<button class="view-btn bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-lg transition-all" data-view="week">📆 Week View</button>
-<button class="view-btn bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-lg transition-all" data-view="day">📋 Day View</button>
-</div>
-<div id="output-container" class="min-h-[300px] flex flex-col justify-center items-center">
-<div class="text-slate-500 text-center">
-<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
-<path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-</svg>
-<p class="text-lg">Your timeline will appear here</p>
-<p class="text-sm mt-1">Configure your phases and click "Generate Timeline"</p>
-</div>
-</div>
-<div id="timeline-wrapper" class="hidden">
-<div id="timeline-container" class="w-full overflow-x-auto pb-4 timeline-container"></div>
-</div>
-</div>
-</div>
-</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calendar Timeline to Image Visualizer</title>
+    <!-- SEO Meta Tags -->
+    <meta
+      name="description"
+      content="A free, interactive tool to create beautiful, color-coded project timelines. Input your project phases, set durations, and instantly generate a shareable visual calendar. Export to PNG."
+    />
+    <meta
+      name="keywords"
+      content="timeline generator, project timeline, gantt chart, project management, roadmap planner, visual calendar, project schedule, free tool"
+    />
+    <meta name="author" content="Gemini" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://example.com/" />
+    <meta property="og:title" content="Calendar Timeline Visualizer" />
+    <meta
+      property="og:description"
+      content="Create beautiful, color-coded project timelines instantly. Input phases, set durations, and export your visual schedule as a PNG."
+    />
+    <meta
+      property="og:image"
+      content="https://placehold.co/1200x630/3b82f6/ffffff?text=Timeline\nVisualizer"
+    />
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://example.com/" />
+    <meta property="twitter:title" content="Calendar Timeline Visualizer" />
+    <meta
+      property="twitter:description"
+      content="Create beautiful, color-coded project timelines instantly. Input phases, set durations, and export your visual schedule as a PNG."
+    />
+    <meta
+      property="twitter:image"
+      content="https://placehold.co/1200x630/3b82f6/ffffff?text=Timeline\nVisualizer"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Libraries for D&D and Exporting -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+      body {
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+      }
+      /* Dark mode styles */
+      body.dark-mode {
+      background-color: #1a202c;
+      color: #e2e8f0;
+      }
+      body.dark-mode .bg-white {
+      background-color: #2d3748;
+      }
+      body.dark-mode .bg-slate-50 {
+      background-color: #1a202c;
+      }
+      body.dark-mode .text-slate-800 {
+      color: #e2e8f0;
+      }
+      body.dark-mode .text-slate-600 {
+      color: #cbd5e0;
+      }
+      body.dark-mode .text-slate-500 {
+      color: #a0aec0;
+      }
+      body.dark-mode .text-slate-700 {
+      color: #e2e8f0;
+      }
+      body.dark-mode .border-slate-200 {
+      border-color: #4a5568;
+      }
+      body.dark-mode .border-slate-300 {
+      border-color: #4a5568;
+      }
+      body.dark-mode input,
+      body.dark-mode select {
+      background-color: #2d3748;
+      color: #e2e8f0;
+      border-color: #4a5568;
+      }
+      body.dark-mode .bg-slate-200 {
+      background-color: #4a5568;
+      }
+      body.dark-mode .bg-blue-600 {
+      background-color: #3182ce;
+      }
+      body.dark-mode .hover\:bg-blue-700:hover {
+      background-color: #2c5282;
+      }
+      body.dark-mode .bg-green-600 {
+      background-color: #38a169;
+      }
+      body.dark-mode .hover\:bg-green-700:hover {
+      background-color: #2f855a;
+      }
+      /* Custom scrollbar */
+      .timeline-container::-webkit-scrollbar { height: 8px; }
+      .timeline-container::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+      .timeline-container::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+      .timeline-container::-webkit-scrollbar-thumb:hover { background: #64748b; }
+      /* SortableJS styles */
+      .sortable-ghost {
+      background-color: #e0f2fe;
+      opacity: 0.7;
+      border: 2px dashed #0284c7;
+      }
+      .sortable-drag { cursor: grabbing; }
+      /* Inline editable title */
+      [contenteditable]:focus {
+      outline: 2px solid #3b82f6;
+      border-radius: 8px;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+      }
+      .phase-row { cursor: grab; }
+      /* Accordion style */
+      details > summary { list-style: none; }
+      details > summary::-webkit-details-marker { display: none; }
+      details .summary-icon { transition: transform 0.2s; }
+      details[open] .summary-icon { transform: rotate(45deg); }
+      /* Preview modal styles */
+      .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      }
+      .modal-content {
+      background-color: white;
+      margin: 2% auto;
+      padding: 30px;
+      border-radius: 16px;
+      width: 95%;
+      max-width: 1400px;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      transition: all 0.3s ease;
+      }
+      body.dark-mode .modal-content {
+      background-color: #2d3748;
+      }
+      .close {
+      color: #aaa;
+      float: right;
+      font-size: 32px;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+      }
+      .close:hover {
+      color: #ef4444;
+      }
+      /* Legend position styles */
+      .legend-top { order: -1; margin-bottom: 1.5rem; }
+      .legend-bottom { order: 1; margin-top: 1.5rem; }
+      .legend-left {
+      order: 0;
+      margin-right: 1.5rem;
+      flex-direction: column !important;
+      min-width: 180px;
+      }
+      .legend-right {
+      order: 1;
+      margin-left: 1.5rem;
+      flex-direction: column !important;
+      min-width: 180px;
+      }
+      .legend-horizontal { flex-direction: row !important; justify-content: center; flex-wrap: wrap; }
+      .legend-vertical { flex-direction: column !important; align-items: flex-start; }
+      /* Preview container styles */
+      .preview-container {
+      width: 100%;
+      height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 2px dashed #cbd5e0;
+      }
+      body.dark-mode .preview-container {
+      background: #1a202c;
+      border-color: #4a5568;
+      }
+      .preview-wrapper {
+      transform-origin: center center;
+      transition: transform 0.3s ease;
+      }
+      /* Toggle switch styles */
+      .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 30px;
+      }
+      .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      }
+      .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e0;
+      transition: .4s;
+      border-radius: 30px;
+      }
+      .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+      }
+      input:checked + .slider {
+      background-color: #3b82f6;
+      }
+      input:checked + .slider:before {
+      transform: translateX(30px);
+      }
+      /* Enhanced button styles */
+      .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px 0 rgba(31, 38, 135, 0.2);
+      }
+      .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px 0 rgba(31, 38, 135, 0.3);
+      }
+      .btn-secondary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px 0 rgba(245, 87, 108, 0.2);
+      }
+      .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px 0 rgba(245, 87, 108, 0.3);
+      }
+      /* Card hover effects */
+      .card-hover {
+      transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-800">
+    <div class="container mx-auto p-4 md:p-8">
+      <header class="text-center mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <div></div>
+          <h1
+            id="main-title"
+            contenteditable="true"
+            class="text-3xl md:text-4xl font-bold text-slate-400 cursor-pointer p-2 rounded-lg"
+          >
+            Calendar Timeline to Image Visualizer
+          </h1>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium">🌙</span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="darkModeToggle" />
+              <span class="slider"></span>
+            </label>
+            <span class="text-sm font-medium">☀️</span>
+          </div>
+        </div>
+        <p class="text-slate-600 mt-2 max-w-2xl mx-auto">
+          Create beautiful, color-coded project timelines. Customize, preview, and export stunning
+          visuals.
+        </p>
+      </header>
+      <!-- How to Use Guide -->
+      <div class="max-w-4xl mx-auto mb-8">
+        <details class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 card-hover">
+          <summary class="font-semibold text-lg cursor-pointer flex justify-between items-center">
+            <span class="flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+              How to Use This Tool
+            </span>
+            <span class="summary-icon text-blue-500 font-bold text-2xl">+</span>
+          </summary>
+          <div class="mt-4 prose prose-slate max-w-none">
+            <ol class="space-y-2">
+              <li>
+                <strong class="text-blue-600">✏️ Edit Title:</strong> Click the main title to rename
+                your project.
+              </li>
+              <li>
+                <strong class="text-blue-600">📅 Set Start Date:</strong> Choose starting month and
+                year for your timeline.
+              </li>
+              <li>
+                <strong class="text-blue-600">⚙️ Configure Export:</strong> Set image width, legend
+                position, and background transparency.
+              </li>
+              <li>
+                <strong class="text-blue-600">🎨 Define Phases:</strong>
+                <ul class="ml-4 mt-1">
+                  <li>Name each phase and set duration in months</li>
+                  <li>
+                    Click <strong class="text-green-600">"+ Add Phase"</strong> for more steps
+                  </li>
+                  <li><strong class="text-purple-600">Drag ☰ to reorder</strong> phases</li>
+                  <li>Click <strong class="text-red-600">❌</strong> to remove phases</li>
+                </ul>
+              </li>
+              <li>
+                <strong class="text-blue-600">🚀 Generate:</strong> Hit "Generate Timeline" to
+                create your visual
+              </li>
+              <li>
+                <strong class="text-blue-600">👁️ Preview & Export:</strong> Preview your timeline,
+                then export as PNG
+              </li>
+            </ol>
+          </div>
+        </details>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- ==== INPUT CONTROLS ==== -->
+        <div
+          class="lg:col-span-4 bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover"
+        >
+          <h2 class="text-xl font-bold mb-6 border-b pb-3 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+              ></path>
+            </svg>
+            Configuration
+          </h2>
+          <div id="config-form">
+            <div class="grid grid-cols-3 gap-4 mb-6">
+              <div>
+                <label for="startMonth" class="block text-sm font-medium text-slate-700 mb-1"
+                  >Start Month</label
+                >
+                <select
+                  id="startMonth"
+                  class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                ></select>
+              </div>
+              <div>
+                <label for="startYear" class="block text-sm font-medium text-slate-700 mb-1"
+                  >Start Year</label
+                >
+                <input
+                  type="number"
+                  id="startYear"
+                  class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                  value="2025"
+                />
+              </div>
+              <div>
+                <label for="unitsPerRow" class="block text-sm font-medium text-slate-700 mb-1"
+                  >Units per Row</label
+                >
+                <input
+                  type="number"
+                  id="unitsPerRow"
+                  class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                  value="12"
+                  min="1"
+                />
+              </div>
+            </div>
+            <!-- Export Configuration -->
+            <div class="border-t pt-6 mb-6">
+              <h3 class="text-lg font-semibold mb-4 text-slate-800 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                Export Configuration
+              </h3>
+              <div class="space-y-4">
+                <div>
+                  <label for="imageWidth" class="block text-sm font-medium text-slate-700 mb-1"
+                    >Image Width (px)</label
+                  >
+                  <input
+                    type="number"
+                    id="imageWidth"
+                    class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                    value="1200"
+                    min="400"
+                    max="4000"
+                  />
+                </div>
+                <div>
+                  <label for="legendPosition" class="block text-sm font-medium text-slate-700 mb-1"
+                    >Legend Position</label
+                  >
+                  <select
+                    id="legendPosition"
+                    class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all"
+                  >
+                    <option value="top">📍 Top</option>
+                    <option value="bottom" selected>📍 Bottom</option>
+                    <option value="left">📍 Left</option>
+                    <option value="right">📍 Right</option>
+                  </select>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div class="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="transparentBackground"
+                      class="mr-2 w-4 h-4 text-blue-600"
+                    />
+                    <label for="transparentBackground" class="text-sm font-medium text-slate-700"
+                      >Transparent Background</label
+                    >
+                  </div>
+                  <span class="text-xs text-slate-500">Perfect for dark mode!</span>
+                </div>
+              </div>
+            </div>
+            <h3 class="text-lg font-semibold mb-4 text-slate-800 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                ></path>
+              </svg>
+              Phase Breakdown
+            </h3>
+            <div id="phases-container" class="space-y-3 mb-4">
+              <!-- Draggable phase inputs will be added here -->
+            </div>
+            <div class="flex justify-between items-center mb-6 p-3 bg-blue-50 rounded-lg">
+              <button
+                id="add-phase-btn"
+                class="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  ></path>
+                </svg>
+                + Add Phase
+              </button>
+              <div class="text-sm font-medium text-slate-700">
+                Total:
+                <span id="total-months-display" class="font-bold text-blue-600">0</span> months
+              </div>
+            </div>
+            <div class="space-y-3">
+              <button
+                id="generate-btn"
+                class="w-full btn-primary text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-300"
+              >
+                🚀 Generate Timeline
+              </button>
+              <button
+                id="preview-btn"
+                class="w-full btn-secondary text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-pink-300 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                👁️ Preview Export
+              </button>
+            </div>
+          </div>
+          <!-- Error Message Area -->
+          <div
+            id="error-message"
+            class="hidden mt-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg"
+            role="alert"
+          >
+            <p class="font-bold">⚠️ Error</p>
+            <p id="error-text"></p>
+          </div>
+        </div>
+        <!-- ==== OUTPUT DISPLAY ==== -->
+        <div
+          id="export-area"
+          class="lg:col-span-8 bg-white p-6 rounded-2xl shadow-lg border border-slate-200 card-hover"
+        >
+          <div class="flex flex-wrap justify-between items-center gap-y-2 border-b pb-4 mb-6">
+            <h2 class="text-xl font-bold flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                ></path>
+              </svg>
+              Timeline Visual
+            </h2>
+            <div class="flex gap-2">
+              <button
+                id="export-png-btn"
+                class="text-sm bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                disabled
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  ></path>
+                </svg>
+                Export PNG
+              </button>
+            </div>
+          </div>
+          <div class="flex gap-2 mb-6">
+            <button
+              class="view-btn bg-blue-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-all"
+              data-view="month"
+            >
+              📅 Month View
+            </button>
+            <button
+              class="view-btn bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-lg transition-all"
+              data-view="week"
+            >
+              📆 Week View
+            </button>
+            <button
+              class="view-btn bg-slate-200 text-slate-700 text-sm font-semibold py-2 px-4 rounded-lg transition-all"
+              data-view="day"
+            >
+              📋 Day View
+            </button>
+          </div>
+          <div
+            id="output-container"
+            class="min-h-[300px] flex flex-col justify-center items-center"
+          >
+            <div class="text-slate-500 text-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-16 w-16 mx-auto mb-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="1"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              <p class="text-lg">Your timeline will appear here</p>
+              <p class="text-sm mt-1">Configure your phases and click "Generate Timeline"</p>
+            </div>
+          </div>
+          <div id="timeline-wrapper" class="hidden">
+            <div
+              id="timeline-container"
+              class="w-full overflow-x-auto pb-4 timeline-container"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<!-- Preview Modal -->
-<div id="previewModal" class="modal">
-<div class="modal-content">
-<span class="close">&times;</span>
-<h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-</svg>
-Export Preview
-</h2>
-<div class="preview-container">
-<div id="preview-content" class="preview-wrapper"></div>
-</div>
-<div class="mt-6 flex gap-3 justify-center">
-<button id="confirm-export-png" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center gap-2">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-</svg>
-Export PNG
-</button>
-<button id="close-preview" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-lg transition-all">
-Close
-</button>
-</div>
-</div>
-</div>
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            ></path>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+            ></path>
+          </svg>
+          Export Preview
+        </h2>
+        <div class="preview-container">
+          <div id="preview-content" class="preview-wrapper"></div>
+        </div>
+        <div class="mt-6 flex gap-3 justify-center">
+          <button
+            id="confirm-export-png"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-all flex items-center gap-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              ></path>
+            </svg>
+            Export PNG
+          </button>
+          <button
+            id="close-preview"
+            class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-lg transition-all"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-// --- DOM ELEMENTS ---
-const startMonthSelect = document.getElementById('startMonth');
-const startYearInput = document.getElementById('startYear');
-const unitsPerRowInput = document.getElementById('unitsPerRow');
-const imageWidthInput = document.getElementById('imageWidth');
-const legendPositionSelect = document.getElementById('legendPosition');
-const transparentBackgroundCheckbox = document.getElementById('transparentBackground');
-const darkModeToggle = document.getElementById('darkModeToggle');
-const phasesContainer = document.getElementById('phases-container');
-const addPhaseBtn = document.getElementById('add-phase-btn');
-const generateBtn = document.getElementById('generate-btn');
-const previewBtn = document.getElementById('preview-btn');
-const timelineWrapper = document.getElementById('timeline-wrapper');
-const timelineContainer = document.getElementById('timeline-container');
-const outputContainer = document.getElementById('output-container');
-const errorMessageDiv = document.getElementById('error-message');
-const errorTextP = document.getElementById('error-text');
-const totalMonthsDisplay = document.getElementById('total-months-display');
-const exportPngBtn = document.getElementById('export-png-btn');
-const exportArea = document.getElementById('export-area');
-const viewButtons = document.querySelectorAll('.view-btn');
-const previewModal = document.getElementById('previewModal');
-const previewContent = document.getElementById('preview-content');
-const closeModal = document.querySelector('.close');
-const confirmExportPng = document.getElementById('confirm-export-png');
-const closePreview = document.getElementById('close-preview');
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+      // --- DOM ELEMENTS ---
+      const startMonthSelect = document.getElementById('startMonth');
+      const startYearInput = document.getElementById('startYear');
+      const unitsPerRowInput = document.getElementById('unitsPerRow');
+      const imageWidthInput = document.getElementById('imageWidth');
+      const legendPositionSelect = document.getElementById('legendPosition');
+      const transparentBackgroundCheckbox = document.getElementById('transparentBackground');
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      const phasesContainer = document.getElementById('phases-container');
+      const addPhaseBtn = document.getElementById('add-phase-btn');
+      const generateBtn = document.getElementById('generate-btn');
+      const previewBtn = document.getElementById('preview-btn');
+      const timelineWrapper = document.getElementById('timeline-wrapper');
+      const timelineContainer = document.getElementById('timeline-container');
+      const outputContainer = document.getElementById('output-container');
+      const errorMessageDiv = document.getElementById('error-message');
+      const errorTextP = document.getElementById('error-text');
+      const totalMonthsDisplay = document.getElementById('total-months-display');
+      const exportPngBtn = document.getElementById('export-png-btn');
+      const exportArea = document.getElementById('export-area');
+      const viewButtons = document.querySelectorAll('.view-btn');
+      const previewModal = document.getElementById('previewModal');
+      const previewContent = document.getElementById('preview-content');
+      const closeModal = document.querySelector('.close');
+      const confirmExportPng = document.getElementById('confirm-export-png');
+      const closePreview = document.getElementById('close-preview');
 
-// --- CONSTANTS & STATE ---
-const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const COLORS = ['#fdba74', '#67e8f9', '#86efac', '#c4b5fd', '#f9a8d4', '#fcd34d', '#5eead4', '#a7f3d0', '#ddd6fe', '#fbcfe8', '#fb923c', '#22d3ee', '#4ade80', '#a78bfa', '#f472b6'];
-let phaseIdCounter = 0;
-let currentView = 'month';
-let currentTimelineData = null;
-let currentPhases = null;
+      // --- CONSTANTS & STATE ---
+      const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      const COLORS = ['#fdba74', '#67e8f9', '#86efac', '#c4b5fd', '#f9a8d4', '#fcd34d', '#5eead4', '#a7f3d0', '#ddd6fe', '#fbcfe8', '#fb923c', '#22d3ee', '#4ade80', '#a78bfa', '#f472b6'];
+      let phaseIdCounter = 0;
+      let currentView = 'month';
+      let currentTimelineData = null;
+      let currentPhases = null;
 
-// --- INITIALIZATION ---
-function initialize() {
-populateMonthSelect();
-setupSortable();
-addDefaultPhases();
-updateTotalMonths();
-setupViewButtons();
-setupModal();
-setupDarkMode();
-}
+      // --- INITIALIZATION ---
+      function initialize() {
+      populateMonthSelect();
+      setupSortable();
+      addDefaultPhases();
+      updateTotalMonths();
+      setupViewButtons();
+      setupModal();
+      setupDarkMode();
+      }
 
-function populateMonthSelect() {
-MONTH_NAMES.forEach((month, index) => {
-const option = new Option(month, index);
-startMonthSelect.appendChild(option);
-});
-startMonthSelect.value = new Date().getMonth();
-startYearInput.value = new Date().getFullYear();
-}
+      function populateMonthSelect() {
+      MONTH_NAMES.forEach((month, index) => {
+      const option = new Option(month, index);
+      startMonthSelect.appendChild(option);
+      });
+      startMonthSelect.value = new Date().getMonth();
+      startYearInput.value = new Date().getFullYear();
+      }
 
-function setupSortable() {
-Sortable.create(phasesContainer, {
-animation: 150,
-ghostClass: 'sortable-ghost',
-handle: '.drag-handle',
-onEnd: () => {}
-});
-}
+      function setupSortable() {
+      Sortable.create(phasesContainer, {
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      handle: '.drag-handle',
+      onEnd: () => {}
+      });
+      }
 
-function setupViewButtons() {
-viewButtons.forEach(btn => {
-btn.addEventListener('click', () => {
-viewButtons.forEach(b => {
-b.classList.remove('bg-blue-600', 'text-white');
-b.classList.add('bg-slate-200', 'text-slate-700');
-});
-btn.classList.remove('bg-slate-200', 'text-slate-700');
-btn.classList.add('bg-blue-600', 'text-white');
-currentView = btn.dataset.view;
-if (!timelineWrapper.classList.contains('hidden')) {
-generateTimeline();
-}
-});
-});
-}
+      function setupViewButtons() {
+      viewButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+      viewButtons.forEach(b => {
+      b.classList.remove('bg-blue-600', 'text-white');
+      b.classList.add('bg-slate-200', 'text-slate-700');
+      });
+      btn.classList.remove('bg-slate-200', 'text-slate-700');
+      btn.classList.add('bg-blue-600', 'text-white');
+      currentView = btn.dataset.view;
+      if (!timelineWrapper.classList.contains('hidden')) {
+      generateTimeline();
+      }
+      });
+      });
+      }
 
-function setupModal() {
-closeModal.onclick = () => previewModal.style.display = 'none';
-closePreview.onclick = () => previewModal.style.display = 'none';
-window.onclick = (event) => {
-if (event.target === previewModal) {
-previewModal.style.display = 'none';
-}
-};
-}
+      function setupModal() {
+      closeModal.onclick = () => previewModal.style.display = 'none';
+      closePreview.onclick = () => previewModal.style.display = 'none';
+      window.onclick = (event) => {
+      if (event.target === previewModal) {
+      previewModal.style.display = 'none';
+      }
+      };
+      }
 
-function setupDarkMode() {
-// Check for saved dark mode preference or system preference
-const isDarkMode = localStorage.getItem('darkMode') === 'true' || 
-(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      function setupDarkMode() {
+      // Check for saved dark mode preference or system preference
+      const isDarkMode = localStorage.getItem('darkMode') === 'true' ||
+      (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-if (isDarkMode) {
-document.body.classList.add('dark-mode');
-darkModeToggle.checked = true;
-}
+      if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+      darkModeToggle.checked = true;
+      }
 
-darkModeToggle.addEventListener('change', () => {
-if (darkModeToggle.checked) {
-document.body.classList.add('dark-mode');
-localStorage.setItem('darkMode', 'true');
-} else {
-document.body.classList.remove('dark-mode');
-localStorage.setItem('darkMode', 'false');
-}
-});
-}
+      darkModeToggle.addEventListener('change', () => {
+      if (darkModeToggle.checked) {
+      document.body.classList.add('dark-mode');
+      localStorage.setItem('darkMode', 'true');
+      } else {
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('darkMode', 'false');
+      }
+      });
+      }
 
-function addDefaultPhases() {
-addPhaseRow("Planning", 1);
-addPhaseRow("Design & Development", 5);
-addPhaseRow("Testing & QA", 3);
-addPhaseRow("Deployment", 1);
-addPhaseRow("Post-Launch Support", 2);
-}
+      function addDefaultPhases() {
+      addPhaseRow("Planning", 1);
+      addPhaseRow("Design & Development", 5);
+      addPhaseRow("Testing & QA", 3);
+      addPhaseRow("Deployment", 1);
+      addPhaseRow("Post-Launch Support", 2);
+      }
 
-// --- DYNAMIC PHASE MANAGEMENT ---
-function addPhaseRow(name = '', duration = '') {
-phaseIdCounter++;
-const phaseDiv = document.createElement('div');
-phaseDiv.className = 'flex items-center gap-2 phase-row p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors';
-phaseDiv.setAttribute('data-id', phaseIdCounter);
-phaseDiv.innerHTML = `
-<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 flex-shrink-0 drag-handle cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-<input type="text" placeholder="Phase Name" class="phase-name w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" value="${name}">
-<input type="number" placeholder="Months" class="phase-duration w-28 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" min="1" value="${duration}">
-<button type="button" class="remove-phase-btn text-slate-400 hover:text-red-500 p-1 rounded-full transition-all hover:bg-red-50">
-<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
-</button>
-`;
-phasesContainer.appendChild(phaseDiv);
-phaseDiv.querySelector('.remove-phase-btn').addEventListener('click', () => {
-phaseDiv.remove();
-updateTotalMonths();
-});
-phaseDiv.querySelector('.phase-duration').addEventListener('input', updateTotalMonths);
-}
+      // --- DYNAMIC PHASE MANAGEMENT ---
+      function addPhaseRow(name = '', duration = '') {
+      phaseIdCounter++;
+      const phaseDiv = document.createElement('div');
+      phaseDiv.className = 'flex items-center gap-2 phase-row p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors';
+      phaseDiv.setAttribute('data-id', phaseIdCounter);
+      phaseDiv.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 flex-shrink-0 drag-handle cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+      <input type="text" placeholder="Phase Name" class="phase-name w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" value="${name}">
+      <input type="number" placeholder="Months" class="phase-duration w-28 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" min="1" value="${duration}">
+      <button type="button" class="remove-phase-btn text-slate-400 hover:text-red-500 p-1 rounded-full transition-all hover:bg-red-50">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+      </button>
+      `;
+      phasesContainer.appendChild(phaseDiv);
+      phaseDiv.querySelector('.remove-phase-btn').addEventListener('click', () => {
+      phaseDiv.remove();
+      updateTotalMonths();
+      });
+      phaseDiv.querySelector('.phase-duration').addEventListener('input', updateTotalMonths);
+      }
 
-function updateTotalMonths() {
-const durations = [...document.querySelectorAll('.phase-duration')].map(input => parseInt(input.value) || 0);
-totalMonthsDisplay.textContent = durations.reduce((sum, current) => sum + current, 0);
-}
+      function updateTotalMonths() {
+      const durations = [...document.querySelectorAll('.phase-duration')].map(input => parseInt(input.value) || 0);
+      totalMonthsDisplay.textContent = durations.reduce((sum, current) => sum + current, 0);
+      }
 
-// --- CORE LOGIC ---
-function generateTimeline() {
-hideError();
-const phases = getPhaseData();
-if (!phases) return;
-const totalDuration = phases.reduce((acc, p) => acc + p.duration, 0);
-if (totalDuration === 0) {
-showError("Please add at least one phase with a duration > 0.");
-return;
-}
-const unitsPerRow = parseInt(unitsPerRowInput.value) || totalDuration;
-const months = buildMonthArray(totalDuration);
-let units = months;
-if (currentView === 'week') units = buildSubUnits(months, 4, 'week');
-if (currentView === 'day') units = buildSubUnits(months, 30, 'day');
-const timelineData = assignPhases(units, phases, currentView);
-currentTimelineData = timelineData;
-currentPhases = phases;
-renderTimeline(timelineData, unitsPerRow, currentView);
-outputContainer.classList.add('hidden');
-timelineWrapper.classList.remove('hidden');
-previewBtn.disabled = false;
-exportPngBtn.disabled = false;
-}
+      // --- CORE LOGIC ---
+      function generateTimeline() {
+      hideError();
+      const phases = getPhaseData();
+      if (!phases) return;
+      const totalDuration = phases.reduce((acc, p) => acc + p.duration, 0);
+      if (totalDuration === 0) {
+      showError("Please add at least one phase with a duration > 0.");
+      return;
+      }
+      const unitsPerRow = parseInt(unitsPerRowInput.value) || totalDuration;
+      const months = buildMonthArray(totalDuration);
+      let units = months;
+      if (currentView === 'week') units = buildSubUnits(months, 4, 'week');
+      if (currentView === 'day') units = buildSubUnits(months, 30, 'day');
+      const timelineData = assignPhases(units, phases, currentView);
+      currentTimelineData = timelineData;
+      currentPhases = phases;
+      renderTimeline(timelineData, unitsPerRow, currentView);
+      outputContainer.classList.add('hidden');
+      timelineWrapper.classList.remove('hidden');
+      previewBtn.disabled = false;
+      exportPngBtn.disabled = false;
+      }
 
-function getPhaseData() {
-const phaseRows = document.querySelectorAll('.phase-row');
-const phases = [];
-let validationPassed = true;
-phaseRows.forEach((row, index) => {
-const nameInput = row.querySelector('.phase-name');
-const durationInput = row.querySelector('.phase-duration');
-const name = nameInput.value.trim() || `Phase ${index + 1}`;
-const duration = parseInt(durationInput.value);
-if (isNaN(duration) || duration <= 0) {
-showError(`Enter a valid duration for "${name}".`);
-validationPassed = false;
-return;
-}
-phases.push({ name, duration, color: COLORS[index % COLORS.length] });
-});
-return validationPassed ? phases : null;
-}
+      function getPhaseData() {
+      const phaseRows = document.querySelectorAll('.phase-row');
+      const phases = [];
+      let validationPassed = true;
+      phaseRows.forEach((row, index) => {
+      const nameInput = row.querySelector('.phase-name');
+      const durationInput = row.querySelector('.phase-duration');
+      const name = nameInput.value.trim() || `Phase ${index + 1}`;
+      const duration = parseInt(durationInput.value);
+      if (isNaN(duration) || duration <= 0) {
+      showError(`Enter a valid duration for "${name}".`);
+      validationPassed = false;
+      return;
+      }
+      phases.push({ name, duration, color: COLORS[index % COLORS.length] });
+      });
+      return validationPassed ? phases : null;
+      }
 
-function buildMonthArray(totalDuration) {
-const monthArray = [];
-let currentMonth = parseInt(startMonthSelect.value);
-let currentYear = parseInt(startYearInput.value);
-for (let i = 0; i < totalDuration; i++) {
-monthArray.push({ monthIndex: currentMonth, year: currentYear });
-currentMonth = (currentMonth + 1) % 12;
-if (currentMonth === 0) currentYear++;
-}
-return monthArray;
-}
+      function buildMonthArray(totalDuration) {
+      const monthArray = [];
+      let currentMonth = parseInt(startMonthSelect.value);
+      let currentYear = parseInt(startYearInput.value);
+      for (let i = 0; i < totalDuration; i++) {
+      monthArray.push({ monthIndex: currentMonth, year: currentYear });
+      currentMonth = (currentMonth + 1) % 12;
+      if (currentMonth === 0) currentYear++;
+      }
+      return monthArray;
+      }
 
-function buildSubUnits(months, count, type) {
-const arr = [];
-months.forEach(m => {
-for (let i = 0; i < count; i++) {
-const unit = { monthIndex: m.monthIndex, year: m.year };
-if (type === 'week') unit.weekIndex = i + 1;
-if (type === 'day') unit.day = i + 1;
-arr.push(unit);
-}
-});
-return arr;
-}
+      function buildSubUnits(months, count, type) {
+      const arr = [];
+      months.forEach(m => {
+      for (let i = 0; i < count; i++) {
+      const unit = { monthIndex: m.monthIndex, year: m.year };
+      if (type === 'week') unit.weekIndex = i + 1;
+      if (type === 'day') unit.day = i + 1;
+      arr.push(unit);
+      }
+      });
+      return arr;
+      }
 
-function assignPhases(units, phases, view) {
-const timeline = [];
-let cursor = 0;
-const factor = view === 'week' ? 4 : view === 'day' ? 30 : 1;
-phases.forEach(phase => {
-const unitsNeeded = phase.duration * factor;
-for (let i = 0; i < unitsNeeded; i++) {
-if (cursor < units.length) {
-timeline.push({ ...units[cursor], phaseName: phase.name, color: phase.color });
-cursor++;
-}
-}
-});
-return timeline;
-}
+      function assignPhases(units, phases, view) {
+      const timeline = [];
+      let cursor = 0;
+      const factor = view === 'week' ? 4 : view === 'day' ? 30 : 1;
+      phases.forEach(phase => {
+      const unitsNeeded = phase.duration * factor;
+      for (let i = 0; i < unitsNeeded; i++) {
+      if (cursor < units.length) {
+      timeline.push({ ...units[cursor], phaseName: phase.name, color: phase.color });
+      cursor++;
+      }
+      }
+      });
+      return timeline;
+      }
 
-// --- RENDERING ---
-function renderTimeline(timelineData, perRow, view) {
-timelineContainer.innerHTML = '';
-for (let i = 0; i < timelineData.length; i += perRow) {
-const row = document.createElement('div');
-row.className = 'flex items-stretch mt-2 justify-center';
-timelineData.slice(i, i + perRow).forEach(item => {
-const cell = document.createElement('div');
-cell.className = 'flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 m-1 rounded-lg text-xs sm:text-sm font-semibold shadow-md text-white transition-transform hover:scale-105';
-cell.style.backgroundColor = item.color;
-if (view === 'week') {
-cell.textContent = 'W' + item.weekIndex;
-} else if (view === 'day') {
-cell.textContent = item.day;
-} else {
-cell.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
-}
-cell.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
-row.appendChild(cell);
-});
-timelineContainer.appendChild(row);
-}
-}
+      // --- RENDERING ---
+      function renderTimeline(timelineData, perRow, view) {
+      timelineContainer.innerHTML = '';
+      for (let i = 0; i < timelineData.length; i += perRow) {
+      const row = document.createElement('div');
+      row.className = 'flex items-stretch mt-2 justify-center';
+      timelineData.slice(i, i + perRow).forEach(item => {
+      const cell = document.createElement('div');
+      cell.className = 'flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 m-1 rounded-lg text-xs sm:text-sm font-semibold shadow-md text-white transition-transform hover:scale-105';
+      cell.style.backgroundColor = item.color;
+      if (view === 'week') {
+      cell.textContent = 'W' + item.weekIndex;
+      } else if (view === 'day') {
+      cell.textContent = item.day;
+      } else {
+      cell.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
+      }
+      cell.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
+      row.appendChild(cell);
+      });
+      timelineContainer.appendChild(row);
+      }
+      }
 
-function createLegend(phases, position, isDarkMode) {
-const legend = document.createElement('div');
-legend.className = `legend-container flex gap-4 ${position === 'top' ? 'legend-top legend-horizontal' : position === 'bottom' ? 'legend-bottom legend-horizontal' : position === 'left' ? 'legend-left legend-vertical' : 'legend-right legend-vertical'}`;
-legend.innerHTML = phases.map(phase => `
-<div class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 transition-colors">
-<div class="w-6 h-6 rounded-md shadow-sm flex-shrink-0" style="background-color: ${phase.color};"></div>
-<span class="text-sm font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}">${phase.name}</span>
-</div>
-`).join('');
-return legend;
-}
+      function createLegend(phases, position, isDarkMode) {
+      const legend = document.createElement('div');
+      legend.className = `legend-container flex gap-4 ${position === 'top' ? 'legend-top legend-horizontal' : position === 'bottom' ? 'legend-bottom legend-horizontal' : position === 'left' ? 'legend-left legend-vertical' : 'legend-right legend-vertical'}`;
+      legend.innerHTML = phases.map(phase => `
+      <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 transition-colors">
+      <div class="w-6 h-6 rounded-md shadow-sm flex-shrink-0" style="background-color: ${phase.color};"></div>
+      <span class="text-sm font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}">${phase.name}</span>
+      </div>
+      `).join('');
+      return legend;
+      }
 
-function createExportContainer(timelineData, perRow, view, phases, width, legendPosition, transparentBg) {
-const container = document.createElement('div');
-container.style.width = width + 'px';
-container.style.backgroundColor = transparentBg ? 'transparent' : '#ffffff';
-container.style.padding = '30px';
-container.style.boxSizing = 'border-box';
-container.style.fontFamily = "'Inter', sans-serif";
-container.style.minHeight = '400px';
+      function createExportContainer(timelineData, perRow, view, phases, width, legendPosition, transparentBg) {
+      const container = document.createElement('div');
+      container.style.width = width + 'px';
+      container.style.backgroundColor = transparentBg ? 'transparent' : '#ffffff';
+      container.style.padding = '30px';
+      container.style.boxSizing = 'border-box';
+      container.style.fontFamily = "'Inter', sans-serif";
+      container.style.minHeight = '400px';
 
-// Add title
-const title = document.createElement('h1');
-title.textContent = document.getElementById('main-title').textContent;
-title.style.fontSize = '28px';
-title.style.fontWeight = 'bold';
-title.style.marginBottom = '30px';
-title.style.textAlign = 'center';
-title.style.color = transparentBg ? (document.body.classList.contains('dark-mode') ? '#e2e8f0' : '#1a202c') : '#1a202c';
-container.appendChild(title);
+      // Add title
+      const title = document.createElement('h1');
+      title.textContent = document.getElementById('main-title').textContent;
+      title.style.fontSize = '28px';
+      title.style.fontWeight = 'bold';
+      title.style.marginBottom = '30px';
+      title.style.textAlign = 'center';
+      title.style.color = transparentBg ? (document.body.classList.contains('dark-mode') ? '#e2e8f0' : '#1a202c') : '#1a202c';
+      container.appendChild(title);
 
-// Create main content area
-const mainContent = document.createElement('div');
-mainContent.style.display = 'flex';
-mainContent.style.flexDirection = legendPosition === 'top' || legendPosition === 'bottom' ? 'column' : 'row';
-mainContent.style.alignItems = 'center';
-mainContent.style.justifyContent = 'center';
-mainContent.style.gap = '30px';
+      // Create main content area
+      const mainContent = document.createElement('div');
+      mainContent.style.display = 'flex';
+      mainContent.style.flexDirection = legendPosition === 'top' || legendPosition === 'bottom' ? 'column' : 'row';
+      mainContent.style.alignItems = 'center';
+      mainContent.style.justifyContent = 'center';
+      mainContent.style.gap = '30px';
 
-// Add legend if positioned on top or left
-if (legendPosition === 'top' || legendPosition === 'left') {
-mainContent.appendChild(createLegend(phases, legendPosition, transparentBg || document.body.classList.contains('dark-mode')));
-}
+      // Add legend if positioned on top or left
+      if (legendPosition === 'top' || legendPosition === 'left') {
+      mainContent.appendChild(createLegend(phases, legendPosition, transparentBg || document.body.classList.contains('dark-mode')));
+      }
 
-// Add timeline
-const timelineWrapper = document.createElement('div');
-timelineWrapper.style.flex = '1';
-timelineWrapper.style.minWidth = '0';
-timelineWrapper.style.display = 'flex';
-timelineWrapper.style.flexDirection = 'column';
-timelineWrapper.style.alignItems = 'center';
+      // Add timeline
+      const timelineWrapper = document.createElement('div');
+      timelineWrapper.style.flex = '1';
+      timelineWrapper.style.minWidth = '0';
+      timelineWrapper.style.display = 'flex';
+      timelineWrapper.style.flexDirection = 'column';
+      timelineWrapper.style.alignItems = 'center';
 
-for (let i = 0; i < timelineData.length; i += perRow) {
-const row = document.createElement('div');
-row.style.display = 'flex';
-row.style.alignItems = 'center';
-row.style.justifyContent = 'center';
-row.style.marginTop = '8px';
-row.style.flexWrap = 'wrap';
+      for (let i = 0; i < timelineData.length; i += perRow) {
+      const row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.justifyContent = 'center';
+      row.style.marginTop = '8px';
+      row.style.flexWrap = 'wrap';
 
-timelineData.slice(i, i + perRow).forEach(item => {
-const cell = document.createElement('div');
-cell.style.flexShrink = '0';
-cell.style.display = 'flex';
-cell.style.alignItems = 'center';
-cell.style.justifyContent = 'center';
-cell.style.width = '60px';
-cell.style.height = '60px';
-cell.style.margin = '6px';
-cell.style.borderRadius = '12px';
-cell.style.fontSize = '14px';
-cell.style.fontWeight = '600';
-cell.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-cell.style.color = 'white';
-cell.style.backgroundColor = item.color;
-cell.style.transition = 'transform 0.2s';
+      timelineData.slice(i, i + perRow).forEach(item => {
+      const cell = document.createElement('div');
+      cell.style.flexShrink = '0';
+      cell.style.display = 'flex';
+      cell.style.alignItems = 'center';
+      cell.style.justifyContent = 'center';
+      cell.style.width = '60px';
+      cell.style.height = '60px';
+      cell.style.margin = '6px';
+      cell.style.borderRadius = '12px';
+      cell.style.fontSize = '14px';
+      cell.style.fontWeight = '600';
+      cell.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+      cell.style.color = 'white';
+      cell.style.backgroundColor = item.color;
+      cell.style.transition = 'transform 0.2s';
 
-if (view === 'week') {
-cell.textContent = 'W' + item.weekIndex;
-} else if (view === 'day') {
-cell.textContent = item.day;
-} else {
-cell.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
-}
-cell.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
-row.appendChild(cell);
-});
-timelineWrapper.appendChild(row);
-}
-mainContent.appendChild(timelineWrapper);
+      if (view === 'week') {
+      cell.textContent = 'W' + item.weekIndex;
+      } else if (view === 'day') {
+      cell.textContent = item.day;
+      } else {
+      cell.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
+      }
+      cell.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
+      row.appendChild(cell);
+      });
+      timelineWrapper.appendChild(row);
+      }
+      mainContent.appendChild(timelineWrapper);
 
-// Add legend if positioned on bottom or right
-if (legendPosition === 'bottom' || legendPosition === 'right') {
-mainContent.appendChild(createLegend(phases, legendPosition, transparentBg || document.body.classList.contains('dark-mode')));
-}
+      // Add legend if positioned on bottom or right
+      if (legendPosition === 'bottom' || legendPosition === 'right') {
+      mainContent.appendChild(createLegend(phases, legendPosition, transparentBg || document.body.classList.contains('dark-mode')));
+      }
 
-container.appendChild(mainContent);
-return container;
-}
+      container.appendChild(mainContent);
+      return container;
+      }
 
-// --- PREVIEW & EXPORT UTILITIES ---
-function showError(message) {
-errorTextP.textContent = message;
-errorMessageDiv.classList.remove('hidden');
-}
+      // --- PREVIEW & EXPORT UTILITIES ---
+      function showError(message) {
+      errorTextP.textContent = message;
+      errorMessageDiv.classList.remove('hidden');
+      }
 
-function hideError() { errorMessageDiv.classList.add('hidden'); }
+      function hideError() { errorMessageDiv.classList.add('hidden'); }
 
-function downloadURI(uri, name) {
-const link = document.createElement("a");
-link.download = name;
-link.href = uri;
-document.body.appendChild(link);
-link.click();
-document.body.removeChild(link);
-}
+      function downloadURI(uri, name) {
+      const link = document.createElement("a");
+      link.download = name;
+      link.href = uri;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      }
 
-function showPreview() {
-if (!currentTimelineData || !currentPhases) return;
+      function showPreview() {
+      if (!currentTimelineData || !currentPhases) return;
 
-const width = parseInt(imageWidthInput.value) || 1200;
-const legendPosition = legendPositionSelect.value;
-const transparentBg = transparentBackgroundCheckbox.checked;
-const perRow = parseInt(unitsPerRowInput.value) || currentTimelineData.length;
+      const width = parseInt(imageWidthInput.value) || 1200;
+      const legendPosition = legendPositionSelect.value;
+      const transparentBg = transparentBackgroundCheckbox.checked;
+      const perRow = parseInt(unitsPerRowInput.value) || currentTimelineData.length;
 
-previewContent.innerHTML = '';
-const previewElement = createExportContainer(currentTimelineData, perRow, currentView, currentPhases, width, legendPosition, transparentBg);
-previewContent.appendChild(previewElement);
+      previewContent.innerHTML = '';
+      const previewElement = createExportContainer(currentTimelineData, perRow, currentView, currentPhases, width, legendPosition, transparentBg);
+      previewContent.appendChild(previewElement);
 
-// Calculate scale to fit in preview container
-const containerWidth = previewContent.parentElement.offsetWidth - 40;
-const containerHeight = previewContent.parentElement.offsetHeight - 40;
-const elementWidth = previewElement.offsetWidth;
-const elementHeight = previewElement.offsetHeight;
+      // Calculate scale to fit in preview container
+      const containerWidth = previewContent.parentElement.offsetWidth - 40;
+      const containerHeight = previewContent.parentElement.offsetHeight - 40;
+      const elementWidth = previewElement.offsetWidth;
+      const elementHeight = previewElement.offsetHeight;
 
-const scaleX = containerWidth / elementWidth;
-const scaleY = containerHeight / elementHeight;
-const scale = Math.min(scaleX, scaleY, 1); // Don't scale up
+      const scaleX = containerWidth / elementWidth;
+      const scaleY = containerHeight / elementHeight;
+      const scale = Math.min(scaleX, scaleY, 1); // Don't scale up
 
-previewContent.style.transform = `scale(${scale})`;
+      previewContent.style.transform = `scale(${scale})`;
 
-previewModal.style.display = 'block';
-}
+      previewModal.style.display = 'block';
+      }
 
-function exportImage() {
-if (!currentTimelineData || !currentPhases) return;
+      function exportImage() {
+      if (!currentTimelineData || !currentPhases) return;
 
-const width = parseInt(imageWidthInput.value) || 1200;
-const legendPosition = legendPositionSelect.value;
-const transparentBg = transparentBackgroundCheckbox.checked;
-const perRow = parseInt(unitsPerRowInput.value) || currentTimelineData.length;
+      const width = parseInt(imageWidthInput.value) || 1200;
+      const legendPosition = legendPositionSelect.value;
+      const transparentBg = transparentBackgroundCheckbox.checked;
+      const perRow = parseInt(unitsPerRowInput.value) || currentTimelineData.length;
 
-const exportElement = createExportContainer(currentTimelineData, perRow, currentView, currentPhases, width, legendPosition, transparentBg);
-document.body.appendChild(exportElement);
-exportElement.style.position = 'absolute';
-exportElement.style.left = '-9999px';
+      const exportElement = createExportContainer(currentTimelineData, perRow, currentView, currentPhases, width, legendPosition, transparentBg);
+      document.body.appendChild(exportElement);
+      exportElement.style.position = 'absolute';
+      exportElement.style.left = '-9999px';
 
-const titleText = document.getElementById('main-title').textContent || "timeline";
-const filename = titleText.toLowerCase().replace(/\s+/g, '_') + '.png';
+      const titleText = document.getElementById('main-title').textContent || "timeline";
+      const filename = titleText.toLowerCase().replace(/\s+/g, '_') + '.png';
 
-html2canvas(exportElement, {
-backgroundColor: transparentBg ? null : '#ffffff',
-scale: 2,
-width: width,
-useCORS: true,
-allowTaint: true,
-logging: false
-}).then(canvas => {
-downloadURI(canvas.toDataURL('image/png'), filename);
-document.body.removeChild(exportElement);
-previewModal.style.display = 'none';
-});
-}
+      html2canvas(exportElement, {
+      backgroundColor: transparentBg ? null : '#ffffff',
+      scale: 2,
+      width: width,
+      useCORS: true,
+      allowTaint: true,
+      logging: false
+      }).then(canvas => {
+      downloadURI(canvas.toDataURL('image/png'), filename);
+      document.body.removeChild(exportElement);
+      previewModal.style.display = 'none';
+      });
+      }
 
-// --- EVENT LISTENERS ---
-addPhaseBtn.addEventListener('click', () => addPhaseRow());
-generateBtn.addEventListener('click', generateTimeline);
-previewBtn.addEventListener('click', showPreview);
-exportPngBtn.addEventListener('click', exportImage);
-confirmExportPng.addEventListener('click', exportImage);
+      // --- EVENT LISTENERS ---
+      addPhaseBtn.addEventListener('click', () => addPhaseRow());
+      generateBtn.addEventListener('click', generateTimeline);
+      previewBtn.addEventListener('click', showPreview);
+      exportPngBtn.addEventListener('click', exportImage);
+      confirmExportPng.addEventListener('click', exportImage);
 
-// --- RUN ---
-initialize();
-});
-</script>
-</body>
+      // --- RUN ---
+      initialize();
+      });
+    </script>
+  </body>
 </html>
