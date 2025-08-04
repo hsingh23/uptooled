@@ -1,858 +1,1168 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Quick Block Text Poster</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title> Block Text Poster</title>
     <!-- SEO Tags -->
-    <meta name="description" content="Create stunning posters with a powerful online tool. Customize text, fonts, colors, and layouts to design your perfect poster.">
-    <meta name="keywords" content="poster creator, design tool, graphic design, custom poster, online editor, typography design">
+    <meta
+      name="description"
+      content="Create stunning posters with a powerful online tool. Customize text, fonts, colors, and layouts to design your perfect poster."
+    />
+    <meta
+      name="keywords"
+      content="poster creator, design tool, graphic design, custom poster, online editor, typography design"
+    />
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Lobster&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Oswald:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Playfair+Display:wght@400;700&family=Raleway:wght@400;700&family=Alfa+Slab+One&family=Bebas+Neue&family=Pacifico&family=Righteous&family=Indie+Flower&family=Patrick+Hand&family=Dancing+Script:wght@400;700&family=Caveat:wght@400;700&family=Julius+Sans+One&family=Great+Vibes&family=Allura&family=Open+Sans:wght@400;700&family=Alegreya:wght@400;700&family=League+Gothic&family=Bangers&family=Alata&family=Amatic+SC&family=Courgette&family=Playlist+Script&family=Anton&family=Cantora+One&family=Cooper+Hewitt&family=Noto+Sans:wght@400;700&family=Source+Sans+3:wght@400;700&family=Sinkin+Sans&family=Comic+Neue:wght@400;700&family=Barriecito&family=Reef&family=Fredoka+One&family=Vidaloka&family=Sacramento&family=Jonathan+Script&family=Brightwall&family=League+Spartan:wght@400;700&family=Yearbook+Solid&family=College&family=Source+Serif+Pro:wght@400;700&family=Muller:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Lobster&family=Lato:wght@400;700&family=Montserrat:wght@400;700&family=Oswald:wght@400;700&family=Merriweather:wght@400;700&family=Lora:wght@400;700&family=Playfair+Display:wght@400;700&family=Raleway:wght@400;700&family=Alfa+Slab+One&family=Bebas+Neue&family=Pacifico&family=Righteous&family=Indie+Flower&family=Patrick+Hand&family=Dancing+Script:wght@400;700&family=Caveat:wght@400;700&family=Julius+Sans+One&family=Great+Vibes&family=Allura&family=Open+Sans:wght@400;700&family=Alegreya:wght@400;700&family=League+Gothic&family=Bangers&family=Alata&family=Amatic+SC&family=Courgette&family=Playlist+Script&family=Anton&family=Cantora+One&family=Cooper+Hewitt&family=Noto+Sans:wght@400;700&family=Source+Sans+3:wght@400;700&family=Sinkin+Sans&family=Comic+Neue:wght@400;700&family=Barriecito&family=Reef&family=Fredoka+One&family=Vidaloka&family=Sacramento&family=Jonathan+Script&family=Brightwall&family=League+Spartan:wght@400;700&family=Yearbook+Solid&family=College&family=Source+Serif+Pro:wght@400;700&family=Muller:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        body { font-family: 'Roboto', sans-serif; overflow: hidden; }
-        #loading-overlay { position: fixed; inset: 0; background-color: rgba(255, 255, 255, 0.8); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        #controls-content::-webkit-scrollbar { width: 8px; }
-        #controls-content::-webkit-scrollbar-track { background: #f1f5f9; }
-        #controls-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        #poster-canvas { cursor: default; }
-        .btn-action { display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background-color: white; transition: background-color 0.2s; }
-        .btn-action:hover { background-color: #f9fafb; }
-        .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+      body {
+        font-family: "Roboto", sans-serif;
+        overflow: hidden;
+      }
+      #loading-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      }
+      #controls-content::-webkit-scrollbar {
+        width: 8px;
+      }
+      #controls-content::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      #controls-content::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      #poster-canvas {
+        cursor: default;
+      }
+      .btn-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        background-color: white;
+        transition: background-color 0.2s;
+      }
+      .btn-action:hover {
+        background-color: #f9fafb;
+      }
+      .btn-action:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
 
-        /* Font previews in select dropdown */
-        .font-select-merriweather { font-family: 'Merriweather', serif; }
-        .font-select-lora { font-family: 'Lora', serif; }
-        .font-select-playfair-display { font-family: 'Playfair Display', serif; }
-        .font-select-roboto { font-family: 'Roboto', sans-serif; }
-        .font-select-lato { font-family: 'Lato', sans-serif; }
-        .font-select-montserrat { font-family: 'Montserrat', sans-serif; }
-        .font-select-oswald { font-family: 'Oswald', sans-serif; }
-        .font-select-raleway { font-family: 'Raleway', sans-serif; }
-        .font-select-lobster { font-family: 'Lobster', cursive; }
-        .font-select-alfa-slab-one { font-family: 'Alfa Slab One', cursive; }
-        .font-select-bebas-neue { font-family: 'Bebas Neue', cursive; }
-        .font-select-pacifico { font-family: 'Pacifico', cursive; }
-        .font-select-righteous { font-family: 'Righteous', cursive; }
-        .font-select-indie-flower { font-family: 'Indie Flower', cursive; }
-        .font-select-patrick-hand { font-family: 'Patrick Hand', cursive; }
-        .font-select-dancing-script { font-family: 'Dancing Script', cursive; }
-        .font-select-caveat { font-family: 'Caveat', cursive; }
+      /* Font previews in select dropdown */
+      .font-select-merriweather {
+        font-family: "Merriweather", serif;
+      }
+      .font-select-lora {
+        font-family: "Lora", serif;
+      }
+      .font-select-playfair-display {
+        font-family: "Playfair Display", serif;
+      }
+      .font-select-roboto {
+        font-family: "Roboto", sans-serif;
+      }
+      .font-select-lato {
+        font-family: "Lato", sans-serif;
+      }
+      .font-select-montserrat {
+        font-family: "Montserrat", sans-serif;
+      }
+      .font-select-oswald {
+        font-family: "Oswald", sans-serif;
+      }
+      .font-select-raleway {
+        font-family: "Raleway", sans-serif;
+      }
+      .font-select-lobster {
+        font-family: "Lobster", cursive;
+      }
+      .font-select-alfa-slab-one {
+        font-family: "Alfa Slab One", cursive;
+      }
+      .font-select-bebas-neue {
+        font-family: "Bebas Neue", cursive;
+      }
+      .font-select-pacifico {
+        font-family: "Pacifico", cursive;
+      }
+      .font-select-righteous {
+        font-family: "Righteous", cursive;
+      }
+      .font-select-indie-flower {
+        font-family: "Indie Flower", cursive;
+      }
+      .font-select-patrick-hand {
+        font-family: "Patrick Hand", cursive;
+      }
+      .font-select-dancing-script {
+        font-family: "Dancing Script", cursive;
+      }
+      .font-select-caveat {
+        font-family: "Caveat", cursive;
+      }
     </style>
-</head>
-<body class="bg-gray-100 flex flex-col lg:flex-row h-screen">
-
+  </head>
+  <body class="bg-gray-100 flex flex-col lg:flex-row h-screen">
     <div id="loading-overlay">
-        <div class="text-center">
-            <svg class="animate-spin h-10 w-10 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <p class="mt-4 text-lg font-semibold text-gray-700">Loading Fonts...</p>
-        </div>
+      <div class="text-center">
+        <svg
+          class="animate-spin h-10 w-10 text-indigo-600 mx-auto"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        <p class="mt-4 text-lg font-semibold text-gray-700">Loading Fonts...</p>
+      </div>
     </div>
-    
+
     <!-- Controls Panel -->
-    <div id="controls-panel" class="w-full lg:w-80 xl:w-96 bg-white shadow-lg flex flex-col flex-shrink-0 transition-all duration-300">
-        <div class="p-4 border-b flex justify-between items-center flex-shrink-0">
-            <h1 class="text-xl font-bold text-gray-800">Quick Block Text Poster</h1>
-            <button id="toggle-controls" class="lg:hidden p-2 rounded-md hover:bg-gray-200"><svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg><svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+    <div
+      id="controls-panel"
+      class="w-full lg:w-80 xl:w-96 bg-white shadow-lg flex flex-col flex-shrink-0 transition-all duration-300"
+    >
+      <div class="p-4 border-b flex justify-between items-center flex-shrink-0">
+        <h1 class="text-xl font-bold text-gray-800">Quick Block Text Poster</h1>
+        <button id="toggle-controls" class="lg:hidden p-2 rounded-md hover:bg-gray-200">
+          <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16m-7 6h7"
+            ></path></svg
+          ><svg
+            id="close-icon"
+            class="w-6 h-6 hidden"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <div id="controls-content" class="overflow-y-auto p-4">
+        <div class="mb-4 text-sm text-gray-600 bg-gray-100 p-3 rounded-md">
+          <p>
+            <strong>Hint:</strong> New text auto-fits. Select to drag or resize. Hold
+            <kbd
+              class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-200 border border-gray-300 rounded-md"
+              >Shift</kbd
+            >
+            to multi-select.
+          </p>
         </div>
-        <div id="controls-content" class="overflow-y-auto p-4">
-             <div class="mb-4 text-sm text-gray-600 bg-gray-100 p-3 rounded-md">
-                <p><strong>Hint:</strong> New text auto-fits. Select to drag or resize. Hold <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-200 border border-gray-300 rounded-md">Shift</kbd> to multi-select.</p>
-            </div>
-            <div class="mb-4">
-                <label for="text-input" class="block text-sm font-medium text-gray-700 mb-1">Text (New line for each line)</label>
-                <textarea id="text-input" rows="6" class="w-full p-2 border border-gray-300 rounded-md">
+        <div class="mb-4">
+          <label for="text-input" class="block text-sm font-medium text-gray-700 mb-1"
+            >Text (New line for each line)</label
+          >
+          <textarea id="text-input" rows="6" class="w-full p-2 border border-gray-300 rounded-md">
 RESIZE ME
 *DRAG ME*
 HAVE FUN
-</textarea>
-            </div>
-            <div class="mb-4">
-                <label for="margin-input" class="block text-sm font-medium text-gray-700 mb-1">Initial Margin (px)</label>
-                <input type="number" id="margin-input" value="30" class="w-full p-2 border border-gray-300 rounded-md">
-            </div>
-            <div class="p-4 border rounded-md mb-4 bg-gray-50">
-                 <h2 class="text-lg font-semibold mb-2 text-gray-700">Actions</h2>
-                 <div class="space-y-2">
-                     <button id="download-btn" class="btn-action"><span>Download JPEG</span></button>
-                     <button id="copy-btn" class="btn-action"><span id="copy-btn-text">Copy Styles</span></button>
-                     <button id="undo-btn" class="btn-action"><span>Undo</span></button>
-                     <button id="redo-btn" class="btn-action"><span>Redo</span></button>
-                 </div>
-            </div>
-            <div class="mb-4">
-                <label for="canvas-size" class="block text-sm font-medium text-gray-700 mb-1">Canvas Size</label>
-                <select id="canvas-size" class="w-full p-2 border border-gray-300 rounded-md">
-                    <option value="tall">Tall (9:16)</option><option value="wide">Wide (16:9)</option><option value="square">Square (1:1)</option>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="bg-color" class="block text-sm font-medium text-gray-700 mb-1">Background Color</label>
-                <input type="text" id="bg-color" value="rgba(0,0,139,1)" class="w-full p-1 border border-gray-300 rounded-md mb-2" placeholder="rgba(r,g,b,a)">
-            </div>
-            <div class="mb-4">
-                <label for="bg-image" class="block text-sm font-medium text-gray-700 mb-1">Background Image</label>
-                <input type="file" id="bg-image" accept="image/*" class="w-full">
-            </div>
-            <div class="p-4 border rounded-md mb-4 bg-gray-50">
-                <h2 class="text-lg font-semibold mb-2 text-gray-700">Primary Font</h2>
-                <select id="primary-font" class="w-full p-2 border border-gray-300 rounded-md mb-2"></select>
-                <input type="text" id="primary-color" value="rgba(255,255,255,1)" class="w-full p-1 border border-gray-300 rounded-md mb-2" placeholder="rgba(r,g,b,a)">
-                <div class="flex flex-wrap items-center gap-4">
-                    <label class="flex items-center"><input type="checkbox" id="primary-bold" class="rounded text-indigo-600"><span class="ml-2 text-sm">Bold</span></label>
-                    <label class="flex items-center"><input type="checkbox" id="primary-italic" class="rounded text-indigo-600"><span class="ml-2 text-sm">Italic</span></label>
-                    <label class="flex items-center"><input type="checkbox" id="primary-strike" class="rounded text-indigo-600"><span class="ml-2 text-sm">Strike</span></label>
-                </div>
-                <div class="grid grid-cols-3 gap-2 mt-2">
-                    <input type="number" id="primary-shadow-x" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="X">
-                    <input type="number" id="primary-shadow-y" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="Y">
-                    <input type="number" id="primary-shadow-blur" value="4" class="p-1 border border-gray-300 rounded-md" placeholder="Blur">
-                    <input type="text" id="primary-shadow-color" value="rgba(0,0,0,0.5)" class="col-span-3 p-1 border border-gray-300 rounded-md" placeholder="rgba(r,g,b,a)">
-                </div>
-            </div>
-            <div class="p-4 border rounded-md bg-gray-50">
-                <h2 class="text-lg font-semibold mb-2 text-gray-700">Call-to-Action Font (*)</h2>
-                <select id="secondary-font" class="w-full p-2 border border-gray-300 rounded-md mb-2"></select>
-                <input type="text" id="secondary-color" value="rgba(173,216,230,1)" class="w-full p-1 border border-gray-300 rounded-md mb-2" placeholder="rgba(r,g,b,a)">
-                 <div class="flex flex-wrap items-center gap-4">
-                    <label class="flex items-center"><input type="checkbox" id="secondary-bold" class="rounded text-indigo-600"><span class="ml-2 text-sm">Bold</span></label>
-                    <label class="flex items-center"><input type="checkbox" id="secondary-italic" class="rounded text-indigo-600"><span class="ml-2 text-sm">Italic</span></label>
-                    <label class="flex items-center"><input type="checkbox" id="secondary-strike" class="rounded text-indigo-600"><span class="ml-2 text-sm">Strike</span></label>
-                </div>
-                <div class="grid grid-cols-3 gap-2 mt-2">
-                    <input type="number" id="secondary-shadow-x" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="X">
-                    <input type="number" id="secondary-shadow-y" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="Y">
-                    <input type="number" id="secondary-shadow-blur" value="4" class="p-1 border border-gray-300 rounded-md" placeholder="Blur">
-                    <input type="text" id="secondary-shadow-color" value="rgba(0,0,0,0.5)" class="col-span-3 p-1 border border-gray-300 rounded-md" placeholder="rgba(r,g,b,a)">
-                </div>
-            </div>
+</textarea
+          >
         </div>
+        <div class="mb-4">
+          <label for="margin-input" class="block text-sm font-medium text-gray-700 mb-1"
+            >Initial Margin (px)</label
+          >
+          <input
+            type="number"
+            id="margin-input"
+            value="30"
+            class="w-full p-2 border border-gray-300 rounded-md"
+          />
+        </div>
+        <div class="p-4 border rounded-md mb-4 bg-gray-50">
+          <h2 class="text-lg font-semibold mb-2 text-gray-700">Actions</h2>
+          <div class="space-y-2">
+            <button id="download-btn" class="btn-action"><span>Download JPEG</span></button>
+            <button id="copy-btn" class="btn-action">
+              <span id="copy-btn-text">Copy Styles</span>
+            </button>
+            <button id="undo-btn" class="btn-action"><span>Undo</span></button>
+            <button id="redo-btn" class="btn-action"><span>Redo</span></button>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label for="canvas-size" class="block text-sm font-medium text-gray-700 mb-1"
+            >Canvas Size</label
+          >
+          <select id="canvas-size" class="w-full p-2 border border-gray-300 rounded-md">
+            <option value="tall">Tall (9:16)</option>
+            <option value="wide">Wide (16:9)</option>
+            <option value="square">Square (1:1)</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label for="bg-color" class="block text-sm font-medium text-gray-700 mb-1"
+            >Background Color</label
+          >
+          <input
+            type="text"
+            id="bg-color"
+            value="rgba(0,0,139,1)"
+            class="w-full p-1 border border-gray-300 rounded-md mb-2"
+            placeholder="rgba(r,g,b,a)"
+          />
+        </div>
+        <div class="mb-4">
+          <label for="bg-image" class="block text-sm font-medium text-gray-700 mb-1"
+            >Background Image</label
+          >
+          <input type="file" id="bg-image" accept="image/*" class="w-full" />
+        </div>
+        <div class="p-4 border rounded-md mb-4 bg-gray-50">
+          <h2 class="text-lg font-semibold mb-2 text-gray-700">Primary Font</h2>
+          <select
+            id="primary-font"
+            class="w-full p-2 border border-gray-300 rounded-md mb-2"
+          ></select>
+          <input
+            type="text"
+            id="primary-color"
+            value="rgba(255,255,255,1)"
+            class="w-full p-1 border border-gray-300 rounded-md mb-2"
+            placeholder="rgba(r,g,b,a)"
+          />
+          <div class="flex flex-wrap items-center gap-4">
+            <label class="flex items-center"
+              ><input type="checkbox" id="primary-bold" class="rounded text-indigo-600" /><span
+                class="ml-2 text-sm"
+                >Bold</span
+              ></label
+            >
+            <label class="flex items-center"
+              ><input type="checkbox" id="primary-italic" class="rounded text-indigo-600" /><span
+                class="ml-2 text-sm"
+                >Italic</span
+              ></label
+            >
+            <label class="flex items-center"
+              ><input type="checkbox" id="primary-strike" class="rounded text-indigo-600" /><span
+                class="ml-2 text-sm"
+                >Strike</span
+              ></label
+            >
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-2">
+            <input
+              type="number"
+              id="primary-shadow-x"
+              value="2"
+              class="p-1 border border-gray-300 rounded-md"
+              placeholder="X"
+            />
+            <input
+              type="number"
+              id="primary-shadow-y"
+              value="2"
+              class="p-1 border border-gray-300 rounded-md"
+              placeholder="Y"
+            />
+            <input
+              type="number"
+              id="primary-shadow-blur"
+              value="4"
+              class="p-1 border border-gray-300 rounded-md"
+              placeholder="Blur"
+            />
+            <input
+              type="text"
+              id="primary-shadow-color"
+              value="rgba(0,0,0,0.5)"
+              class="col-span-3 p-1 border border-gray-300 rounded-md"
+              placeholder="rgba(r,g,b,a)"
+            />
+          </div>
+        </div>
+        <div class="p-4 border rounded-md bg-gray-50">
+          <h2 class="text-lg font-semibold mb-2 text-gray-700">Call-to-Action Font (*)</h2>
+          <select
+            id="secondary-font"
+            class="w-full p-2 border border-gray-300 rounded-md mb-2"
+          ></select>
+          <input
+            type="text"
+            id="secondary-color"
+            value="rgba(173,216,230,1)"
+            class="w-full p-1 border border-gray-300 rounded-md mb-2"
+            placeholder="rgba(r,g,b,a)"
+          />
+          <div class="flex flex-wrap items-center gap-4">
+            <label class="flex items-center"
+              ><input type="checkbox" id="secondary-bold" class="rounded text-indigo-600" /><span
+                class="ml-2 text-sm"
+                >Bold</span
+              ></label
+            >
+            <label class="flex items-center"
+              ><input type="checkbox" id="secondary-italic" class="rounded text-indigo-600" /><span
+                class="ml-2 text-sm"
+                >Italic</span
+              ></label
+            >
+            <label class="flex items-center"
+              ><input type="checkbox" id="secondary-strike" class="rounded text-indigo-600" /><span
+                class="ml-2 text-sm"
+                >Strike</span
+              ></label
+            >
+          </div>
+          <div class="grid grid-cols-3 gap-2 mt-2">
+            <input
+              type="number"
+              id="secondary-shadow-x"
+              value="2"
+              class="p-1 border border-gray-300 rounded-md"
+              placeholder="X"
+            />
+            <input
+              type="number"
+              id="secondary-shadow-y"
+              value="2"
+              class="p-1 border border-gray-300 rounded-md"
+              placeholder="Y"
+            />
+            <input
+              type="number"
+              id="secondary-shadow-blur"
+              value="4"
+              class="p-1 border border-gray-300 rounded-md"
+              placeholder="Blur"
+            />
+            <input
+              type="text"
+              id="secondary-shadow-color"
+              value="rgba(0,0,0,0.5)"
+              class="col-span-3 p-1 border border-gray-300 rounded-md"
+              placeholder="rgba(r,g,b,a)"
+            />
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="canvas-container" class="flex-grow flex items-center justify-center p-4 bg-gray-200 relative min-h-0">
-                <canvas id="poster-canvas" class="bg-white shadow-lg rounded-md"></canvas>
-                <div id="item-editor" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div class="bg-white p-4 rounded-md shadow-lg w-72">
-                        <div class="mb-2">
-                            <label for="editor-text" class="block text-sm font-medium text-gray-700 mb-1">Text</label>
-                            <input id="editor-text" type="text" class="w-full p-1 border border-gray-300 rounded-md">
-                        </div>
-                        <div class="mb-2">
-                            <label for="editor-font" class="block text-sm font-medium text-gray-700 mb-1">Font</label>
-                            <select id="editor-font" class="w-full p-1 border border-gray-300 rounded-md"></select>
-                        </div>
-                        <div class="mb-2">
-                            <label for="editor-color" class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                            <input id="editor-color" type="text" class="w-full p-1 border border-gray-300 rounded-md mb-2" value="rgba(255,255,255,1)" placeholder="rgba(r,g,b,a)">
-                        </div>
-                        <div class="flex flex-wrap items-center gap-4 mb-4">
-                            <label class="flex items-center"><input type="checkbox" id="editor-bold" class="rounded text-indigo-600"><span class="ml-2 text-sm">Bold</span></label>
-                            <label class="flex items-center"><input type="checkbox" id="editor-italic" class="rounded text-indigo-600"><span class="ml-2 text-sm">Italic</span></label>
-                            <label class="flex items-center"><input type="checkbox" id="editor-strike" class="rounded text-indigo-600"><span class="ml-2 text-sm">Strike</span></label>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 mb-4">
-                            <input type="number" id="editor-shadow-x" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="X">
-                            <input type="number" id="editor-shadow-y" value="2" class="p-1 border border-gray-300 rounded-md" placeholder="Y">
-                            <input type="number" id="editor-shadow-blur" value="4" class="p-1 border border-gray-300 rounded-md" placeholder="Blur">
-                            <input type="text" id="editor-shadow-color" value="rgba(0,0,0,0.5)" class="col-span-3 p-1 border border-gray-300 rounded-md" placeholder="rgba(r,g,b,a)">
-                        </div>
-                        <div class="flex justify-end space-x-2">
-                            <button id="editor-reset" class="btn-action">Reset</button>
-                            <button id="editor-close" class="btn-action">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div
+      id="canvas-container"
+      class="flex-grow flex items-center justify-center p-4 bg-gray-200 relative min-h-0"
+    >
+      <canvas id="poster-canvas" class="bg-white shadow-lg rounded-md"></canvas>
+      <div
+        id="item-editor"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div class="bg-white p-4 rounded-md shadow-lg w-72">
+          <div class="mb-2">
+            <label for="editor-text" class="block text-sm font-medium text-gray-700 mb-1"
+              >Text</label
+            >
+            <input
+              id="editor-text"
+              type="text"
+              class="w-full p-1 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div class="mb-2">
+            <label for="editor-font" class="block text-sm font-medium text-gray-700 mb-1"
+              >Font</label
+            >
+            <select id="editor-font" class="w-full p-1 border border-gray-300 rounded-md"></select>
+          </div>
+          <div class="mb-2">
+            <label for="editor-color" class="block text-sm font-medium text-gray-700 mb-1"
+              >Color</label
+            >
+            <input
+              id="editor-color"
+              type="text"
+              class="w-full p-1 border border-gray-300 rounded-md mb-2"
+              value="rgba(255,255,255,1)"
+              placeholder="rgba(r,g,b,a)"
+            />
+          </div>
+          <div class="flex flex-wrap items-center gap-4 mb-4">
+            <label class="flex items-center"
+              ><input type="checkbox" id="editor-bold" class="rounded text-indigo-600" /><span
+                class="ml-2 text-sm"
+                >Bold</span
+              ></label
+            >
+            <label class="flex items-center"
+              ><input type="checkbox" id="editor-italic" class="rounded text-indigo-600" /><span
+                class="ml-2 text-sm"
+                >Italic</span
+              ></label
+            >
+            <label class="flex items-center"
+              ><input type="checkbox" id="editor-strike" class="rounded text-indigo-600" /><span
+                class="ml-2 text-sm"
+                >Strike</span
+              ></label
+            >
+          </div>
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <input
+              type="number"
+              id="editor-shadow-x"
+              value="2"
+              class="p-1 border border-gray-300 rounded-md"
+              placeholder="X"
+            />
+            <input
+              type="number"
+              id="editor-shadow-y"
+              value="2"
+              class="p-1 border border-gray-300 rounded-md"
+              placeholder="Y"
+            />
+            <input
+              type="number"
+              id="editor-shadow-blur"
+              value="4"
+              class="p-1 border border-gray-300 rounded-md"
+              placeholder="Blur"
+            />
+            <input
+              type="text"
+              id="editor-shadow-color"
+              value="rgba(0,0,0,0.5)"
+              class="col-span-3 p-1 border border-gray-300 rounded-md"
+              placeholder="rgba(r,g,b,a)"
+            />
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button id="editor-reset" class="btn-action">Reset</button>
+            <button id="editor-close" class="btn-action">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const FONT_LIST = {
-                "Serif": ["Merriweather", "Lora", "Playfair Display"],
-                "Sans-serif": ["Roboto", "Lato", "Montserrat", "Oswald", "Raleway"],
-                "Display": ["Lobster", "Alfa Slab One", "Bebas Neue", "Pacifico", "Righteous"],
-                "Handwriting": ["Indie Flower", "Patrick Hand", "Dancing Script", "Caveat"],
-                "Logos & Branding": ["Montserrat", "Bebas Neue", "Julius Sans One"],
-                "Wedding Invitations": ["Great Vibes", "Playfair Display", "Allura"],
-                "Resumes & CVs": ["Open Sans", "Lato", "Alegreya", "Roboto"],
-                "YouTube Thumbnails": ["Bebas Neue", "Oswald", "League Gothic", "Bangers"],
-                "Instagram & Social Posts": ["Alata", "Amatic SC", "Courgette", "Playlist Script"],
-                "Posters & Flyers": ["Bangers", "Anton", "Cantora One", "Cooper Hewitt"],
-                "Business & Corporate": ["Noto Sans", "Source Sans 3", "Sinkin Sans"],
-                "Kids & Children Designs": ["Comic Neue", "Barriecito", "Reef", "Fredoka One"],
-                "Fashion & Luxury Brands": ["Playfair Display", "Vidaloka", "Sacramento"],
-                "Quotes & Inspirational": ["Jonathan", "Brightwall", "Great Vibes"],
-                "Sports & Athletic": ["League Spartan", "Yearbook Solid", "College"],
-                "Magazine & Editorial": ["Merriweather", "Source Serif Pro", "Muller"]
-            };
+      document.addEventListener('DOMContentLoaded', () => {
+          const FONT_LIST = {
+              "Serif": ["Merriweather", "Lora", "Playfair Display"],
+              "Sans-serif": ["Roboto", "Lato", "Montserrat", "Oswald", "Raleway"],
+              "Display": ["Lobster", "Alfa Slab One", "Bebas Neue", "Pacifico", "Righteous"],
+              "Handwriting": ["Indie Flower", "Patrick Hand", "Dancing Script", "Caveat"],
+              "Logos & Branding": ["Montserrat", "Bebas Neue", "Julius Sans One"],
+              "Wedding Invitations": ["Great Vibes", "Playfair Display", "Allura"],
+              "Resumes & CVs": ["Open Sans", "Lato", "Alegreya", "Roboto"],
+              "YouTube Thumbnails": ["Bebas Neue", "Oswald", "League Gothic", "Bangers"],
+              "Instagram & Social Posts": ["Alata", "Amatic SC", "Courgette", "Playlist Script"],
+              "Posters & Flyers": ["Bangers", "Anton", "Cantora One", "Cooper Hewitt"],
+              "Business & Corporate": ["Noto Sans", "Source Sans 3", "Sinkin Sans"],
+              "Kids & Children Designs": ["Comic Neue", "Barriecito", "Reef", "Fredoka One"],
+              "Fashion & Luxury Brands": ["Playfair Display", "Vidaloka", "Sacramento"],
+              "Quotes & Inspirational": ["Jonathan", "Brightwall", "Great Vibes"],
+              "Sports & Athletic": ["League Spartan", "Yearbook Solid", "College"],
+              "Magazine & Editorial": ["Merriweather", "Source Serif Pro", "Muller"]
+          };
 
-            const canvas = document.getElementById('poster-canvas');
-            const ctx = canvas.getContext('2d');
-            const canvasContainer = document.getElementById('canvas-container');
-            const textInput = document.getElementById('text-input');
-            const marginInput = document.getElementById('margin-input');
-            const downloadBtn = document.getElementById('download-btn');
-            const undoBtn = document.getElementById('undo-btn');
-            const redoBtn = document.getElementById('redo-btn');
-            const editor = document.getElementById('item-editor');
-            const editorText = document.getElementById('editor-text');
-            const editorFont = document.getElementById('editor-font');
-            const editorColor = document.getElementById('editor-color');
-            const editorBold = document.getElementById('editor-bold');
-            const editorItalic = document.getElementById('editor-italic');
-            const editorStrike = document.getElementById('editor-strike');
-            const editorShadow = {
-                x: document.getElementById('editor-shadow-x'),
-                y: document.getElementById('editor-shadow-y'),
-                blur: document.getElementById('editor-shadow-blur'),
-                color: document.getElementById('editor-shadow-color')
-            };
-            const editorReset = document.getElementById('editor-reset');
-            const editorClose = document.getElementById('editor-close');
+          const canvas = document.getElementById('poster-canvas');
+          const ctx = canvas.getContext('2d');
+          const canvasContainer = document.getElementById('canvas-container');
+          const textInput = document.getElementById('text-input');
+          const marginInput = document.getElementById('margin-input');
+          const downloadBtn = document.getElementById('download-btn');
+          const undoBtn = document.getElementById('undo-btn');
+          const redoBtn = document.getElementById('redo-btn');
+          const editor = document.getElementById('item-editor');
+          const editorText = document.getElementById('editor-text');
+          const editorFont = document.getElementById('editor-font');
+          const editorColor = document.getElementById('editor-color');
+          const editorBold = document.getElementById('editor-bold');
+          const editorItalic = document.getElementById('editor-italic');
+          const editorStrike = document.getElementById('editor-strike');
+          const editorShadow = {
+              x: document.getElementById('editor-shadow-x'),
+              y: document.getElementById('editor-shadow-y'),
+              blur: document.getElementById('editor-shadow-blur'),
+              color: document.getElementById('editor-shadow-color')
+          };
+          const editorReset = document.getElementById('editor-reset');
+          const editorClose = document.getElementById('editor-close');
 
-            const controls = {
-                bgColor: document.getElementById('bg-color'),
-                bgImage: document.getElementById('bg-image'),
-                canvasSize: document.getElementById('canvas-size'),
-                primary: {
-                    font: document.getElementById('primary-font'),
-                    color: document.getElementById('primary-color'),
-                    bold: document.getElementById('primary-bold'),
-                    italic: document.getElementById('primary-italic'),
-                    strike: document.getElementById('primary-strike'),
-                    shadowX: document.getElementById('primary-shadow-x'),
-                    shadowY: document.getElementById('primary-shadow-y'),
-                    shadowBlur: document.getElementById('primary-shadow-blur'),
-                    shadowColor: document.getElementById('primary-shadow-color')
-                },
-                secondary: {
-                    font: document.getElementById('secondary-font'),
-                    color: document.getElementById('secondary-color'),
-                    bold: document.getElementById('secondary-bold'),
-                    italic: document.getElementById('secondary-italic'),
-                    strike: document.getElementById('secondary-strike'),
-                    shadowX: document.getElementById('secondary-shadow-x'),
-                    shadowY: document.getElementById('secondary-shadow-y'),
-                    shadowBlur: document.getElementById('secondary-shadow-blur'),
-                    shadowColor: document.getElementById('secondary-shadow-color')
-                }
-            };
-            
-            let textItems = [];
-            let currentEditItem = null;
-            let backgroundImage = null;
-            let lastMousePos = { x: 0, y: 0 };
-            const undoStack = [];
-            const redoStack = [];
-            const RESIZE_HANDLE_SIZE = 20;
-            const sizes = { tall: { width: 1080, height: 1920 }, wide: { width: 1920, height: 1080 }, square: { width: 1080, height: 1080 } };
+          const controls = {
+              bgColor: document.getElementById('bg-color'),
+              bgImage: document.getElementById('bg-image'),
+              canvasSize: document.getElementById('canvas-size'),
+              primary: {
+                  font: document.getElementById('primary-font'),
+                  color: document.getElementById('primary-color'),
+                  bold: document.getElementById('primary-bold'),
+                  italic: document.getElementById('primary-italic'),
+                  strike: document.getElementById('primary-strike'),
+                  shadowX: document.getElementById('primary-shadow-x'),
+                  shadowY: document.getElementById('primary-shadow-y'),
+                  shadowBlur: document.getElementById('primary-shadow-blur'),
+                  shadowColor: document.getElementById('primary-shadow-color')
+              },
+              secondary: {
+                  font: document.getElementById('secondary-font'),
+                  color: document.getElementById('secondary-color'),
+                  bold: document.getElementById('secondary-bold'),
+                  italic: document.getElementById('secondary-italic'),
+                  strike: document.getElementById('secondary-strike'),
+                  shadowX: document.getElementById('secondary-shadow-x'),
+                  shadowY: document.getElementById('secondary-shadow-y'),
+                  shadowBlur: document.getElementById('secondary-shadow-blur'),
+                  shadowColor: document.getElementById('secondary-shadow-color')
+              }
+          };
 
-            function cloneState() {
-                return {
-                    textItems: textItems.map(i => ({...i})),
-                    backgroundImage: backgroundImage ? {
-                        ...backgroundImage,
-                        imgSrc: backgroundImage.img ? backgroundImage.img.src : null
-                    } : null,
-                    ui: {
-                        text: textInput.value,
-                        margin: marginInput.value,
-                        bgColor: controls.bgColor.value,
-                        primary: {
-                            font: controls.primary.font.value,
-                            color: controls.primary.color.value,
-                            bold: controls.primary.bold.checked,
-                            italic: controls.primary.italic.checked,
-                            strike: controls.primary.strike.checked,
-                            shadowX: controls.primary.shadowX.value,
-                            shadowY: controls.primary.shadowY.value,
-                            shadowBlur: controls.primary.shadowBlur.value,
-                            shadowColor: controls.primary.shadowColor.value
-                        },
-                        secondary: {
-                            font: controls.secondary.font.value,
-                            color: controls.secondary.color.value,
-                            bold: controls.secondary.bold.checked,
-                            italic: controls.secondary.italic.checked,
-                            strike: controls.secondary.strike.checked,
-                            shadowX: controls.secondary.shadowX.value,
-                            shadowY: controls.secondary.shadowY.value,
-                            shadowBlur: controls.secondary.shadowBlur.value,
-                            shadowColor: controls.secondary.shadowColor.value
-                        }
-                    }
-                };
-            }
+          let textItems = [];
+          let currentEditItem = null;
+          let backgroundImage = null;
+          let lastMousePos = { x: 0, y: 0 };
+          const undoStack = [];
+          const redoStack = [];
+          const RESIZE_HANDLE_SIZE = 20;
+          const sizes = { tall: { width: 1080, height: 1920 }, wide: { width: 1920, height: 1080 }, square: { width: 1080, height: 1080 } };
 
-            function applyState(state) {
-                textItems = state.textItems.map(i => ({...i}));
-                if (state.backgroundImage) {
-                    const img = new Image();
-                    img.src = state.backgroundImage.imgSrc;
-                    backgroundImage = {...state.backgroundImage, img};
-                } else {
-                    backgroundImage = null;
-                }
-                if (state.ui) {
-                    textInput.value = state.ui.text;
-                    marginInput.value = state.ui.margin;
-                    controls.bgColor.value = state.ui.bgColor;
-                    const p = state.ui.primary;
-                    controls.primary.font.value = p.font;
-                    controls.primary.color.value = p.color;
-                    controls.primary.bold.checked = p.bold;
-                    controls.primary.italic.checked = p.italic;
-                    controls.primary.strike.checked = p.strike;
-                    controls.primary.shadowX.value = p.shadowX;
-                    controls.primary.shadowY.value = p.shadowY;
-                    controls.primary.shadowBlur.value = p.shadowBlur;
-                    controls.primary.shadowColor.value = p.shadowColor;
-                    const s = state.ui.secondary;
-                    controls.secondary.font.value = s.font;
-                    controls.secondary.color.value = s.color;
-                    controls.secondary.bold.checked = s.bold;
-                    controls.secondary.italic.checked = s.italic;
-                    controls.secondary.strike.checked = s.strike;
-                    controls.secondary.shadowX.value = s.shadowX;
-                    controls.secondary.shadowY.value = s.shadowY;
-                    controls.secondary.shadowBlur.value = s.shadowBlur;
-                    controls.secondary.shadowColor.value = s.shadowColor;
-                }
-                draw();
-            }
+          function cloneState() {
+              return {
+                  textItems: textItems.map(i => ({...i})),
+                  backgroundImage: backgroundImage ? {
+                      ...backgroundImage,
+                      imgSrc: backgroundImage.img ? backgroundImage.img.src : null
+                  } : null,
+                  ui: {
+                      text: textInput.value,
+                      margin: marginInput.value,
+                      bgColor: controls.bgColor.value,
+                      primary: {
+                          font: controls.primary.font.value,
+                          color: controls.primary.color.value,
+                          bold: controls.primary.bold.checked,
+                          italic: controls.primary.italic.checked,
+                          strike: controls.primary.strike.checked,
+                          shadowX: controls.primary.shadowX.value,
+                          shadowY: controls.primary.shadowY.value,
+                          shadowBlur: controls.primary.shadowBlur.value,
+                          shadowColor: controls.primary.shadowColor.value
+                      },
+                      secondary: {
+                          font: controls.secondary.font.value,
+                          color: controls.secondary.color.value,
+                          bold: controls.secondary.bold.checked,
+                          italic: controls.secondary.italic.checked,
+                          strike: controls.secondary.strike.checked,
+                          shadowX: controls.secondary.shadowX.value,
+                          shadowY: controls.secondary.shadowY.value,
+                          shadowBlur: controls.secondary.shadowBlur.value,
+                          shadowColor: controls.secondary.shadowColor.value
+                      }
+                  }
+              };
+          }
 
-            function saveState() {
-                undoStack.push(cloneState());
-                if (undoStack.length > 50) undoStack.shift();
-                redoStack.length = 0;
-                updateUndoRedo();
-            }
+          function applyState(state) {
+              textItems = state.textItems.map(i => ({...i}));
+              if (state.backgroundImage) {
+                  const img = new Image();
+                  img.src = state.backgroundImage.imgSrc;
+                  backgroundImage = {...state.backgroundImage, img};
+              } else {
+                  backgroundImage = null;
+              }
+              if (state.ui) {
+                  textInput.value = state.ui.text;
+                  marginInput.value = state.ui.margin;
+                  controls.bgColor.value = state.ui.bgColor;
+                  const p = state.ui.primary;
+                  controls.primary.font.value = p.font;
+                  controls.primary.color.value = p.color;
+                  controls.primary.bold.checked = p.bold;
+                  controls.primary.italic.checked = p.italic;
+                  controls.primary.strike.checked = p.strike;
+                  controls.primary.shadowX.value = p.shadowX;
+                  controls.primary.shadowY.value = p.shadowY;
+                  controls.primary.shadowBlur.value = p.shadowBlur;
+                  controls.primary.shadowColor.value = p.shadowColor;
+                  const s = state.ui.secondary;
+                  controls.secondary.font.value = s.font;
+                  controls.secondary.color.value = s.color;
+                  controls.secondary.bold.checked = s.bold;
+                  controls.secondary.italic.checked = s.italic;
+                  controls.secondary.strike.checked = s.strike;
+                  controls.secondary.shadowX.value = s.shadowX;
+                  controls.secondary.shadowY.value = s.shadowY;
+                  controls.secondary.shadowBlur.value = s.shadowBlur;
+                  controls.secondary.shadowColor.value = s.shadowColor;
+              }
+              draw();
+          }
 
-            function undo() {
-                if (!undoStack.length) return;
-                const current = cloneState();
-                redoStack.push(current);
-                const state = undoStack.pop();
-                applyState(state);
-                updateUndoRedo();
-            }
+          function saveState() {
+              undoStack.push(cloneState());
+              if (undoStack.length > 50) undoStack.shift();
+              redoStack.length = 0;
+              updateUndoRedo();
+          }
 
-            function redo() {
-                if (!redoStack.length) return;
-                const current = cloneState();
-                undoStack.push(current);
-                const state = redoStack.pop();
-                applyState(state);
-                updateUndoRedo();
-            }
+          function undo() {
+              if (!undoStack.length) return;
+              const current = cloneState();
+              redoStack.push(current);
+              const state = undoStack.pop();
+              applyState(state);
+              updateUndoRedo();
+          }
 
-            function updateUndoRedo() {
-                undoBtn.disabled = undoStack.length === 0;
-                redoBtn.disabled = redoStack.length === 0;
-                undoBtn.classList.toggle('opacity-50', undoBtn.disabled);
-                redoBtn.classList.toggle('opacity-50', redoBtn.disabled);
-            }
+          function redo() {
+              if (!redoStack.length) return;
+              const current = cloneState();
+              undoStack.push(current);
+              const state = redoStack.pop();
+              applyState(state);
+              updateUndoRedo();
+          }
 
-            function populateFontSelectors() {
-                const selects = [controls.primary.font, controls.secondary.font, editorFont];
-                selects.forEach(select => {
-                    select.innerHTML = '';
-                    for (const category in FONT_LIST) {
-                        const optgroup = document.createElement('optgroup');
-                        optgroup.label = category;
-                        FONT_LIST[category].forEach(fontName => {
-                            const option = document.createElement('option');
-                            option.value = fontName;
-                            option.textContent = fontName;
-                            option.style.fontFamily = `'${fontName}', sans-serif`;
-                            option.style.fontSize = '16px';
-                            optgroup.appendChild(option);
-                        });
-                        select.appendChild(optgroup);
-                    }
-                });
-                 controls.primary.font.value = 'Roboto';
-                 controls.secondary.font.value = 'Lobster';
-            }
+          function updateUndoRedo() {
+              undoBtn.disabled = undoStack.length === 0;
+              redoBtn.disabled = redoStack.length === 0;
+              undoBtn.classList.toggle('opacity-50', undoBtn.disabled);
+              redoBtn.classList.toggle('opacity-50', redoBtn.disabled);
+          }
 
-            async function loadFonts() {
-                const loadingOverlay = document.getElementById('loading-overlay');
-                loadingOverlay.style.display = 'flex';
-                const fontPromises = [];
-                for (const category in FONT_LIST) {
-                    FONT_LIST[category].forEach(font => {
-                        fontPromises.push(document.fonts.load(`1em "${font}"`));
-                    });
-                }
-                try {
-                    await Promise.all(fontPromises);
-                } catch (err) {
-                    console.error("Error loading fonts:", err);
-                } finally {
-                    loadingOverlay.style.display = 'none';
-                    init();
-                }
-            }
+          function populateFontSelectors() {
+              const selects = [controls.primary.font, controls.secondary.font, editorFont];
+              selects.forEach(select => {
+                  select.innerHTML = '';
+                  for (const category in FONT_LIST) {
+                      const optgroup = document.createElement('optgroup');
+                      optgroup.label = category;
+                      FONT_LIST[category].forEach(fontName => {
+                          const option = document.createElement('option');
+                          option.value = fontName;
+                          option.textContent = fontName;
+                          option.style.fontFamily = `'${fontName}', sans-serif`;
+                          option.style.fontSize = '16px';
+                          optgroup.appendChild(option);
+                      });
+                      select.appendChild(optgroup);
+                  }
+              });
+               controls.primary.font.value = 'Roboto';
+               controls.secondary.font.value = 'Lobster';
+          }
 
-            function getFontString(item) { return `${item.italic ? 'italic' : ''} ${item.bold ? 'bold' : ''} ${item.fontSize}px "${item.fontFamily}"`; }
-            function hexToRgba(hex, alpha = 1) {
-                const bigint = parseInt(hex.slice(1), 16);
-                const r = (bigint >> 16) & 255;
-                const g = (bigint >> 8) & 255;
-                const b = bigint & 255;
-                return `rgba(${r},${g},${b},${alpha})`;
-            }
-            function getFitFontSize(text, item) {
-                const margin = parseInt(marginInput.value, 10) || 0;
-                const targetWidth = canvas.width - (2 * margin);
-                let fontSize = 300;
-                if (!text.trim()) return 10;
-                do {
-                    fontSize -= 5;
-                    ctx.font = `${item.italic ? 'italic' : ''} ${item.bold ? 'bold' : ''} ${fontSize}px "${item.fontFamily}"`;
-                } while (ctx.measureText(text).width > targetWidth && fontSize > 10);
-                return fontSize;
-            }
+          async function loadFonts() {
+              const loadingOverlay = document.getElementById('loading-overlay');
+              loadingOverlay.style.display = 'flex';
+              const fontPromises = [];
+              for (const category in FONT_LIST) {
+                  FONT_LIST[category].forEach(font => {
+                      fontPromises.push(document.fonts.load(`1em "${font}"`));
+                  });
+              }
+              try {
+                  await Promise.all(fontPromises);
+              } catch (err) {
+                  console.error("Error loading fonts:", err);
+              } finally {
+                  loadingOverlay.style.display = 'none';
+                  init();
+              }
+          }
 
-            function syncTextItems() {
-                const lines = textInput.value.split('\n');
-                const newTextItems = [];
-                let totalHeight = 0;
+          function getFontString(item) { return `${item.italic ? 'italic' : ''} ${item.bold ? 'bold' : ''} ${item.fontSize}px "${item.fontFamily}"`; }
+          function hexToRgba(hex, alpha = 1) {
+              const bigint = parseInt(hex.slice(1), 16);
+              const r = (bigint >> 16) & 255;
+              const g = (bigint >> 8) & 255;
+              const b = bigint & 255;
+              return `rgba(${r},${g},${b},${alpha})`;
+          }
+          function getFitFontSize(text, item) {
+              const margin = parseInt(marginInput.value, 10) || 0;
+              const targetWidth = canvas.width - (2 * margin);
+              let fontSize = 300;
+              if (!text.trim()) return 10;
+              do {
+                  fontSize -= 5;
+                  ctx.font = `${item.italic ? 'italic' : ''} ${item.bold ? 'bold' : ''} ${fontSize}px "${item.fontFamily}"`;
+              } while (ctx.measureText(text).width > targetWidth && fontSize > 10);
+              return fontSize;
+          }
 
-                // First pass: Create items and calculate their height
-                lines.forEach(line => {
-                    const isSecondary = line.startsWith('*') && line.endsWith('*');
-                    const props = isSecondary ? controls.secondary : controls.primary;
-                    const newItem = {
-                        originalLine: line,
-                        text: isSecondary ? line.substring(1, line.length - 1) : line,
-                        isSecondary: isSecondary,
-                        fontFamily: props.font.value,
-                        color: props.color.value,
-                        bold: props.bold.checked,
-                        italic: props.italic.checked,
-                        strike: props.strike.checked,
-                        shadow: {
-                            x: props.shadowX.value,
-                            y: props.shadowY.value,
-                            blur: props.shadowBlur.value,
-                            color: props.shadowColor.value
-                        },
-                        x: canvas.width / 2,
-                        y: 0, // temp y
-                        isSelected: false,
-                        action: null,
-                    };
-                    newItem.fontSize = getFitFontSize(newItem.text, newItem);
-                    
-                    // Estimate height for stacking
-                    ctx.font = getFontString(newItem);
-                    newItem.height = newItem.fontSize * 1.2; // A common line-height approximation
-                    totalHeight += newItem.height;
-                    newTextItems.push(newItem);
-                });
+          function syncTextItems() {
+              const lines = textInput.value.split('\n');
+              const newTextItems = [];
+              let totalHeight = 0;
 
-                // Second pass: Position items vertically
-                let currentY = (canvas.height - totalHeight) / 2;
-                if (currentY < 50) { // Add some padding if it's too high
-                    currentY = 50;
-                }
+              // First pass: Create items and calculate their height
+              lines.forEach(line => {
+                  const isSecondary = line.startsWith('*') && line.endsWith('*');
+                  const props = isSecondary ? controls.secondary : controls.primary;
+                  const newItem = {
+                      originalLine: line,
+                      text: isSecondary ? line.substring(1, line.length - 1) : line,
+                      isSecondary: isSecondary,
+                      fontFamily: props.font.value,
+                      color: props.color.value,
+                      bold: props.bold.checked,
+                      italic: props.italic.checked,
+                      strike: props.strike.checked,
+                      shadow: {
+                          x: props.shadowX.value,
+                          y: props.shadowY.value,
+                          blur: props.shadowBlur.value,
+                          color: props.shadowColor.value
+                      },
+                      x: canvas.width / 2,
+                      y: 0, // temp y
+                      isSelected: false,
+                      action: null,
+                  };
+                  newItem.fontSize = getFitFontSize(newItem.text, newItem);
 
-                newTextItems.forEach(item => {
-                    item.y = currentY + item.height / 2;
-                    currentY += item.height;
-                });
+                  // Estimate height for stacking
+                  ctx.font = getFontString(newItem);
+                  newItem.height = newItem.fontSize * 1.2; // A common line-height approximation
+                  totalHeight += newItem.height;
+                  newTextItems.push(newItem);
+              });
 
-                textItems = newTextItems;
-                draw();
-                saveState();
-            }
+              // Second pass: Position items vertically
+              let currentY = (canvas.height - totalHeight) / 2;
+              if (currentY < 50) { // Add some padding if it's too high
+                  currentY = 50;
+              }
 
-            function handleImageUpload(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                const img = new Image();
-                img.onload = () => {
-                    backgroundImage = {
-                        img,
-                        x: canvas.width / 2,
-                        y: canvas.height / 2,
-                        width: canvas.width,
-                        height: canvas.height,
-                        actualHeight: canvas.height,
-                        isSelected: false,
-                        action: null
-                    };
-                    draw();
-                    saveState();
-                };
-                img.src = URL.createObjectURL(file);
-            }
+              newTextItems.forEach(item => {
+                  item.y = currentY + item.height / 2;
+                  currentY += item.height;
+              });
 
-            function downloadImage() {
-                const link = document.createElement('a');
-                canvas.toBlob(blob => {
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'poster.jpg';
-                    link.click();
-                    URL.revokeObjectURL(link.href);
-                }, 'image/jpeg');
-            }
+              textItems = newTextItems;
+              draw();
+              saveState();
+          }
 
-            function draw(isExporting = false) {
-                ctx.fillStyle = controls.bgColor.value;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                if(backgroundImage && backgroundImage.img){
-                    ctx.drawImage(backgroundImage.img,
-                        backgroundImage.x - backgroundImage.width/2,
-                        backgroundImage.y - backgroundImage.height/2,
-                        backgroundImage.width,
-                        backgroundImage.height);
-                    if(backgroundImage.isSelected && !isExporting) drawSelectionBox(backgroundImage);
-                }
-                textItems.forEach(item => {
-                    ctx.save();
-                    ctx.font = getFontString(item);
-                    const metrics = ctx.measureText(item.text);
-                    item.width = metrics.width;
-                    item.actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-                    ctx.fillStyle = item.color;
-                    ctx.globalAlpha = 1;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    if (item.shadow) {
-                        ctx.shadowColor = item.shadow.color;
-                        ctx.shadowBlur = parseFloat(item.shadow.blur) || 0;
-                        ctx.shadowOffsetX = parseFloat(item.shadow.x) || 0;
-                        ctx.shadowOffsetY = parseFloat(item.shadow.y) || 0;
-                    }
-                    ctx.fillText(item.text, item.x, item.y);
-                    if (item.strike) {
-                        ctx.beginPath();
-                        ctx.moveTo(item.x - item.width/2, item.y);
-                        ctx.lineTo(item.x + item.width/2, item.y);
-                        ctx.lineWidth = 2;
-                        ctx.strokeStyle = item.color;
-                        ctx.stroke();
-                    }
-                    ctx.restore();
-                    if (item.isSelected && !isExporting) drawSelectionBox(item);
-                });
-            }
-            
-            function drawSelectionBox(item) {
-                const tL = { x: item.x - item.width / 2, y: item.y - item.actualHeight / 2 };
-                const bR = { x: item.x + item.width / 2, y: item.y + item.actualHeight / 2 };
-                ctx.strokeStyle = '#4A90E2';
-                ctx.lineWidth = 4;
-                ctx.strokeRect(tL.x - 5, tL.y - 5, bR.x - tL.x + 10, bR.y - tL.y + 10);
-                ctx.fillStyle = '#FFFFFF';
-                ctx.beginPath();
-                ctx.arc(bR.x + 5, bR.y + 5, RESIZE_HANDLE_SIZE / 2, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.stroke();
-            }
+          function handleImageUpload(e) {
+              const file = e.target.files[0];
+              if (!file) return;
+              const img = new Image();
+              img.onload = () => {
+                  backgroundImage = {
+                      img,
+                      x: canvas.width / 2,
+                      y: canvas.height / 2,
+                      width: canvas.width,
+                      height: canvas.height,
+                      actualHeight: canvas.height,
+                      isSelected: false,
+                      action: null
+                  };
+                  draw();
+                  saveState();
+              };
+              img.src = URL.createObjectURL(file);
+          }
 
-            function resizeCanvas() {
-                const size = sizes[controls.canvasSize.value];
-                const container = canvasContainer;
-                const containerW = container.clientWidth;
-                const containerH = container.clientHeight;
-                const ratio = containerW / containerH > size.width / size.height;
-                canvas.style.height = (ratio ? containerH : containerW / (size.width / size.height)) * 0.9 + 'px';
-                canvas.style.width = (ratio ? containerH * (size.width / size.height) : containerW) * 0.9 + 'px';
-                canvas.width = size.width;
-                canvas.height = size.height;
-                syncTextItems();
-            }
+          function downloadImage() {
+              const link = document.createElement('a');
+              canvas.toBlob(blob => {
+                  link.href = URL.createObjectURL(blob);
+                  link.download = 'poster.jpg';
+                  link.click();
+                  URL.revokeObjectURL(link.href);
+              }, 'image/jpeg');
+          }
 
-            const getCanvasPos = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height)};
-            };
-            
-            function getActionTarget(p) {
-                const items = backgroundImage ? [backgroundImage, ...textItems] : [...textItems];
-                for (const item of [...items].reverse()) {
-                    if (item.isSelected) {
-                        const bR = { x: item.x + item.width / 2, y: item.y + item.actualHeight / 2 };
-                        if (Math.sqrt(Math.pow(p.x - (bR.x + 5), 2) + Math.pow(p.y - (bR.y + 5), 2)) < RESIZE_HANDLE_SIZE) return { item, action: 'resizing' };
-                    }
-                }
-                for (const item of [...items].reverse()) {
-                    if (p.x > item.x - item.width/2 && p.x < item.x + item.width/2 && p.y > item.y - item.actualHeight/2 && p.y < item.y + item.actualHeight/2) return { item, action: 'dragging' };
-                }
-                return null;
-            }
+          function draw(isExporting = false) {
+              ctx.fillStyle = controls.bgColor.value;
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+              if(backgroundImage && backgroundImage.img){
+                  ctx.drawImage(backgroundImage.img,
+                      backgroundImage.x - backgroundImage.width/2,
+                      backgroundImage.y - backgroundImage.height/2,
+                      backgroundImage.width,
+                      backgroundImage.height);
+                  if(backgroundImage.isSelected && !isExporting) drawSelectionBox(backgroundImage);
+              }
+              textItems.forEach(item => {
+                  ctx.save();
+                  ctx.font = getFontString(item);
+                  const metrics = ctx.measureText(item.text);
+                  item.width = metrics.width;
+                  item.actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+                  ctx.fillStyle = item.color;
+                  ctx.globalAlpha = 1;
+                  ctx.textAlign = 'center';
+                  ctx.textBaseline = 'middle';
+                  if (item.shadow) {
+                      ctx.shadowColor = item.shadow.color;
+                      ctx.shadowBlur = parseFloat(item.shadow.blur) || 0;
+                      ctx.shadowOffsetX = parseFloat(item.shadow.x) || 0;
+                      ctx.shadowOffsetY = parseFloat(item.shadow.y) || 0;
+                  }
+                  ctx.fillText(item.text, item.x, item.y);
+                  if (item.strike) {
+                      ctx.beginPath();
+                      ctx.moveTo(item.x - item.width/2, item.y);
+                      ctx.lineTo(item.x + item.width/2, item.y);
+                      ctx.lineWidth = 2;
+                      ctx.strokeStyle = item.color;
+                      ctx.stroke();
+                  }
+                  ctx.restore();
+                  if (item.isSelected && !isExporting) drawSelectionBox(item);
+              });
+          }
 
-            function handleMouseDown(e) {
-                e.preventDefault();
-                const pos = getCanvasPos(e);
-                lastMousePos = pos;
-                const target = getActionTarget(pos);
-                const all = backgroundImage ? [backgroundImage, ...textItems] : [...textItems];
-                if (target) {
-                    saveState();
-                    if (e.ctrlKey && !target.item.img) {
-                        openItemEditor(target.item);
-                        return;
-                    }
-                    if (e.shiftKey) {
-                        target.item.isSelected = !target.item.isSelected;
-                    } else if (!target.item.isSelected) {
-                        all.forEach(i => i.isSelected = false);
-                        target.item.isSelected = true;
-                    }
+          function drawSelectionBox(item) {
+              const tL = { x: item.x - item.width / 2, y: item.y - item.actualHeight / 2 };
+              const bR = { x: item.x + item.width / 2, y: item.y + item.actualHeight / 2 };
+              ctx.strokeStyle = '#4A90E2';
+              ctx.lineWidth = 4;
+              ctx.strokeRect(tL.x - 5, tL.y - 5, bR.x - tL.x + 10, bR.y - tL.y + 10);
+              ctx.fillStyle = '#FFFFFF';
+              ctx.beginPath();
+              ctx.arc(bR.x + 5, bR.y + 5, RESIZE_HANDLE_SIZE / 2, 0, 2 * Math.PI);
+              ctx.fill();
+              ctx.stroke();
+          }
 
-                    all.forEach(i => {
-                        if (i.isSelected) {
-                            i.action = target.action;
-                            i.dragOffset = { x: pos.x - i.x, y: pos.y - i.y };
-                            i.dragStart = { fontSize: i.fontSize, width: i.width, height: i.actualHeight };
-                            i.topLeftStart = { x: i.x - i.width/2, y: i.y - i.actualHeight/2 };
-                        }
-                    });
-                } else {
-                    if (!e.shiftKey) all.forEach(i => i.isSelected = false);
-                }
-                draw();
-            }
+          function resizeCanvas() {
+              const size = sizes[controls.canvasSize.value];
+              const container = canvasContainer;
+              const containerW = container.clientWidth;
+              const containerH = container.clientHeight;
+              const ratio = containerW / containerH > size.width / size.height;
+              canvas.style.height = (ratio ? containerH : containerW / (size.width / size.height)) * 0.9 + 'px';
+              canvas.style.width = (ratio ? containerH * (size.width / size.height) : containerW) * 0.9 + 'px';
+              canvas.width = size.width;
+              canvas.height = size.height;
+              syncTextItems();
+          }
 
-            function handleMouseMove(e) {
-                e.preventDefault();
-                const pos = getCanvasPos(e);
-                let needsRedraw = false;
-                const selectedItems = [];
-                if (backgroundImage && backgroundImage.isSelected && backgroundImage.action) selectedItems.push(backgroundImage);
-                selectedItems.push(...textItems.filter(i => i.isSelected && i.action));
-                if (selectedItems.length === 0) return;
+          const getCanvasPos = (e) => {
+              const rect = canvas.getBoundingClientRect();
+              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+              const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+              return {x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height)};
+          };
 
-                if (selectedItems[0].action === 'dragging') {
-                    selectedItems.forEach(item => {
-                        const newX = pos.x - item.dragOffset.x;
-                        const newY = pos.y - item.dragOffset.y;
-                        const halfW = item.width / 2;
-                        const halfH = item.actualHeight / 2;
-                        item.x = Math.max(halfW, Math.min(canvas.width - halfW, newX));
-                        item.y = Math.max(halfH, Math.min(canvas.height - halfH, newY));
-                    });
-                    needsRedraw = true;
-                } else if (selectedItems[0].action === 'resizing') {
-                    const resizingItem = selectedItems.find(i => i.action === 'resizing');
-                    const dx = pos.x - lastMousePos.x;
-                    const newWidth = Math.max(20, resizingItem.width + dx);
-                    const scale = newWidth / resizingItem.width;
+          function getActionTarget(p) {
+              const items = backgroundImage ? [backgroundImage, ...textItems] : [...textItems];
+              for (const item of [...items].reverse()) {
+                  if (item.isSelected) {
+                      const bR = { x: item.x + item.width / 2, y: item.y + item.actualHeight / 2 };
+                      if (Math.sqrt(Math.pow(p.x - (bR.x + 5), 2) + Math.pow(p.y - (bR.y + 5), 2)) < RESIZE_HANDLE_SIZE) return { item, action: 'resizing' };
+                  }
+              }
+              for (const item of [...items].reverse()) {
+                  if (p.x > item.x - item.width/2 && p.x < item.x + item.width/2 && p.y > item.y - item.actualHeight/2 && p.y < item.y + item.actualHeight/2) return { item, action: 'dragging' };
+              }
+              return null;
+          }
 
-                    selectedItems.forEach(item => {
-                        if (item.fontSize) {
-                            item.fontSize = item.dragStart.fontSize * scale;
-                        }
-                        const newW = item.dragStart.width * scale;
-                        const newH = item.dragStart.height * scale;
-                        item.width = newW;
-                        item.actualHeight = newH;
-                        if (item.height !== undefined) item.height = newH;
-                        item.x = item.topLeftStart.x + newW/2;
-                        item.y = item.topLeftStart.y + newH/2;
-                    });
-                    needsRedraw = true;
-                }
-                if (needsRedraw) draw();
-            }
+          function handleMouseDown(e) {
+              e.preventDefault();
+              const pos = getCanvasPos(e);
+              lastMousePos = pos;
+              const target = getActionTarget(pos);
+              const all = backgroundImage ? [backgroundImage, ...textItems] : [...textItems];
+              if (target) {
+                  saveState();
+                  if (e.ctrlKey && !target.item.img) {
+                      openItemEditor(target.item);
+                      return;
+                  }
+                  if (e.shiftKey) {
+                      target.item.isSelected = !target.item.isSelected;
+                  } else if (!target.item.isSelected) {
+                      all.forEach(i => i.isSelected = false);
+                      target.item.isSelected = true;
+                  }
 
-            function applyStyleToSelection() {
-                saveState();
-                const selected = textItems.filter(i => i.isSelected);
-                selected.forEach(item => {
-                     const props = item.isSecondary ? controls.secondary : controls.primary;
-                     item.fontFamily = props.font.value;
-                     item.color = props.color.value;
-                     item.bold = props.bold.checked;
-                     item.italic = props.italic.checked;
-                     item.strike = props.strike.checked;
-                     item.shadow = {
-                         x: props.shadowX.value,
-                         y: props.shadowY.value,
-                         blur: props.shadowBlur.value,
-                         color: props.shadowColor.value
-                     };
-                     item.custom = true;
-                });
-                if(selected.length > 0) draw();
-            }
+                  all.forEach(i => {
+                      if (i.isSelected) {
+                          i.action = target.action;
+                          i.dragOffset = { x: pos.x - i.x, y: pos.y - i.y };
+                          i.dragStart = { fontSize: i.fontSize, width: i.width, height: i.actualHeight };
+                          i.topLeftStart = { x: i.x - i.width/2, y: i.y - i.actualHeight/2 };
+                      }
+                  });
+              } else {
+                  if (!e.shiftKey) all.forEach(i => i.isSelected = false);
+              }
+              draw();
+          }
 
-           function handleGlobalStyleChange() {
-                saveState();
-                const selected = textItems.filter(i => i.isSelected);
-                if (selected.length) {
-                    applyStyleToSelection();
-                } else {
-                    textItems.forEach(item => {
-                        if (!item.custom) {
-                            const props = item.isSecondary ? controls.secondary : controls.primary;
-                            item.fontFamily = props.font.value;
-                            item.color = props.color.value;
-                            item.bold = props.bold.checked;
-                            item.italic = props.italic.checked;
-                            item.strike = props.strike.checked;
-                            item.shadow = {
-                                x: props.shadowX.value,
-                                y: props.shadowY.value,
-                                blur: props.shadowBlur.value,
-                                color: props.shadowColor.value
-                            };
-                        }
-                    });
-                    draw();
-                }
-            }
+          function handleMouseMove(e) {
+              e.preventDefault();
+              const pos = getCanvasPos(e);
+              let needsRedraw = false;
+              const selectedItems = [];
+              if (backgroundImage && backgroundImage.isSelected && backgroundImage.action) selectedItems.push(backgroundImage);
+              selectedItems.push(...textItems.filter(i => i.isSelected && i.action));
+              if (selectedItems.length === 0) return;
 
-            function openItemEditor(item) {
-                currentEditItem = item;
-                editorText.value = item.text;
-                editorFont.value = item.fontFamily;
-                editorColor.value = item.color;
-                editorBold.checked = item.bold;
-                editorItalic.checked = item.italic;
-                editorStrike.checked = item.strike;
-                editorShadow.x.value = item.shadow?.x || 0;
-                editorShadow.y.value = item.shadow?.y || 0;
-                editorShadow.blur.value = item.shadow?.blur || 0;
-                editorShadow.color.value = item.shadow?.color || 'rgba(0,0,0,0.5)';
-                editor.classList.remove('hidden');
-            }
+              if (selectedItems[0].action === 'dragging') {
+                  selectedItems.forEach(item => {
+                      const newX = pos.x - item.dragOffset.x;
+                      const newY = pos.y - item.dragOffset.y;
+                      const halfW = item.width / 2;
+                      const halfH = item.actualHeight / 2;
+                      item.x = Math.max(halfW, Math.min(canvas.width - halfW, newX));
+                      item.y = Math.max(halfH, Math.min(canvas.height - halfH, newY));
+                  });
+                  needsRedraw = true;
+              } else if (selectedItems[0].action === 'resizing') {
+                  const resizingItem = selectedItems.find(i => i.action === 'resizing');
+                  const dx = pos.x - lastMousePos.x;
+                  const newWidth = Math.max(20, resizingItem.width + dx);
+                  const scale = newWidth / resizingItem.width;
 
-            function closeItemEditor() {
-                currentEditItem = null;
-                editor.classList.add('hidden');
-            }
+                  selectedItems.forEach(item => {
+                      if (item.fontSize) {
+                          item.fontSize = item.dragStart.fontSize * scale;
+                      }
+                      const newW = item.dragStart.width * scale;
+                      const newH = item.dragStart.height * scale;
+                      item.width = newW;
+                      item.actualHeight = newH;
+                      if (item.height !== undefined) item.height = newH;
+                      item.x = item.topLeftStart.x + newW/2;
+                      item.y = item.topLeftStart.y + newH/2;
+                  });
+                  needsRedraw = true;
+              }
+              if (needsRedraw) draw();
+          }
 
-            editorText.addEventListener('input', () => {
-                if (!currentEditItem) return;
-                saveState();
-                currentEditItem.text = editorText.value;
-                currentEditItem.custom = true;
-                draw();
-            });
-            editorFont.addEventListener('input', () => {
-                if (!currentEditItem) return;
-                saveState();
-                currentEditItem.fontFamily = editorFont.value;
-                currentEditItem.custom = true;
-                draw();
-            });
-            editorColor.addEventListener('input', () => {
-                if (!currentEditItem) return;
-                saveState();
-                currentEditItem.color = editorColor.value;
-                currentEditItem.custom = true;
-                draw();
-            });
-            editorBold.addEventListener('change', () => {
-                if (!currentEditItem) return;
-                saveState();
-                currentEditItem.bold = editorBold.checked;
-                currentEditItem.custom = true;
-                draw();
-            });
-            editorItalic.addEventListener('change', () => {
-                if (!currentEditItem) return;
-                saveState();
-                currentEditItem.italic = editorItalic.checked;
-                currentEditItem.custom = true;
-                draw();
-            });
-            editorStrike.addEventListener('change', () => {
-                if (!currentEditItem) return;
-                saveState();
-                currentEditItem.strike = editorStrike.checked;
-                currentEditItem.custom = true;
-                draw();
-            });
-            [editorShadow.x, editorShadow.y, editorShadow.blur, editorShadow.color].forEach(el => el.addEventListener('input', () => {
-                if (!currentEditItem) return;
-                saveState();
-                currentEditItem.shadow = {
-                    x: editorShadow.x.value,
-                    y: editorShadow.y.value,
-                    blur: editorShadow.blur.value,
-                    color: editorShadow.color.value
-                };
-                currentEditItem.custom = true;
-                draw();
-            }));
-            editorReset.addEventListener('click', () => {
-                if (!currentEditItem) return;
-                saveState();
-                const props = currentEditItem.isSecondary ? controls.secondary : controls.primary;
-                currentEditItem.fontFamily = props.font.value;
-                currentEditItem.color = props.color.value;
-                currentEditItem.bold = props.bold.checked;
-                currentEditItem.italic = props.italic.checked;
-                currentEditItem.strike = props.strike.checked;
-                currentEditItem.shadow = {
-                    x: props.shadowX.value,
-                    y: props.shadowY.value,
-                    blur: props.shadowBlur.value,
-                    color: props.shadowColor.value
-                };
-                currentEditItem.custom = false;
-                draw();
-            });
-            editorClose.addEventListener('click', closeItemEditor);
-            
-            function init() {
-                populateFontSelectors();
-                resizeCanvas();
-                textInput.addEventListener('input', syncTextItems);
-                marginInput.addEventListener('change', syncTextItems);
-                controls.bgColor.addEventListener('input', draw);
-                controls.bgImage.addEventListener('change', handleImageUpload);
-                downloadBtn.addEventListener('click', downloadImage);
-                undoBtn.addEventListener('click', undo);
-                redoBtn.addEventListener('click', redo);
-                controls.canvasSize.addEventListener('change', resizeCanvas);
-                Object.values(controls.primary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
-                Object.values(controls.secondary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
-                window.addEventListener('resize', resizeCanvas);
-                updateUndoRedo();
-                canvas.addEventListener('mousedown', handleMouseDown);
-                canvas.addEventListener('mousemove', handleMouseMove);
-                canvas.addEventListener('mouseup', () => {
-                    let changed = false;
-                    textItems.forEach(i=>{
-                        if(i.action){changed = true; i.action=null;}
-                    });
-                    if (backgroundImage && backgroundImage.action) {changed = true; backgroundImage.action=null;}
-                    if(changed) saveState();
-                });
-                canvas.addEventListener('mouseleave', () => {
-                    textItems.forEach(i=>i.action=null);
-                    if (backgroundImage) backgroundImage.action=null;
-                });
-                canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
-                canvas.addEventListener('touchmove', handleMouseMove, { passive: false });
-                canvas.addEventListener('touchend', () => {
-                    let changed = false;
-                    textItems.forEach(i=>{
-                        if(i.action){changed=true; i.action=null;}
-                    });
-                    if (backgroundImage && backgroundImage.action) {changed=true; backgroundImage.action=null;}
-                    if(changed) saveState();
-                });
-                document.addEventListener('keydown', e => {
-                    if((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key==='z') { e.preventDefault(); undo(); }
-                    else if((e.ctrlKey||e.metaKey) && (e.key==='y' || (e.shiftKey && e.key==='z'))) { e.preventDefault(); redo(); }
-                });
-            }
-            loadFonts();
-        });
+          function applyStyleToSelection() {
+              saveState();
+              const selected = textItems.filter(i => i.isSelected);
+              selected.forEach(item => {
+                   const props = item.isSecondary ? controls.secondary : controls.primary;
+                   item.fontFamily = props.font.value;
+                   item.color = props.color.value;
+                   item.bold = props.bold.checked;
+                   item.italic = props.italic.checked;
+                   item.strike = props.strike.checked;
+                   item.shadow = {
+                       x: props.shadowX.value,
+                       y: props.shadowY.value,
+                       blur: props.shadowBlur.value,
+                       color: props.shadowColor.value
+                   };
+                   item.custom = true;
+              });
+              if(selected.length > 0) draw();
+          }
+
+         function handleGlobalStyleChange() {
+              saveState();
+              const selected = textItems.filter(i => i.isSelected);
+              if (selected.length) {
+                  applyStyleToSelection();
+              } else {
+                  textItems.forEach(item => {
+                      if (!item.custom) {
+                          const props = item.isSecondary ? controls.secondary : controls.primary;
+                          item.fontFamily = props.font.value;
+                          item.color = props.color.value;
+                          item.bold = props.bold.checked;
+                          item.italic = props.italic.checked;
+                          item.strike = props.strike.checked;
+                          item.shadow = {
+                              x: props.shadowX.value,
+                              y: props.shadowY.value,
+                              blur: props.shadowBlur.value,
+                              color: props.shadowColor.value
+                          };
+                      }
+                  });
+                  draw();
+              }
+          }
+
+          function openItemEditor(item) {
+              currentEditItem = item;
+              editorText.value = item.text;
+              editorFont.value = item.fontFamily;
+              editorColor.value = item.color;
+              editorBold.checked = item.bold;
+              editorItalic.checked = item.italic;
+              editorStrike.checked = item.strike;
+              editorShadow.x.value = item.shadow?.x || 0;
+              editorShadow.y.value = item.shadow?.y || 0;
+              editorShadow.blur.value = item.shadow?.blur || 0;
+              editorShadow.color.value = item.shadow?.color || 'rgba(0,0,0,0.5)';
+              editor.classList.remove('hidden');
+          }
+
+          function closeItemEditor() {
+              currentEditItem = null;
+              editor.classList.add('hidden');
+          }
+
+          editorText.addEventListener('input', () => {
+              if (!currentEditItem) return;
+              saveState();
+              currentEditItem.text = editorText.value;
+              currentEditItem.custom = true;
+              draw();
+          });
+          editorFont.addEventListener('input', () => {
+              if (!currentEditItem) return;
+              saveState();
+              currentEditItem.fontFamily = editorFont.value;
+              currentEditItem.custom = true;
+              draw();
+          });
+          editorColor.addEventListener('input', () => {
+              if (!currentEditItem) return;
+              saveState();
+              currentEditItem.color = editorColor.value;
+              currentEditItem.custom = true;
+              draw();
+          });
+          editorBold.addEventListener('change', () => {
+              if (!currentEditItem) return;
+              saveState();
+              currentEditItem.bold = editorBold.checked;
+              currentEditItem.custom = true;
+              draw();
+          });
+          editorItalic.addEventListener('change', () => {
+              if (!currentEditItem) return;
+              saveState();
+              currentEditItem.italic = editorItalic.checked;
+              currentEditItem.custom = true;
+              draw();
+          });
+          editorStrike.addEventListener('change', () => {
+              if (!currentEditItem) return;
+              saveState();
+              currentEditItem.strike = editorStrike.checked;
+              currentEditItem.custom = true;
+              draw();
+          });
+          [editorShadow.x, editorShadow.y, editorShadow.blur, editorShadow.color].forEach(el => el.addEventListener('input', () => {
+              if (!currentEditItem) return;
+              saveState();
+              currentEditItem.shadow = {
+                  x: editorShadow.x.value,
+                  y: editorShadow.y.value,
+                  blur: editorShadow.blur.value,
+                  color: editorShadow.color.value
+              };
+              currentEditItem.custom = true;
+              draw();
+          }));
+          editorReset.addEventListener('click', () => {
+              if (!currentEditItem) return;
+              saveState();
+              const props = currentEditItem.isSecondary ? controls.secondary : controls.primary;
+              currentEditItem.fontFamily = props.font.value;
+              currentEditItem.color = props.color.value;
+              currentEditItem.bold = props.bold.checked;
+              currentEditItem.italic = props.italic.checked;
+              currentEditItem.strike = props.strike.checked;
+              currentEditItem.shadow = {
+                  x: props.shadowX.value,
+                  y: props.shadowY.value,
+                  blur: props.shadowBlur.value,
+                  color: props.shadowColor.value
+              };
+              currentEditItem.custom = false;
+              draw();
+          });
+          editorClose.addEventListener('click', closeItemEditor);
+
+          function init() {
+              populateFontSelectors();
+              resizeCanvas();
+              textInput.addEventListener('input', syncTextItems);
+              marginInput.addEventListener('change', syncTextItems);
+              controls.bgColor.addEventListener('input', draw);
+              controls.bgImage.addEventListener('change', handleImageUpload);
+              downloadBtn.addEventListener('click', downloadImage);
+              undoBtn.addEventListener('click', undo);
+              redoBtn.addEventListener('click', redo);
+              controls.canvasSize.addEventListener('change', resizeCanvas);
+              Object.values(controls.primary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
+              Object.values(controls.secondary).forEach(el => el.addEventListener('input', handleGlobalStyleChange));
+              window.addEventListener('resize', resizeCanvas);
+              updateUndoRedo();
+              canvas.addEventListener('mousedown', handleMouseDown);
+              canvas.addEventListener('mousemove', handleMouseMove);
+              canvas.addEventListener('mouseup', () => {
+                  let changed = false;
+                  textItems.forEach(i=>{
+                      if(i.action){changed = true; i.action=null;}
+                  });
+                  if (backgroundImage && backgroundImage.action) {changed = true; backgroundImage.action=null;}
+                  if(changed) saveState();
+              });
+              canvas.addEventListener('mouseleave', () => {
+                  textItems.forEach(i=>i.action=null);
+                  if (backgroundImage) backgroundImage.action=null;
+              });
+              canvas.addEventListener('touchstart', handleMouseDown, { passive: false });
+              canvas.addEventListener('touchmove', handleMouseMove, { passive: false });
+              canvas.addEventListener('touchend', () => {
+                  let changed = false;
+                  textItems.forEach(i=>{
+                      if(i.action){changed=true; i.action=null;}
+                  });
+                  if (backgroundImage && backgroundImage.action) {changed=true; backgroundImage.action=null;}
+                  if(changed) saveState();
+              });
+              document.addEventListener('keydown', e => {
+                  if((e.ctrlKey||e.metaKey) && !e.shiftKey && e.key==='z') { e.preventDefault(); undo(); }
+                  else if((e.ctrlKey||e.metaKey) && (e.key==='y' || (e.shiftKey && e.key==='z'))) { e.preventDefault(); redo(); }
+              });
+          }
+          loadFonts();
+      });
     </script>
-</body>
+  </body>
 </html>
