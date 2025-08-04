@@ -121,6 +121,13 @@
   function hideAuth() {
     authSection.style.display = 'none';
     editorSection.style.display = 'flex';
+    
+    // Refresh CodeMirror after making it visible
+    setTimeout(() => {
+      if (editor) {
+        editor.refresh();
+      }
+    }, 10);
   }
   
   async function apiRequest(path, options = {}) {
@@ -224,11 +231,25 @@
     if (res.status === 404) {
       editor.setValue('');
       shas[path] = null;
+      
+      // Refresh CodeMirror after setting empty content
+      setTimeout(() => {
+        if (editor) {
+          editor.refresh();
+        }
+      }, 10);
       return;
     }
     const data = await res.json();
     editor.setValue(base64DecodeUtf8(data.content.replace(/\n/g, '')));
     shas[path] = data.sha;
+    
+    // Refresh CodeMirror after setting content
+    setTimeout(() => {
+      if (editor) {
+        editor.refresh();
+      }
+    }, 10);
   }
   
   async function saveCurrentFile() {
