@@ -11,9 +11,15 @@
   const saveFileBtn = document.getElementById('save-file');
   const renameFileBtn = document.getElementById('rename-file');
   const deleteFileBtn = document.getElementById('delete-file');
+  const previewFileBtn = document.getElementById('preview-file');
+  const backToToolsBtn = document.getElementById('back-to-tools');
   const currentPathEl = document.getElementById('current-path');
   const textArea = document.getElementById('file-content');
   const popupEl = document.getElementById('popup');
+  const previewModal = document.getElementById('preview-modal');
+  const previewIframe = document.getElementById('preview-iframe');
+  const previewClose = document.querySelector('.preview-close');
+  const prettifyBtn = document.getElementById('prettify-btn');
   const shas = {};
   let editor;
   let currentPath = '';
@@ -238,10 +244,21 @@
     }
   }
   
+  function updateUrlWithFile(path) {
+    const url = new URL(window.location);
+    if (path) {
+      url.searchParams.set('file', path);
+    } else {
+      url.searchParams.delete('file');
+    }
+    window.history.replaceState({}, '', url);
+  }
+
   async function loadFile(path) {
     currentPath = path;
     currentPathEl.querySelector('span').textContent = path;
     setModeFromPath(path);
+    updateUrlWithFile(path);
     
     // Close mobile sidebar when file is selected
     if (window.innerWidth <= 768) {
@@ -272,6 +289,84 @@
         editor.refresh();
       }
     }, 10);
+  }
+
+  function openPreviewModal() {
+    if (!currentPath) {
+      showPopup('No file selected for preview');
+      return;
+    }
+    
+    const content = editor.getValue();
+    if (!content.trim()) {
+      showPopup('No content to preview');
+      return;
+    }
+    
+    // Create a blob URL for the HTML content
+    const blob = new Blob([content], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    previewIframe.src = url;
+    previewModal.classList.add('active');
+    
+    // Clean up the blob URL after the iframe loads
+    previewIframe.onload = () => {
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+    };
+  }
+
+  function closePreviewModal() {
+    previewModal.classList.remove('active');
+    previewIframe.src = '';
+  }
+
+  function prettifyCode() {
+    if (!window.prettier) {
+      showPopup('Prettier library not loaded');
+      return;
+    }
+    
+    try {
+      const content = editor.getValue();
+      if (!content.trim()) {
+        showPopup('No content to prettify');
+        return;
+      }
+      
+      const formatted = prettier.format(content, {
+        parser: 'html',
+        plugins: prettierPlugins,
+        tabWidth: 2,
+        useTabs: false,
+        printWidth: 100
+      });
+      
+      editor.setValue(formatted);
+      showPopup('Code prettified!');
+      
+      // Update URL since content changed
+      updateUrlWithFile(currentPath);
+    } catch (error) {
+      showPopup('Error prettifying code: ' + error.message);
+    }
+  }
+
+  function backToTools() {
+    // Navigate back to the main tools page with the current file selected
+    const baseUrl = new URL('/', window.location.origin).toString();
+    if (currentPath) {
+      // Extract just the filename for the tools page
+      const filename = currentPath.split('/').pop();
+      if (filename && filename !== 'external-sites.csv') {
+        // Use hash-based routing with URL encoding like the tools page expects
+        const encodedPath = encodeURIComponent(currentPath);
+        window.location.href = `${baseUrl}#${encodedPath}`;
+        return;
+      }
+    }
+    // If no specific file or it's external-sites.csv, just go to the main page
+    window.location.href = baseUrl;
   }
   
   async function saveCurrentFile() {
@@ -310,6 +405,7 @@
     currentPathEl.querySelector('span').textContent = '';
     delete shas[currentPath];
     currentPath = '';
+    updateUrlWithFile(''); // Clear URL param when no file
     showPopup('Deleted');
   }
   
@@ -346,6 +442,35 @@
   saveFileBtn.addEventListener('click', saveCurrentFile);
   deleteFileBtn.addEventListener('click', deleteCurrentFile);
   renameFileBtn.addEventListener('click', renameCurrentFile);
+  previewFileBtn.addEventListener('click', openPreviewModal);
+  previewClose.addEventListener('click', closePreviewModal);
+  prettifyBtn.addEventListener('click', prettifyCode);
+  backToToolsBtn.addEventListener('click', backToTools);
+  
+  // Close modal when clicking outside
+  previewModal.addEventListener('click', (e) => {
+    if (e.target === previewModal) {
+      closePreviewModal();
+    }
+  });
+  
+  // Close modal with Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && previewModal.classList.contains('active')) {
+      closePreviewModal();
+    }
+  });
+  
+  // Update URL when content changes
+  editor.on('change', () => {
+    // Debounce URL updates to avoid too many history entries
+    clearTimeout(editor._urlUpdateTimeout);
+    editor._urlUpdateTimeout = setTimeout(() => {
+      if (currentPath) {
+        updateUrlWithFile(currentPath);
+      }
+    }, 1000);
+  });
   createFileBtn.addEventListener('click', () => {
     const name = newFileInput.value.trim();
     if (!name) return;
