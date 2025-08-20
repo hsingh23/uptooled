@@ -619,7 +619,10 @@
     }
     
     function applyPanConstraints() {
-        if (!originalImageToDraw || !currentTargetSize) return;
+        if ((!originalImageToDraw && !isBackgroundOnlyMode) || !currentTargetSize) return;
+
+        // In background-only mode, there's no image to constrain
+        if (isBackgroundOnlyMode) return;
 
         const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
         const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
@@ -711,7 +714,7 @@
     }
 
     function startPan(event) {
-        if (!activeImageId || !currentTargetSize || !originalImageToDraw) return;
+        if (!activeImageId || !currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
 
         event.preventDefault(); 
         isPanning = true;
