@@ -624,10 +624,29 @@
         const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
         const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
 
-        const minPanX = (drawWidth <= editorCanvas.width) ? (editorCanvas.width - drawWidth) / 2 : editorCanvas.width - drawWidth;
-        const maxPanX = (drawWidth <= editorCanvas.width) ? (editorCanvas.width - drawWidth) / 2 : 0;
-        const minPanY = (drawHeight <= editorCanvas.height) ? (editorCanvas.height - drawHeight) / 2 : editorCanvas.height - drawHeight;
-        const maxPanY = (drawHeight <= editorCanvas.height) ? (editorCanvas.height - drawHeight) / 2 : 0;
+        // For small images (smaller than canvas), allow positioning anywhere within canvas bounds
+        // For large images (larger than canvas), constrain to show at least some part of the image
+        let minPanX, maxPanX, minPanY, maxPanY;
+        
+        if (drawWidth <= editorCanvas.width) {
+            // Small image horizontally - allow positioning anywhere from left edge to right edge
+            minPanX = 0 - drawWidth;
+            maxPanX = editorCanvas.width;
+        } else {
+            // Large image horizontally - constrain to show some part of the image
+            minPanX = editorCanvas.width - drawWidth;
+            maxPanX = 0;
+        }
+        
+        if (drawHeight <= editorCanvas.height) {
+            // Small image vertically - allow positioning anywhere from top edge to bottom edge
+            minPanY = 0 - drawHeight;
+            maxPanY = editorCanvas.height;
+        } else {
+            // Large image vertically - constrain to show some part of the image
+            minPanY = editorCanvas.height - drawHeight;
+            maxPanY = 0;
+        }
         
         currentPan.x = Math.max(minPanX, Math.min(maxPanX, currentPan.x));
         currentPan.y = Math.max(minPanY, Math.min(maxPanY, currentPan.y));
@@ -693,12 +712,6 @@
 
     function startPan(event) {
         if (!activeImageId || !currentTargetSize || !originalImageToDraw) return;
-        const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
-        const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
-        if (drawWidth <= editorCanvas.width && drawHeight <= editorCanvas.height) {
-            isPanning = false;
-            return;
-        }
 
         event.preventDefault(); 
         isPanning = true;
