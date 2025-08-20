@@ -160,9 +160,15 @@
 
             <div>
                 <h4 class="text-md font-semibold mb-1 text-gray-700">Background Color:</h4>
-                <div class="flex gap-2 items-center">
+                <div class="flex gap-2 items-center flex-wrap">
                     <input type="color" id="bgColorPicker" value="#FFFFFF" class="w-10 h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
                     <button id="transparentBgButton" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm">Transparent BG</button>
+                </div>
+                <div class="mt-2">
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" id="backgroundOnlyMode" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                        <span>Background only (no image)</span>
+                    </label>
                 </div>
             </div>
           </div>
@@ -233,6 +239,7 @@
     const zoomValueDisplay = document.getElementById('zoomValueDisplay');
     const bgColorPicker = document.getElementById('bgColorPicker');
     const transparentBgButton = document.getElementById('transparentBgButton');
+    const backgroundOnlyMode = document.getElementById('backgroundOnlyMode');
 
     // App State
     let imagesData = []; 
@@ -244,6 +251,7 @@
     let currentBackgroundColor = '#FFFFFF';
     let isPanning = false;
     let lastMousePos = { x: 0, y: 0 };
+    let isBackgroundOnlyMode = false;
 
     const PREDEFINED_SIZES = [
         // Original icon sizes
@@ -288,6 +296,7 @@
         zoomSlider.addEventListener('input', handleZoomChange);
         bgColorPicker.addEventListener('input', handleBgColorChange);
         transparentBgButton.addEventListener('click', setTransparentBackground);
+        backgroundOnlyMode.addEventListener('change', handleBackgroundOnlyModeChange);
 
         downloadCurrentImageVersionButton.addEventListener('click', downloadCurrentVersion);
         downloadAllForCurrentImageButton.addEventListener('click', downloadAllVersionsForCurrentImage);
@@ -457,31 +466,49 @@
     }
 
     function resetZoomAndBgToDefaultsOrStored() {
-        if (!activeImageId || !currentTargetSize || !originalImageToDraw) {
+        if (!activeImageId || !currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) {
             updateCanvasForNewState();
             return;
         }
 
-        const imgData = imagesData.find(img => img.id === activeImageId);
-        const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-        const storedVersion = imgData.processedVersions[sizeKey];
-
-        if (storedVersion) {
-            currentZoom = storedVersion.zoom;
-            currentBackgroundColor = storedVersion.backgroundColor;
-            currentPan.x = storedVersion.panX;
-            currentPan.y = storedVersion.panY;
+        if (isBackgroundOnlyMode) {
+            // Background-only mode
+            const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
+            const storedVersion = window.backgroundOnlyVersions ? window.backgroundOnlyVersions[sizeKey] : null;
+            
+            if (storedVersion) {
+                currentBackgroundColor = storedVersion.backgroundColor;
+            } else {
+                currentBackgroundColor = '#FFFFFF';
+            }
+            
+            // Reset zoom and pan for background mode
+            currentZoom = 1.0;
+            currentPan.x = 0;
+            currentPan.y = 0;
         } else {
-            const zoomX = currentTargetSize.width / originalImageToDraw.naturalWidth;
-            const zoomY = currentTargetSize.height / originalImageToDraw.naturalHeight;
-            currentZoom = Math.max(zoomX, zoomY);
-            
-            const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
-            const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
-            currentPan.x = (currentTargetSize.width - drawWidth) / 2;
-            currentPan.y = (currentTargetSize.height - drawHeight) / 2;
-            
-            currentBackgroundColor = '#FFFFFF';
+            // Regular image mode
+            const imgData = imagesData.find(img => img.id === activeImageId);
+            const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
+            const storedVersion = imgData.processedVersions[sizeKey];
+
+            if (storedVersion) {
+                currentZoom = storedVersion.zoom;
+                currentBackgroundColor = storedVersion.backgroundColor;
+                currentPan.x = storedVersion.panX;
+                currentPan.y = storedVersion.panY;
+            } else {
+                const zoomX = currentTargetSize.width / originalImageToDraw.naturalWidth;
+                const zoomY = currentTargetSize.height / originalImageToDraw.naturalHeight;
+                currentZoom = Math.max(zoomX, zoomY);
+                
+                const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
+                const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
+                currentPan.x = (currentTargetSize.width - drawWidth) / 2;
+                currentPan.y = (currentTargetSize.height - drawHeight) / 2;
+                
+                currentBackgroundColor = '#FFFFFF';
+            }
         }
         
         zoomSlider.value = currentZoom * 100;
@@ -493,7 +520,7 @@
 
 
     function updateCanvasForNewState() {
-        if (!activeImageId || !currentTargetSize || !originalImageToDraw) {
+        if (!activeImageId || !currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) {
             ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
             editorCanvas.style.width = '0px';
             editorCanvas.style.height = '0px';
@@ -561,6 +588,35 @@
         showToast('Background set to transparent.', 'info');
         redrawCanvasAndStore();
     }
+
+    function handleBackgroundOnlyModeChange(event) {
+        isBackgroundOnlyMode = event.target.checked;
+        
+        if (isBackgroundOnlyMode) {
+            // Enable background-only mode
+            activeImageId = 'background-only';
+            originalImageToDraw = null;
+            currentImageNameDisplay.textContent = 'Background Only Mode';
+            
+            // Set default size if none selected
+            if (!currentTargetSize) {
+                currentTargetSize = { width: PREDEFINED_SIZES[7].width, height: PREDEFINED_SIZES[7].height }; // Default to 1600x900
+                customWidthInput.value = currentTargetSize.width;
+                customHeightInput.value = currentTargetSize.height;
+                highlightActiveSizeButton();
+            }
+            
+            resetZoomAndBgToDefaultsOrStored();
+        } else {
+            // Disable background-only mode
+            activeImageId = null;
+            originalImageToDraw = null;
+            currentImageNameDisplay.textContent = '';
+        }
+        
+        updateEditorVisibility();
+        updateDownloadButtonsState();
+    }
     
     function applyPanConstraints() {
         if (!originalImageToDraw || !currentTargetSize) return;
@@ -579,7 +635,7 @@
 
 
     function redrawCanvasAndStore() {
-        if (!originalImageToDraw || !currentTargetSize) return;
+        if (!currentTargetSize) return;
 
         ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
         
@@ -588,24 +644,42 @@
             ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
         }
 
-        const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
-        const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
-        ctx.drawImage(originalImageToDraw, currentPan.x, currentPan.y, drawWidth, drawHeight);
+        // Only draw image if we have one and not in background-only mode
+        if (originalImageToDraw && !isBackgroundOnlyMode) {
+            const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
+            const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
+            ctx.drawImage(originalImageToDraw, currentPan.x, currentPan.y, drawWidth, drawHeight);
+        }
 
         const dataURL = editorCanvas.toDataURL('image/png'); 
-        const imgData = imagesData.find(img => img.id === activeImageId);
-        if (imgData) {
+        
+        if (isBackgroundOnlyMode) {
+            // Store background-only version in a special location
+            if (!window.backgroundOnlyVersions) {
+                window.backgroundOnlyVersions = {};
+            }
             const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-            imgData.processedVersions[sizeKey] = {
+            window.backgroundOnlyVersions[sizeKey] = {
                 dataURL,
-                panX: currentPan.x,
-                panY: currentPan.y,
-                zoom: currentZoom,
                 backgroundColor: currentBackgroundColor,
                 targetWidth: currentTargetSize.width,
                 targetHeight: currentTargetSize.height
             };
-            updateImageListItemProcessedState(activeImageId);
+        } else {
+            const imgData = imagesData.find(img => img.id === activeImageId);
+            if (imgData) {
+                const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
+                imgData.processedVersions[sizeKey] = {
+                    dataURL,
+                    panX: currentPan.x,
+                    panY: currentPan.y,
+                    zoom: currentZoom,
+                    backgroundColor: currentBackgroundColor,
+                    targetWidth: currentTargetSize.width,
+                    targetHeight: currentTargetSize.height
+                };
+                updateImageListItemProcessedState(activeImageId);
+            }
         }
         updateDownloadButtonsState();
     }
@@ -676,18 +750,27 @@
     }
 
     function updateDownloadButtonsState() {
-        const imgData = imagesData.find(img => img.id === activeImageId);
         let currentVersionExists = false;
         let anyVersionExistsForCurrentImage = false;
         let anyVersionExistsAtAll = false;
 
-        if (imgData && currentTargetSize) {
+        if (isBackgroundOnlyMode && currentTargetSize) {
+            // Check background-only versions
             const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-            if (imgData.processedVersions[sizeKey] && imgData.processedVersions[sizeKey].dataURL) {
+            if (window.backgroundOnlyVersions && window.backgroundOnlyVersions[sizeKey]) {
                 currentVersionExists = true;
-            }
-            if (Object.keys(imgData.processedVersions).length > 0) {
                 anyVersionExistsForCurrentImage = true;
+            }
+        } else {
+            const imgData = imagesData.find(img => img.id === activeImageId);
+            if (imgData && currentTargetSize) {
+                const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
+                if (imgData.processedVersions[sizeKey] && imgData.processedVersions[sizeKey].dataURL) {
+                    currentVersionExists = true;
+                }
+                if (Object.keys(imgData.processedVersions).length > 0) {
+                    anyVersionExistsForCurrentImage = true;
+                }
             }
         }
         
@@ -696,6 +779,11 @@
                 anyVersionExistsAtAll = true;
             }
         });
+        
+        // Also check background-only versions
+        if (window.backgroundOnlyVersions && Object.keys(window.backgroundOnlyVersions).length > 0) {
+            anyVersionExistsAtAll = true;
+        }
 
         downloadCurrentImageVersionButton.disabled = !currentVersionExists;
         downloadAllForCurrentImageButton.disabled = !anyVersionExistsForCurrentImage;
@@ -704,38 +792,66 @@
 
     function downloadCurrentVersion() {
         if (!activeImageId || !currentTargetSize) return;
-        const imgData = imagesData.find(img => img.id === activeImageId);
+        
         const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-        const version = imgData?.processedVersions[sizeKey];
-
-        if (version?.dataURL) {
-            triggerDownload(version.dataURL, `${getSafeFilenameBase(imgData.name)}_${version.targetWidth}x${version.targetHeight}.png`);
-            showToast(`Downloading ${version.targetWidth}x${version.targetHeight} version.`, 'success');
+        
+        if (isBackgroundOnlyMode) {
+            const version = window.backgroundOnlyVersions?.[sizeKey];
+            if (version?.dataURL) {
+                triggerDownload(version.dataURL, `background_${version.targetWidth}x${version.targetHeight}.png`);
+                showToast(`Downloading ${version.targetWidth}x${version.targetHeight} background.`, 'success');
+            } else {
+                showToast('No processed version available for this size.', 'error');
+            }
         } else {
-            showToast('No processed version available for this size.', 'error');
+            const imgData = imagesData.find(img => img.id === activeImageId);
+            const version = imgData?.processedVersions[sizeKey];
+
+            if (version?.dataURL) {
+                triggerDownload(version.dataURL, `${getSafeFilenameBase(imgData.name)}_${version.targetWidth}x${version.targetHeight}.png`);
+                showToast(`Downloading ${version.targetWidth}x${version.targetHeight} version.`, 'success');
+            } else {
+                showToast('No processed version available for this size.', 'error');
+            }
         }
     }
 
     function downloadAllVersionsForCurrentImage() {
         if (!activeImageId) return;
-        const imgData = imagesData.find(img => img.id === activeImageId);
-        if (!imgData || Object.keys(imgData.processedVersions).length === 0) {
-            showToast('No processed versions for this image.', 'info');
-            return;
-        }
-
-        Object.values(imgData.processedVersions).forEach(version => {
-            if (version.dataURL) {
-                triggerDownload(version.dataURL, `${getSafeFilenameBase(imgData.name)}_${version.targetWidth}x${version.targetHeight}.png`);
+        
+        if (isBackgroundOnlyMode) {
+            if (!window.backgroundOnlyVersions || Object.keys(window.backgroundOnlyVersions).length === 0) {
+                showToast('No processed background versions.', 'info');
+                return;
             }
-        });
-        showToast(`Downloading all processed versions for ${imgData.name}.`, 'success');
+
+            Object.values(window.backgroundOnlyVersions).forEach(version => {
+                if (version.dataURL) {
+                    triggerDownload(version.dataURL, `background_${version.targetWidth}x${version.targetHeight}.png`);
+                }
+            });
+            showToast(`Downloading all background versions.`, 'success');
+        } else {
+            const imgData = imagesData.find(img => img.id === activeImageId);
+            if (!imgData || Object.keys(imgData.processedVersions).length === 0) {
+                showToast('No processed versions for this image.', 'info');
+                return;
+            }
+
+            Object.values(imgData.processedVersions).forEach(version => {
+                if (version.dataURL) {
+                    triggerDownload(version.dataURL, `${getSafeFilenameBase(imgData.name)}_${version.targetWidth}x${version.targetHeight}.png`);
+                }
+            });
+            showToast(`Downloading all processed versions for ${imgData.name}.`, 'success');
+        }
     }
 
     async function downloadAllProcessedZip() {
         const zip = new JSZip();
         let filesAdded = 0;
 
+        // Add regular image versions
         imagesData.forEach(imgData => {
             const safeOriginalNameBase = getSafeFilenameBase(imgData.name);
             Object.values(imgData.processedVersions).forEach(versionData => {
@@ -746,6 +862,17 @@
                 }
             });
         });
+
+        // Add background-only versions
+        if (window.backgroundOnlyVersions) {
+            Object.values(window.backgroundOnlyVersions).forEach(versionData => {
+                if (versionData.dataURL) {
+                    const base64Data = versionData.dataURL.split(',')[1];
+                    zip.file(`background_${versionData.targetWidth}x${versionData.targetHeight}.png`, base64Data, { base64: true });
+                    filesAdded++;
+                }
+            });
+        }
 
         if (filesAdded === 0) {
             showToast('No processed images to download.', 'info');
