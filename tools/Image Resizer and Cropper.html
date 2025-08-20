@@ -162,6 +162,7 @@
                 <h4 class="text-md font-semibold mb-1 text-gray-700">Background Color:</h4>
                 <div class="flex gap-2 items-center flex-wrap">
                     <input type="color" id="bgColorPicker" value="#FFFFFF" class="w-10 h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
+                    <input type="text" id="hexColorInput" placeholder="#FFFFFF" class="w-24 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm font-mono" maxlength="7">
                     <button id="transparentBgButton" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm">Transparent BG</button>
                 </div>
                 <div class="mt-2">
@@ -238,6 +239,7 @@
     const zoomSlider = document.getElementById('zoomSlider');
     const zoomValueDisplay = document.getElementById('zoomValueDisplay');
     const bgColorPicker = document.getElementById('bgColorPicker');
+    const hexColorInput = document.getElementById('hexColorInput');
     const transparentBgButton = document.getElementById('transparentBgButton');
     const backgroundOnlyMode = document.getElementById('backgroundOnlyMode');
 
@@ -295,6 +297,8 @@
 
         zoomSlider.addEventListener('input', handleZoomChange);
         bgColorPicker.addEventListener('input', handleBgColorChange);
+        hexColorInput.addEventListener('input', handleHexColorChange);
+        hexColorInput.addEventListener('blur', validateHexColor);
         transparentBgButton.addEventListener('click', setTransparentBackground);
         backgroundOnlyMode.addEventListener('change', handleBackgroundOnlyModeChange);
 
@@ -478,9 +482,8 @@
             
             if (storedVersion) {
                 currentBackgroundColor = storedVersion.backgroundColor;
-            } else {
-                currentBackgroundColor = '#FFFFFF';
             }
+            // If no stored version, keep the current background color (don't reset to white)
             
             // Reset zoom and pan for background mode
             currentZoom = 1.0;
@@ -514,6 +517,7 @@
         zoomSlider.value = currentZoom * 100;
         zoomValueDisplay.textContent = Math.round(currentZoom * 100);
         bgColorPicker.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor;
+        hexColorInput.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor.toUpperCase();
 
         updateCanvasForNewState();
     }
@@ -579,12 +583,37 @@
 
     function handleBgColorChange(event) {
         currentBackgroundColor = event.target.value;
+        hexColorInput.value = currentBackgroundColor.toUpperCase();
         redrawCanvasAndStore();
+    }
+
+    function handleHexColorChange(event) {
+        const hexValue = event.target.value;
+        if (isValidHexColor(hexValue)) {
+            currentBackgroundColor = hexValue;
+            bgColorPicker.value = hexValue;
+            redrawCanvasAndStore();
+        }
+    }
+
+    function validateHexColor(event) {
+        const hexValue = event.target.value;
+        if (hexValue && !isValidHexColor(hexValue)) {
+            showToast('Invalid hex color format. Use #RRGGBB format.', 'error');
+            hexColorInput.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor;
+        } else if (!hexValue) {
+            hexColorInput.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor;
+        }
+    }
+
+    function isValidHexColor(hex) {
+        return /^#[0-9A-Fa-f]{6}$/.test(hex);
     }
 
     function setTransparentBackground() {
         currentBackgroundColor = 'transparent';
         bgColorPicker.value = '#FFFFFF';
+        hexColorInput.value = '#FFFFFF';
         showToast('Background set to transparent.', 'info');
         redrawCanvasAndStore();
     }
