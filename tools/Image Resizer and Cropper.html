@@ -11,14 +11,14 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://example.com/">
+    <meta property="og:url" content="https://tools.privacyfirstapps.org/#tools%2FImage%20Resizer%20and%20Cropper.html">
     <meta property="og:title" content="Free Image Resizer & Cropper - Online Tool">
     <meta property="og:description" content="Easily resize, crop, and edit images for favicons, app icons, and more. Features zoom, pan, and custom background colors.">
     <meta property="og:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Image+Resizer\n&cropper">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://example.com/">
+    <meta property="twitter:url" content="https://tools.privacyfirstapps.org/#tools%2FImage%20Resizer%20and%20Cropper.html">
     <meta property="twitter:title" content="Free Image Resizer & Cropper - Online Tool">
     <meta property="twitter:description" content="Easily resize, crop, and edit images for favicons, app icons, and more. Features zoom, pan, and custom background colors.">
     <meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Image+Resizer\n&cropper">
@@ -246,6 +246,7 @@
     let lastMousePos = { x: 0, y: 0 };
 
     const PREDEFINED_SIZES = [
+        // Original icon sizes
         { name: 'Icon 16x16', width: 16, height: 16 },
         { name: 'Icon 32x32', width: 32, height: 32 },
         { name: 'Icon 48x48', width: 48, height: 48 },
@@ -253,6 +254,22 @@
         { name: 'Favicon 32x32', width: 32, height: 32 },
         { name: 'Web App Icon 192x192', width: 192, height: 192 },
         { name: 'Web App Icon 512x512', width: 512, height: 512 },
+        
+        // 16:9 aspect ratio (landscape)
+        { name: '16:9 - 1600x900', width: 1600, height: 900 },
+        { name: '16:9 - 2400x1350', width: 2400, height: 1350 },
+        
+        // 9:16 aspect ratio (portrait)
+        { name: '9:16 - 900x1600', width: 900, height: 1600 },
+        { name: '9:16 - 1350x2400', width: 1350, height: 2400 },
+        
+        // 4:3 aspect ratio (landscape)
+        { name: '4:3 - 1600x1200', width: 1600, height: 1200 },
+        { name: '4:3 - 2400x1800', width: 2400, height: 1800 },
+        
+        // 3:4 aspect ratio (portrait)
+        { name: '3:4 - 1200x1600', width: 1200, height: 1600 },
+        { name: '3:4 - 1800x2400', width: 1800, height: 2400 },
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
