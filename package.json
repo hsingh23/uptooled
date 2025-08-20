@@ -4,7 +4,8 @@
   "description": "Tools gallery",
   "main": "generate.js",
   "scripts": {
-    "generate": "node generate.js"
+    "generate": "node generate.js",
+    "dev": "npx serve ."
   },
   "keywords": [],
   "author": "",
