@@ -254,6 +254,7 @@
     let isPanning = false;
     let lastMousePos = { x: 0, y: 0 };
     let isBackgroundOnlyMode = false;
+    let previousActiveImageId = null;
 
     const PREDEFINED_SIZES = [
         // Original icon sizes
@@ -282,10 +283,163 @@
         { name: '3:4 - 1800x2400', width: 1800, height: 2400 },
     ];
 
+    function generateImageId() {
+        return `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    }
+
+    function getFileNameWithFallback(file, fallbackPrefix = 'image') {
+        if (file && typeof file.name === 'string' && file.name.trim()) {
+            return file.name.trim();
+        }
+
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const extension = (file && file.type && file.type.includes('/'))
+            ? `.${file.type.split('/')[1] || 'png'}`
+            : '.png';
+
+        return `${fallbackPrefix}-${timestamp}${extension}`;
+    }
+
+    function processImageFile(file, options = {}) {
+        if (!file) return;
+
+        const { nameOverride = null, fallbackPrefix = 'image', successMessage = null } = options;
+        const displayName = nameOverride || getFileNameWithFallback(file, fallbackPrefix);
+        const imageId = generateImageId();
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const imgElement = new Image();
+            imgElement.onload = () => {
+                const newImage = {
+                    id: imageId,
+                    file,
+                    name: displayName,
+                    originalSrc: e.target.result,
+                    originalWidth: imgElement.naturalWidth,
+                    originalHeight: imgElement.naturalHeight,
+                    imgElement,
+                    processedVersions: {}
+                };
+
+                imagesData.push(newImage);
+                renderImageListItem(newImage);
+                noImagesMessage.classList.add('hidden');
+
+                setActiveImage(imageId);
+                updateDownloadButtonsState();
+
+                if (successMessage) {
+                    showToast(successMessage, 'success');
+                }
+            };
+
+            imgElement.onerror = () => showToast(`Error loading image: ${displayName}`, 'error');
+            imgElement.src = e.target.result;
+        };
+
+        reader.onerror = () => showToast(`Error reading file: ${displayName}`, 'error');
+        reader.readAsDataURL(file);
+    }
+
+    function setBackgroundOnlyMode(enabled, options = {}) {
+        const { deferReset = false, skipRestore = false } = options;
+
+        if (enabled) {
+            if (isBackgroundOnlyMode) return;
+
+            if (activeImageId && activeImageId !== 'background-only') {
+                previousActiveImageId = activeImageId;
+            }
+
+            isBackgroundOnlyMode = true;
+            backgroundOnlyMode.checked = true;
+            activeImageId = 'background-only';
+            originalImageToDraw = null;
+            currentImageNameDisplay.textContent = 'Background Only Mode';
+
+            document.querySelectorAll('#imageListContainer > div').forEach(el => {
+                el.classList.remove('thumbnail-selected', 'bg-blue-50');
+            });
+
+            if (!currentTargetSize && PREDEFINED_SIZES.length > 0) {
+                currentTargetSize = { width: PREDEFINED_SIZES[7].width, height: PREDEFINED_SIZES[7].height };
+                customWidthInput.value = currentTargetSize.width;
+                customHeightInput.value = currentTargetSize.height;
+                highlightActiveSizeButton();
+            }
+
+            currentZoom = 1.0;
+            currentPan.x = 0;
+            currentPan.y = 0;
+
+            if (!deferReset) {
+                resetZoomAndBgToDefaultsOrStored();
+            }
+
+            updateEditorVisibility();
+            updateDownloadButtonsState();
+            return;
+        }
+
+        if (!isBackgroundOnlyMode) return;
+
+        isBackgroundOnlyMode = false;
+        backgroundOnlyMode.checked = false;
+
+        if (skipRestore) {
+            activeImageId = null;
+            originalImageToDraw = null;
+            currentImageNameDisplay.textContent = '';
+            updateEditorVisibility();
+            updateCanvasForNewState();
+            updateDownloadButtonsState();
+            return;
+        }
+
+        if (previousActiveImageId && imagesData.some(img => img.id === previousActiveImageId)) {
+            setActiveImage(previousActiveImageId);
+        } else if (imagesData.length > 0) {
+            setActiveImage(imagesData[0].id);
+        } else {
+            activeImageId = null;
+            originalImageToDraw = null;
+            currentImageNameDisplay.textContent = '';
+            updateEditorVisibility();
+            updateCanvasForNewState();
+            updateDownloadButtonsState();
+        }
+    }
+
+    function ensureBackgroundModeIfNoImage() {
+        if (imagesData.length === 0) {
+            setBackgroundOnlyMode(true, { deferReset: true });
+        }
+    }
+
+    function handlePasteEvent(event) {
+        const clipboardData = event.clipboardData || window.clipboardData;
+        if (!clipboardData || !clipboardData.items) return;
+
+        const items = Array.from(clipboardData.items);
+        const imageItem = items.find(item => item.type && item.type.startsWith('image/'));
+
+        if (!imageItem) return;
+
+        const file = imageItem.getAsFile();
+        if (!file) return;
+
+        event.preventDefault();
+        processImageFile(file, {
+            fallbackPrefix: 'pasted-image',
+            successMessage: 'Pasted image added to the editor.'
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         fileInput.addEventListener('change', handleFileSelect);
         setCustomSizeButton.addEventListener('click', handleSetCustomSize);
-        
+
         editorCanvas.addEventListener('mousedown', startPan);
         editorCanvas.addEventListener('mousemove', panImage);
         editorCanvas.addEventListener('mouseup', endPan);
@@ -305,10 +459,11 @@
         downloadCurrentImageVersionButton.addEventListener('click', downloadCurrentVersion);
         downloadAllForCurrentImageButton.addEventListener('click', downloadAllVersionsForCurrentImage);
         downloadAllProcessedButton.addEventListener('click', downloadAllProcessedZip);
-        
+
         populatePredefinedSizes();
         updateEditorVisibility();
         updateDownloadButtonsState();
+        document.addEventListener('paste', handlePasteEvent);
     });
 
     function populatePredefinedSizes() {
@@ -320,6 +475,7 @@
                 currentTargetSize = { width: size.width, height: size.height };
                 customWidthInput.value = size.width;
                 customHeightInput.value = size.height;
+                ensureBackgroundModeIfNoImage();
                 resetZoomAndBgToDefaultsOrStored();
                 highlightActiveSizeButton();
             };
@@ -347,36 +503,12 @@
     function handleFileSelect(event) {
         const files = event.target.files;
         if (!files.length) return;
-        noImagesMessage.classList.add('hidden');
-
         Array.from(files).forEach(file => {
-            const reader = new FileReader();
-            const imageId = `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-            reader.onload = (e) => {
-                const imgElement = new Image();
-                imgElement.onload = () => {
-                    const newImage = {
-                        id: imageId,
-                        file: file,
-                        name: file.name,
-                        originalSrc: e.target.result,
-                        originalWidth: imgElement.naturalWidth,
-                        originalHeight: imgElement.naturalHeight,
-                        imgElement: imgElement,
-                        processedVersions: {}
-                    };
-                    imagesData.push(newImage);
-                    renderImageListItem(newImage);
-                    if (!activeImageId) {
-                        setActiveImage(imageId);
-                    }
-                    updateDownloadButtonsState();
-                };
-                imgElement.onerror = () => showToast(`Error loading image: ${file.name}`, 'error');
-                imgElement.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            const displayName = getFileNameWithFallback(file, 'image');
+            processImageFile(file, {
+                nameOverride: displayName,
+                successMessage: `${displayName} added to the editor.`
+            });
         });
         fileInput.value = '';
     }
@@ -419,7 +551,11 @@
     }
 
     function setActiveImage(imageId) {
-        if (activeImageId === imageId && originalImageToDraw) return; 
+        if (isBackgroundOnlyMode) {
+            setBackgroundOnlyMode(false, { skipRestore: true });
+        }
+
+        if (activeImageId === imageId && originalImageToDraw) return;
 
         activeImageId = imageId;
         const imgData = imagesData.find(img => img.id === activeImageId);
@@ -430,6 +566,8 @@
             updateEditorVisibility();
             return;
         }
+
+        previousActiveImageId = activeImageId;
 
         currentImageNameDisplay.textContent = imgData.name;
         originalImageToDraw = imgData.imgElement;
@@ -465,8 +603,9 @@
             return;
         }
         currentTargetSize = { width, height };
+        ensureBackgroundModeIfNoImage();
         resetZoomAndBgToDefaultsOrStored();
-        highlightActiveSizeButton(); 
+        highlightActiveSizeButton();
     }
 
     function resetZoomAndBgToDefaultsOrStored() {
@@ -619,32 +758,7 @@
     }
 
     function handleBackgroundOnlyModeChange(event) {
-        isBackgroundOnlyMode = event.target.checked;
-        
-        if (isBackgroundOnlyMode) {
-            // Enable background-only mode
-            activeImageId = 'background-only';
-            originalImageToDraw = null;
-            currentImageNameDisplay.textContent = 'Background Only Mode';
-            
-            // Set default size if none selected
-            if (!currentTargetSize) {
-                currentTargetSize = { width: PREDEFINED_SIZES[7].width, height: PREDEFINED_SIZES[7].height }; // Default to 1600x900
-                customWidthInput.value = currentTargetSize.width;
-                customHeightInput.value = currentTargetSize.height;
-                highlightActiveSizeButton();
-            }
-            
-            resetZoomAndBgToDefaultsOrStored();
-        } else {
-            // Disable background-only mode
-            activeImageId = null;
-            originalImageToDraw = null;
-            currentImageNameDisplay.textContent = '';
-        }
-        
-        updateEditorVisibility();
-        updateDownloadButtonsState();
+        setBackgroundOnlyMode(event.target.checked);
     }
     
     function applyPanConstraints() {
