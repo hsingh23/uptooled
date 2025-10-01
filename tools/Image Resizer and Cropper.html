@@ -24,7 +24,6 @@
     <meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Image+Resizer\n&cropper">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -48,16 +47,19 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
         }
         #canvasContainer {
-             display: flex;
-             justify-content: center;
-             align-items: center;
-             width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
         }
         #editorCanvas {
             max-width: 100%;
-            max-height: 400px;
+            max-height: 100%;
             object-fit: contain;
-            border-radius: 0.375rem; /* rounded-md */
+            border-radius: 0.75rem;
             background-image:
                 linear-gradient(45deg, #eee 25%, transparent 25%),
                 linear-gradient(-45deg, #eee 25%, transparent 25%),
@@ -94,119 +96,178 @@
             cursor: pointer;
             border: 2px solid white;
         }
+        .split-text {
+            display: inline-flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.25em;
+            perspective: 900px;
+        }
+        .split-text-word {
+            display: inline-flex;
+            gap: 0.02em;
+        }
+        .split-text-char {
+            display: inline-block;
+            transform: translateY(120%) rotateX(80deg);
+            transform-origin: center bottom;
+            opacity: 0;
+        }
+        .split-text-animate .split-text-char {
+            animation: splitTextRise 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation-delay: calc(var(--char-index) * 45ms);
+        }
+        .split-text-space {
+            display: inline-block;
+            width: 0.35em;
+        }
+        .split-text-reduced .split-text-char {
+            opacity: 1;
+            transform: none;
+            animation: none;
+        }
+        @keyframes splitTextRise {
+            0% {
+                transform: translateY(120%) rotateX(80deg);
+                opacity: 0;
+            }
+            60% {
+                transform: translateY(-10%) rotateX(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(0) rotateX(0deg);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-  <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
     <header class="mb-6 text-center">
-      <h1 class="text-3xl sm:text-4xl font-bold text-blue-600">Image Resizer & Cropper</h1>
+      <h1 class="text-3xl sm:text-4xl font-bold text-blue-600" data-animate-split-text>Image Resizer &amp; Cropper</h1>
       <p class="text-gray-600 mt-1">Upload, zoom, position, set background, and download your images.</p>
     </header>
 
     <!-- How to Use Guide -->
-    <div class="bg-white p-5 rounded-lg shadow-md mb-6">
-        <h2 class="text-xl font-semibold text-gray-700 mb-3">How to Use This Tool</h2>
-        <ol class="list-decimal list-inside space-y-2 text-gray-600">
-            <li><strong>Upload:</strong> Click "Choose Files" to select one or more images from your device.</li>
-            <li><strong>Select:</strong> Click on any image in the "Uploaded Images" list to activate it in the editor.</li>
-            <li><strong>Set Size:</strong> Pick a preset size (e.g., for icons) or enter custom dimensions and click "Set".</li>
-            <li><strong>Adjust:</strong> Use the zoom slider and drag the image in the preview window to get the perfect crop. You can also pick a background color or make it transparent.</li>
-            <li><strong>Download:</strong>
-                <ul class="list-disc list-inside ml-4 mt-1 text-sm">
-                    <li>Download just the current edited version.</li>
-                    <li>Download all processed versions for the selected image.</li>
-                    <li>Download a ZIP file of every image you've edited.</li>
-                </ul>
-            </li>
-        </ol>
-    </div>
+    <section id="instructionsCard" class="bg-white p-6 rounded-2xl shadow-md border border-blue-100" aria-live="polite">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="space-y-3">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-700">How to Use This Tool</h2>
+            <p class="text-sm text-gray-500 mt-1">Follow these quick steps to get started.</p>
+          </div>
+          <ol class="list-decimal list-inside space-y-2 text-gray-600">
+            <li><strong>Upload:</strong> Choose one or more images from your device.</li>
+            <li><strong>Select:</strong> Pick an image from the uploaded list to load it into the editor.</li>
+            <li><strong>Set Size:</strong> Use a preset or enter custom dimensions, then click <span class="font-semibold">Set</span>.</li>
+            <li><strong>Adjust:</strong> Pinch, scroll, or drag directly on the preview, or refine it with the zoom slider.</li>
+            <li><strong>Download:</strong> Save the current size with the single download button below the editor.</li>
+          </ol>
+        </div>
+        <button id="dismissInstructionsButton" type="button" class="self-start px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300">
+          Dismiss guide
+        </button>
+      </div>
+    </section>
 
 
-    <div class="flex flex-col lg:flex-row gap-6">
-      <!-- Left Column: Uploads and Image List -->
-      <div class="lg:w-1/3 bg-white p-6 rounded-lg shadow-xl">
-        <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">1. Upload Images</h2>
-        <input type="file" id="fileInput" multiple accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4 cursor-pointer">
-
-        <h3 class="text-lg font-semibold mb-3 text-gray-700">Uploaded Images:</h3>
-        <div id="imageListContainer" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+    <section id="uploadPanel" class="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-lg p-6">
+      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 class="text-2xl font-semibold text-gray-800">Upload &amp; Manage Images</h2>
+          <p class="text-sm text-gray-500 mt-1">Drop multiple images at once, then tap a thumbnail to begin editing.</p>
+        </div>
+        <label class="w-full md:w-auto">
+          <span class="sr-only">Choose images to upload</span>
+          <input type="file" id="fileInput" multiple accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+        </label>
+      </div>
+      <div class="mt-5">
+        <h3 class="text-lg font-semibold text-gray-700 mb-3">Uploaded Images</h3>
+        <div id="imageListContainer" class="space-y-3 max-h-[22rem] lg:max-h-[26rem] overflow-y-auto pr-1">
           <p id="noImagesMessage" class="text-gray-500 italic">No images uploaded yet.</p>
         </div>
       </div>
+    </section>
 
-      <!-- Right Column: Editor and Controls -->
-      <div id="editorArea" class="lg:w-2/3 bg-white p-6 rounded-lg shadow-xl hidden">
-        <h2 class="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">2. Adjust & Resize: <span id="currentImageNameDisplay" class="text-blue-600 font-medium"></span></h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div> <!-- Column 1: Size, Zoom, Background -->
-            <h3 class="text-lg font-semibold mb-2 text-gray-700">Target Size:</h3>
-            <div id="sizeSelectionContainer" class="space-y-2 mb-4">
-            </div>
-            <div>
-              <h4 class="text-md font-semibold mb-1 text-gray-700">Custom Size (px):</h4>
-              <div class="flex gap-2 items-center mb-4 flex-wrap">
-                <input type="number" id="customWidthInput" placeholder="Width" class="w-24 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                <span class="font-semibold text-gray-500">x</span>
-                <input type="number" id="customHeightInput" placeholder="Height" class="w-24 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                <button id="setCustomSizeButton" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Set</button>
+    <section id="editorArea" class="w-full bg-white/80 border border-gray-200 rounded-2xl shadow-xl p-6 hidden">
+      <div class="flex flex-col gap-8">
+        <header class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
+          <h2 class="text-2xl font-semibold text-gray-800">Adjust &amp; Export</h2>
+          <p class="text-sm text-gray-500">Editing: <span id="currentImageNameDisplay" class="text-blue-600 font-medium"></span></p>
+        </header>
+        <div class="flex flex-col xl:flex-row gap-8 items-start">
+          <div class="flex-1 w-full space-y-6">
+            <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 shadow-inner">
+              <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-800">Preview &amp; Position</h3>
+                  <p class="text-sm text-gray-500">Canvas: <span id="canvasSizeDisplay" class="font-medium">N/A</span></p>
+                </div>
+                <p class="text-xs text-gray-400">Drag to pan · Pinch, scroll, or use the slider to zoom</p>
+              </div>
+              <div id="canvasContainer" class="relative flex items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md h-[360px] sm:h-[480px] lg:h-[640px]">
+                <canvas id="editorCanvas" class="cursor-grab active:cursor-grabbing"></canvas>
               </div>
             </div>
 
-            <div class="mb-4">
-                <h4 class="text-md font-semibold mb-1 text-gray-700">Zoom: <span id="zoomValueDisplay">100</span>%</h4>
-                <input type="range" id="zoomSlider" min="10" max="500" value="100" class="w-full">
-            </div>
-
-            <div>
-                <h4 class="text-md font-semibold mb-1 text-gray-700">Background Color:</h4>
-                <div class="flex gap-2 items-center flex-wrap">
-                    <input type="color" id="bgColorPicker" value="#FFFFFF" class="w-10 h-10 p-1 border border-gray-300 rounded-md cursor-pointer">
-                    <input type="text" id="hexColorInput" placeholder="#FFFFFF" class="w-24 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm font-mono" maxlength="7">
-                    <button id="transparentBgButton" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm">Transparent BG</button>
-                </div>
-                <div class="mt-2">
-                    <label class="flex items-center gap-2 text-sm">
-                        <input type="checkbox" id="backgroundOnlyMode" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                        <span>Background only (no image)</span>
-                    </label>
-                </div>
+            <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm">
+              <label for="zoomSlider" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
+                <span>Zoom</span>
+                <span class="text-gray-500"><span id="zoomValueDisplay">100</span>%</span>
+              </label>
+              <input type="range" id="zoomSlider" min="10" max="500" value="100" class="w-full">
             </div>
           </div>
 
-          <div class="flex flex-col"> <!-- Column 2: Preview -->
-            <h3 class="text-lg font-semibold mb-2 text-gray-700">Preview & Position:</h3>
-            <p class="text-sm text-gray-500 mb-1">Canvas: <span id="canvasSizeDisplay" class="font-medium">N/A</span></p>
-            <p class="text-xs text-gray-400 mb-2">Click and drag image to position. Use slider to zoom.</p>
-            <div id="canvasContainer" class="border border-gray-300 rounded-md bg-white flex items-center justify-center min-h-[200px] sm:min-h-[256px] overflow-hidden">
-              <canvas id="editorCanvas" class="cursor-grab active:cursor-grabbing"></canvas>
+          <div class="w-full xl:max-w-sm flex-shrink-0 space-y-5">
+            <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              <h3 class="text-lg font-semibold mb-3 text-gray-800">Target Size</h3>
+              <div id="sizeSelectionContainer" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2 mb-4"></div>
+              <div>
+                <h4 class="text-sm font-semibold mb-2 text-gray-700">Custom Size (px)</h4>
+                <div class="flex flex-wrap items-center gap-2">
+                  <input type="number" id="customWidthInput" placeholder="Width" class="w-24 p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <span class="font-semibold text-gray-500">×</span>
+                  <input type="number" id="customHeightInput" placeholder="Height" class="w-24 p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                  <button id="setCustomSizeButton" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Set</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              <h3 class="text-lg font-semibold mb-3 text-gray-800">Background &amp; Canvas</h3>
+              <div class="flex flex-wrap items-center gap-3">
+                <input type="color" id="bgColorPicker" value="#FFFFFF" class="w-11 h-11 p-1 border border-gray-300 rounded-lg cursor-pointer">
+                <input type="text" id="hexColorInput" placeholder="#FFFFFF" class="w-28 p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm font-mono" maxlength="7">
+                <button id="transparentBgButton" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm">Transparent BG</button>
+              </div>
+              <label class="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                <input type="checkbox" id="backgroundOnlyMode" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
+                <span>Background only (no image)</span>
+              </label>
             </div>
           </div>
         </div>
 
-        <div class="mt-6 space-y-3">
-            <button id="downloadCurrentImageVersionButton" class="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                Download This Version (<span id="currentVersionSizeDisplay">N/A</span>)
-            </button>
-            <button id="downloadAllForCurrentImageButton" class="w-full px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
-                Download All Processed for This Image
-            </button>
-            <button id="downloadAllProcessedButton" class="w-full px-6 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
-                Download All Processed Images (ZIP)
-            </button>        </div>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h3 class="text-lg font-semibold text-gray-800">Download this size</h3>
+          <button id="downloadCurrentImageVersionButton" class="w-full sm:w-auto px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+            Download <span id="currentVersionSizeDisplay">N/A</span>
+          </button>
+        </div>
       </div>
-      <div id="editorPlaceholder" class="lg:w-2/3 bg-white p-6 rounded-lg shadow-xl flex flex-col items-center justify-center text-center text-gray-500 min-h-[400px]">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-20 h-20 mb-4 text-gray-400">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-        </svg>
-        <p class="text-xl font-medium">Select or upload an image to begin.</p>
-        <p class="text-sm mt-1">Follow the guide above to get started!</p>
-      </div>
-    </div>
+    </section>
 
+    <section id="editorPlaceholder" class="w-full bg-white/80 border border-dashed border-gray-300 p-10 rounded-2xl shadow-inner flex flex-col items-center justify-center text-center text-gray-500 min-h-[440px]">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-20 h-20 mb-4 text-gray-400">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+      </svg>
+      <p class="text-xl font-medium">Select or upload an image to begin.</p>
+      <p class="text-sm mt-1">Your preview will fill this workspace once an image is selected.</p>
+    </section>
     <footer class="text-center mt-8 text-gray-500 text-sm">
         <p>&copy; 2025 Image Resizer & Cropper. Created with Gemini.</p>
     </footer>
@@ -217,6 +278,8 @@
 
 <script>
     // DOM Elements
+    const instructionsCard = document.getElementById('instructionsCard');
+    const dismissInstructionsButton = document.getElementById('dismissInstructionsButton');
     const fileInput = document.getElementById('fileInput');
     const imageListContainer = document.getElementById('imageListContainer');
     const noImagesMessage = document.getElementById('noImagesMessage');
@@ -233,8 +296,6 @@
     const canvasSizeDisplay = document.getElementById('canvasSizeDisplay');
     const downloadCurrentImageVersionButton = document.getElementById('downloadCurrentImageVersionButton');
     const currentVersionSizeDisplay = document.getElementById('currentVersionSizeDisplay');
-    const downloadAllForCurrentImageButton = document.getElementById('downloadAllForCurrentImageButton');
-    const downloadAllProcessedButton = document.getElementById('downloadAllProcessedButton');
     const toastContainer = document.getElementById('toastContainer');
     const zoomSlider = document.getElementById('zoomSlider');
     const zoomValueDisplay = document.getElementById('zoomValueDisplay');
@@ -242,6 +303,11 @@
     const hexColorInput = document.getElementById('hexColorInput');
     const transparentBgButton = document.getElementById('transparentBgButton');
     const backgroundOnlyMode = document.getElementById('backgroundOnlyMode');
+    const animatedTitle = document.querySelector('[data-animate-split-text]');
+
+    const MIN_ZOOM = parseInt(zoomSlider.min, 10) / 100;
+    const MAX_ZOOM = parseInt(zoomSlider.max, 10) / 100;
+    const INSTRUCTIONS_STORAGE_KEY = 'imageResizerInstructionsDismissed';
 
     // App State
     let imagesData = []; 
@@ -255,6 +321,11 @@
     let lastMousePos = { x: 0, y: 0 };
     let isBackgroundOnlyMode = false;
     let previousActiveImageId = null;
+    let isPinching = false;
+    let initialPinchDistance = 0;
+    let initialPinchZoom = 1;
+    let lastPinchMidpoint = null;
+    let gestureStartZoom = null;
 
     const PREDEFINED_SIZES = [
         // Original icon sizes
@@ -282,6 +353,103 @@
         { name: '3:4 - 1200x1600', width: 1200, height: 1600 },
         { name: '3:4 - 1800x2400', width: 1800, height: 2400 },
     ];
+
+    function triggerSplitTextAnimation(targetElement) {
+        if (!targetElement) return;
+
+        targetElement.classList.remove('split-text-animate');
+        // Force reflow so animation can restart
+        void targetElement.offsetWidth;
+        targetElement.classList.add('split-text-animate');
+    }
+
+    function initializeSplitTextAnimation(targetElement) {
+        if (!targetElement) return;
+
+        const originalText = targetElement.textContent.replace(/\s+/g, ' ').trim();
+        if (!originalText) return;
+
+        const fragment = document.createDocumentFragment();
+        let characterIndex = 0;
+        const words = originalText.split(' ');
+
+        words.forEach((word, wordIndex) => {
+            const wordWrapper = document.createElement('span');
+            wordWrapper.className = 'split-text-word';
+            wordWrapper.setAttribute('aria-hidden', 'true');
+
+            Array.from(word).forEach((character) => {
+                const characterSpan = document.createElement('span');
+                characterSpan.className = 'split-text-char';
+                characterSpan.style.setProperty('--char-index', characterIndex);
+                characterSpan.textContent = character;
+                wordWrapper.appendChild(characterSpan);
+                characterIndex += 1;
+            });
+
+            fragment.appendChild(wordWrapper);
+
+            if (wordIndex < words.length - 1) {
+                const spaceSpan = document.createElement('span');
+                spaceSpan.className = 'split-text-space';
+                spaceSpan.setAttribute('aria-hidden', 'true');
+                spaceSpan.textContent = ' ';
+                fragment.appendChild(spaceSpan);
+                characterIndex += 1;
+            }
+        });
+
+        targetElement.textContent = '';
+        targetElement.appendChild(fragment);
+        targetElement.classList.add('split-text');
+        targetElement.setAttribute('aria-label', originalText);
+
+        const prefersReducedMotion = typeof window.matchMedia === 'function'
+            ? window.matchMedia('(prefers-reduced-motion: reduce)')
+            : null;
+
+        function handleMotionPreferenceChange(event) {
+            if (event.matches) {
+                targetElement.classList.add('split-text-reduced');
+                targetElement.classList.remove('split-text-animate');
+            } else {
+                targetElement.classList.remove('split-text-reduced');
+                triggerSplitTextAnimation(targetElement);
+            }
+        }
+
+        if (prefersReducedMotion && prefersReducedMotion.matches) {
+            targetElement.classList.add('split-text-reduced');
+        } else {
+            requestAnimationFrame(() => triggerSplitTextAnimation(targetElement));
+        }
+
+        if (prefersReducedMotion) {
+            if (typeof prefersReducedMotion.addEventListener === 'function') {
+                prefersReducedMotion.addEventListener('change', handleMotionPreferenceChange);
+            } else if (typeof prefersReducedMotion.addListener === 'function') {
+                prefersReducedMotion.addListener(handleMotionPreferenceChange);
+            }
+        }
+
+        const reTriggerAnimation = () => {
+            if (!targetElement.classList.contains('split-text-reduced')) {
+                triggerSplitTextAnimation(targetElement);
+            }
+        };
+
+        if (window.PointerEvent) {
+            targetElement.addEventListener('pointerenter', reTriggerAnimation);
+        } else {
+            targetElement.addEventListener('mouseenter', reTriggerAnimation);
+        }
+
+        targetElement.addEventListener('click', reTriggerAnimation);
+    }
+
+    if (animatedTitle) {
+        initializeSplitTextAnimation(animatedTitle);
+    }
 
     function generateImageId() {
         return `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -417,6 +585,107 @@
         }
     }
 
+    function clampZoom(value) {
+        return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
+    }
+
+    function updateZoomDisplay(zoomValue) {
+        const percent = Math.round(clampZoom(zoomValue) * 100);
+        zoomSlider.value = percent;
+        zoomValueDisplay.textContent = percent;
+    }
+
+    function getTouchDistance(touches) {
+        if (!touches || touches.length < 2) return 0;
+        const [touch1, touch2] = touches;
+        const dx = touch1.clientX - touch2.clientX;
+        const dy = touch1.clientY - touch2.clientY;
+        return Math.hypot(dx, dy);
+    }
+
+    function getTouchMidpoint(touches) {
+        if (!touches || touches.length < 2) return null;
+        const [touch1, touch2] = touches;
+        return {
+            x: (touch1.clientX + touch2.clientX) / 2,
+            y: (touch1.clientY + touch2.clientY) / 2,
+        };
+    }
+
+    function handleWheelZoom(event) {
+        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
+        if (!event.ctrlKey && !event.metaKey) return;
+
+        event.preventDefault();
+
+        const zoomIntensity = Math.exp(-event.deltaY * 0.0025);
+        const nextZoom = clampZoom(currentZoom * zoomIntensity);
+
+        if (Math.abs(nextZoom - currentZoom) < 0.0001) {
+            return;
+        }
+
+        applyZoom(nextZoom, { origin: { x: event.clientX, y: event.clientY } });
+    }
+
+    function handleGestureStart(event) {
+        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
+        event.preventDefault();
+        gestureStartZoom = currentZoom;
+    }
+
+    function handleGestureChange(event) {
+        if (gestureStartZoom === null) return;
+        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
+
+        event.preventDefault();
+
+        const scale = typeof event.scale === 'number' && event.scale > 0 ? event.scale : 1;
+        const nextZoom = clampZoom(gestureStartZoom * scale);
+
+        if (Math.abs(nextZoom - currentZoom) < 0.0001) {
+            return;
+        }
+
+        applyZoom(nextZoom);
+    }
+
+    function handleGestureEnd() {
+        gestureStartZoom = null;
+    }
+
+    function applyZoom(newZoom, options = {}) {
+        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
+
+        const { origin = null } = options;
+        const clampedZoom = clampZoom(newZoom);
+
+        const rect = editorCanvas.getBoundingClientRect();
+        let canvasOriginX = editorCanvas.width / 2;
+        let canvasOriginY = editorCanvas.height / 2;
+
+        if (origin && rect.width > 0 && rect.height > 0) {
+            const offsetX = origin.x - rect.left;
+            const offsetY = origin.y - rect.top;
+            const normalizedX = Math.max(0, Math.min(rect.width, offsetX));
+            const normalizedY = Math.max(0, Math.min(rect.height, offsetY));
+            canvasOriginX = (normalizedX / rect.width) * editorCanvas.width;
+            canvasOriginY = (normalizedY / rect.height) * editorCanvas.height;
+        }
+
+        const imgPtXAtOrigin = (canvasOriginX - currentPan.x) / currentZoom;
+        const imgPtYAtOrigin = (canvasOriginY - currentPan.y) / currentZoom;
+
+        currentZoom = clampedZoom;
+
+        currentPan.x = canvasOriginX - (imgPtXAtOrigin * currentZoom);
+        currentPan.y = canvasOriginY - (imgPtYAtOrigin * currentZoom);
+
+        applyPanConstraints();
+        updateZoomDisplay(currentZoom);
+        redrawCanvasAndStore();
+    }
+
     function handlePasteEvent(event) {
         const clipboardData = event.clipboardData || window.clipboardData;
         if (!clipboardData || !clipboardData.items) return;
@@ -437,6 +706,37 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        let instructionsDismissed = false;
+        try {
+            instructionsDismissed = localStorage.getItem(INSTRUCTIONS_STORAGE_KEY) === 'true';
+        } catch (error) {
+            instructionsDismissed = false;
+        }
+
+        if (instructionsCard) {
+            if (instructionsDismissed) {
+                instructionsCard.classList.add('hidden');
+                instructionsCard.setAttribute('aria-hidden', 'true');
+            } else {
+                instructionsCard.classList.remove('hidden');
+                instructionsCard.removeAttribute('aria-hidden');
+            }
+        }
+
+        if (dismissInstructionsButton) {
+            dismissInstructionsButton.addEventListener('click', () => {
+                if (instructionsCard) {
+                    instructionsCard.classList.add('hidden');
+                    instructionsCard.setAttribute('aria-hidden', 'true');
+                }
+                try {
+                    localStorage.setItem(INSTRUCTIONS_STORAGE_KEY, 'true');
+                } catch (error) {
+                    // Ignore storage errors (e.g., private browsing).
+                }
+            });
+        }
+
         fileInput.addEventListener('change', handleFileSelect);
         setCustomSizeButton.addEventListener('click', handleSetCustomSize);
 
@@ -449,6 +749,13 @@
         editorCanvas.addEventListener('touchend', endPan);
         editorCanvas.addEventListener('touchcancel', endPan);
 
+        if (canvasContainer) {
+            canvasContainer.addEventListener('wheel', handleWheelZoom, { passive: false });
+            canvasContainer.addEventListener('gesturestart', handleGestureStart);
+            canvasContainer.addEventListener('gesturechange', handleGestureChange);
+            canvasContainer.addEventListener('gestureend', handleGestureEnd);
+        }
+
         zoomSlider.addEventListener('input', handleZoomChange);
         bgColorPicker.addEventListener('input', handleBgColorChange);
         hexColorInput.addEventListener('input', handleHexColorChange);
@@ -457,8 +764,6 @@
         backgroundOnlyMode.addEventListener('change', handleBackgroundOnlyModeChange);
 
         downloadCurrentImageVersionButton.addEventListener('click', downloadCurrentVersion);
-        downloadAllForCurrentImageButton.addEventListener('click', downloadAllVersionsForCurrentImage);
-        downloadAllProcessedButton.addEventListener('click', downloadAllProcessedZip);
 
         populatePredefinedSizes();
         updateEditorVisibility();
@@ -563,6 +868,7 @@
         if (!imgData) {
             activeImageId = null;
             originalImageToDraw = null;
+            currentImageNameDisplay.textContent = '';
             updateEditorVisibility();
             return;
         }
@@ -653,8 +959,8 @@
             }
         }
         
-        zoomSlider.value = currentZoom * 100;
-        zoomValueDisplay.textContent = Math.round(currentZoom * 100);
+        currentZoom = clampZoom(currentZoom);
+        updateZoomDisplay(currentZoom);
         bgColorPicker.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor;
         hexColorInput.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor.toUpperCase();
 
@@ -677,14 +983,22 @@
         editorCanvas.height = currentTargetSize.height;
 
         const canvasAspectRatio = editorCanvas.width / editorCanvas.height;
-        const containerWidth = canvasContainer.clientWidth;
+        const containerWidth = canvasContainer.clientWidth || editorCanvas.width;
+        const containerHeight = canvasContainer.clientHeight || Math.min(640, window.innerHeight * 0.75);
+
         let displayW = containerWidth;
         let displayH = displayW / canvasAspectRatio;
-        const maxDisplayHeight = 400;
+
+        const maxDisplayHeight = Math.min(containerHeight, window.innerHeight * 0.85);
 
         if (displayH > maxDisplayHeight) {
             displayH = maxDisplayHeight;
             displayW = displayH * canvasAspectRatio;
+        }
+
+        if (displayW > containerWidth) {
+            displayW = containerWidth;
+            displayH = displayW / canvasAspectRatio;
         }
 
         editorCanvas.style.width = `${displayW}px`;
@@ -699,25 +1013,11 @@
     }
     
     function handleZoomChange(event) {
-        if (!originalImageToDraw || !currentTargetSize) return;
+        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
 
-        const newZoomSliderValue = parseInt(event.target.value);
+        const newZoomSliderValue = parseInt(event.target.value, 10);
         const newZoom = newZoomSliderValue / 100;
-        zoomValueDisplay.textContent = newZoomSliderValue;
-
-        const canvasCenterX = editorCanvas.width / 2;
-        const canvasCenterY = editorCanvas.height / 2;
-
-        const imgPtXAtCenter = (canvasCenterX - currentPan.x) / currentZoom;
-        const imgPtYAtCenter = (canvasCenterY - currentPan.y) / currentZoom;
-        
-        currentZoom = newZoom;
-
-        currentPan.x = canvasCenterX - (imgPtXAtCenter * currentZoom);
-        currentPan.y = canvasCenterY - (imgPtYAtCenter * currentZoom);
-
-        applyPanConstraints();
-        redrawCanvasAndStore();
+        applyZoom(newZoom);
     }
 
     function handleBgColorChange(event) {
@@ -857,10 +1157,30 @@
     }
 
     function startPan(event) {
-        if (!activeImageId || !currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
+        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
 
-        event.preventDefault(); 
+        if (event.touches) {
+            if (event.touches.length === 2) {
+                event.preventDefault();
+                isPinching = true;
+                isPanning = false;
+                initialPinchDistance = getTouchDistance(event.touches);
+                initialPinchZoom = currentZoom;
+                lastPinchMidpoint = getTouchMidpoint(event.touches);
+                editorCanvas.classList.remove('cursor-grab');
+                editorCanvas.classList.add('cursor-grabbing');
+                return;
+            }
+
+            if (event.touches.length > 2) {
+                return;
+            }
+        }
+
+        event.preventDefault();
+        isPinching = false;
         isPanning = true;
+        lastPinchMidpoint = null;
         editorCanvas.classList.remove('cursor-grab');
         editorCanvas.classList.add('cursor-grabbing');
         const coords = getEventCoordinates(event);
@@ -868,28 +1188,56 @@
     }
 
     function panImage(event) {
+        if (isPinching && event.touches && event.touches.length >= 2) {
+            event.preventDefault();
+            const newDistance = getTouchDistance(event.touches);
+            if (initialPinchDistance > 0) {
+                const zoomFactor = newDistance / initialPinchDistance;
+                const midpoint = getTouchMidpoint(event.touches) || lastPinchMidpoint;
+                lastPinchMidpoint = midpoint;
+                applyZoom(initialPinchZoom * zoomFactor, { origin: midpoint });
+            }
+            return;
+        }
+
         if (!isPanning) return;
         event.preventDefault();
-        
+
         const coords = getEventCoordinates(event);
         const currentMousePos = { x: coords.x, y: coords.y };
 
         const scaleX = editorCanvas.width / editorCanvas.offsetWidth;
         const scaleY = editorCanvas.height / editorCanvas.offsetHeight;
 
-        const dx = (currentMousePos.x - lastMousePos.x) * (editorCanvas.offsetWidth > 0 ? scaleX : 1) ;
+        const dx = (currentMousePos.x - lastMousePos.x) * (editorCanvas.offsetWidth > 0 ? scaleX : 1);
         const dy = (currentMousePos.y - lastMousePos.y) * (editorCanvas.offsetHeight > 0 ? scaleY : 1);
 
         currentPan.x += dx;
         currentPan.y += dy;
-        
+
         applyPanConstraints();
         lastMousePos = currentMousePos;
-        redrawCanvasAndStore(); 
+        redrawCanvasAndStore();
     }
 
-    function endPan() {
-        if (!isPanning) return;
+    function endPan(event) {
+        const remainingTouches = event && event.touches ? event.touches.length : 0;
+
+        if (isPinching) {
+            if (remainingTouches >= 2) {
+                return;
+            }
+            isPinching = false;
+            initialPinchDistance = 0;
+            lastPinchMidpoint = null;
+        }
+
+        if (!isPanning) {
+            editorCanvas.classList.remove('cursor-grabbing');
+            editorCanvas.classList.add('cursor-grab');
+            return;
+        }
+
         isPanning = false;
         editorCanvas.classList.remove('cursor-grabbing');
         editorCanvas.classList.add('cursor-grab');
@@ -910,43 +1258,23 @@
 
     function updateDownloadButtonsState() {
         let currentVersionExists = false;
-        let anyVersionExistsForCurrentImage = false;
-        let anyVersionExistsAtAll = false;
 
-        if (isBackgroundOnlyMode && currentTargetSize) {
-            // Check background-only versions
+        if (currentTargetSize) {
             const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-            if (window.backgroundOnlyVersions && window.backgroundOnlyVersions[sizeKey]) {
-                currentVersionExists = true;
-                anyVersionExistsForCurrentImage = true;
-            }
-        } else {
-            const imgData = imagesData.find(img => img.id === activeImageId);
-            if (imgData && currentTargetSize) {
-                const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-                if (imgData.processedVersions[sizeKey] && imgData.processedVersions[sizeKey].dataURL) {
+
+            if (isBackgroundOnlyMode) {
+                if (window.backgroundOnlyVersions && window.backgroundOnlyVersions[sizeKey]) {
                     currentVersionExists = true;
                 }
-                if (Object.keys(imgData.processedVersions).length > 0) {
-                    anyVersionExistsForCurrentImage = true;
+            } else {
+                const imgData = imagesData.find(img => img.id === activeImageId);
+                if (imgData && imgData.processedVersions[sizeKey] && imgData.processedVersions[sizeKey].dataURL) {
+                    currentVersionExists = true;
                 }
             }
-        }
-        
-        imagesData.forEach(img => {
-            if (Object.keys(img.processedVersions).length > 0) {
-                anyVersionExistsAtAll = true;
-            }
-        });
-        
-        // Also check background-only versions
-        if (window.backgroundOnlyVersions && Object.keys(window.backgroundOnlyVersions).length > 0) {
-            anyVersionExistsAtAll = true;
         }
 
         downloadCurrentImageVersionButton.disabled = !currentVersionExists;
-        downloadAllForCurrentImageButton.disabled = !anyVersionExistsForCurrentImage;
-        downloadAllProcessedButton.disabled = !anyVersionExistsAtAll;
     }
 
     function downloadCurrentVersion() {
@@ -975,86 +1303,6 @@
         }
     }
 
-    function downloadAllVersionsForCurrentImage() {
-        if (!activeImageId) return;
-        
-        if (isBackgroundOnlyMode) {
-            if (!window.backgroundOnlyVersions || Object.keys(window.backgroundOnlyVersions).length === 0) {
-                showToast('No processed background versions.', 'info');
-                return;
-            }
-
-            Object.values(window.backgroundOnlyVersions).forEach(version => {
-                if (version.dataURL) {
-                    triggerDownload(version.dataURL, `background_${version.targetWidth}x${version.targetHeight}.png`);
-                }
-            });
-            showToast(`Downloading all background versions.`, 'success');
-        } else {
-            const imgData = imagesData.find(img => img.id === activeImageId);
-            if (!imgData || Object.keys(imgData.processedVersions).length === 0) {
-                showToast('No processed versions for this image.', 'info');
-                return;
-            }
-
-            Object.values(imgData.processedVersions).forEach(version => {
-                if (version.dataURL) {
-                    triggerDownload(version.dataURL, `${getSafeFilenameBase(imgData.name)}_${version.targetWidth}x${version.targetHeight}.png`);
-                }
-            });
-            showToast(`Downloading all processed versions for ${imgData.name}.`, 'success');
-        }
-    }
-
-    async function downloadAllProcessedZip() {
-        const zip = new JSZip();
-        let filesAdded = 0;
-
-        // Add regular image versions
-        imagesData.forEach(imgData => {
-            const safeOriginalNameBase = getSafeFilenameBase(imgData.name);
-            Object.values(imgData.processedVersions).forEach(versionData => {
-                if (versionData.dataURL) {
-                    const base64Data = versionData.dataURL.split(',')[1];
-                    zip.file(`${safeOriginalNameBase}_${versionData.targetWidth}x${versionData.targetHeight}.png`, base64Data, { base64: true });
-                    filesAdded++;
-                }
-            });
-        });
-
-        // Add background-only versions
-        if (window.backgroundOnlyVersions) {
-            Object.values(window.backgroundOnlyVersions).forEach(versionData => {
-                if (versionData.dataURL) {
-                    const base64Data = versionData.dataURL.split(',')[1];
-                    zip.file(`background_${versionData.targetWidth}x${versionData.targetHeight}.png`, base64Data, { base64: true });
-                    filesAdded++;
-                }
-            });
-        }
-
-        if (filesAdded === 0) {
-            showToast('No processed images to download.', 'info');
-            return;
-        }
-
-        try {
-            showToast(`Generating ZIP with ${filesAdded} images...`, 'info');
-            const content = await zip.generateAsync({ type: "blob" });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(content);
-            link.download = "resized_images_pack.zip";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-            showToast(`Downloaded ZIP with ${filesAdded} images.`, 'success');
-        } catch (err) {
-            console.error("Error generating ZIP:", err);
-            showToast('Error creating ZIP file.', 'error');
-        }
-    }
-    
     function getSafeFilenameBase(originalName) {
         const nameWithoutExt = originalName.includes('.') ? originalName.substring(0, originalName.lastIndexOf('.')) : originalName;
         return nameWithoutExt.replace(/[^a-zA-Z0-9_-]/g, '_') || 'image';
