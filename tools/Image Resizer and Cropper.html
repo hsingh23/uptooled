@@ -96,12 +96,56 @@
             cursor: pointer;
             border: 2px solid white;
         }
+        .split-text {
+            display: inline-flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.25em;
+            perspective: 900px;
+        }
+        .split-text-word {
+            display: inline-flex;
+            gap: 0.02em;
+        }
+        .split-text-char {
+            display: inline-block;
+            transform: translateY(120%) rotateX(80deg);
+            transform-origin: center bottom;
+            opacity: 0;
+        }
+        .split-text-animate .split-text-char {
+            animation: splitTextRise 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation-delay: calc(var(--char-index) * 45ms);
+        }
+        .split-text-space {
+            display: inline-block;
+            width: 0.35em;
+        }
+        .split-text-reduced .split-text-char {
+            opacity: 1;
+            transform: none;
+            animation: none;
+        }
+        @keyframes splitTextRise {
+            0% {
+                transform: translateY(120%) rotateX(80deg);
+                opacity: 0;
+            }
+            60% {
+                transform: translateY(-10%) rotateX(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(0) rotateX(0deg);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
     <header class="mb-6 text-center">
-      <h1 class="text-3xl sm:text-4xl font-bold text-blue-600">Image Resizer & Cropper</h1>
+      <h1 class="text-3xl sm:text-4xl font-bold text-blue-600" data-animate-split-text>Image Resizer &amp; Cropper</h1>
       <p class="text-gray-600 mt-1">Upload, zoom, position, set background, and download your images.</p>
     </header>
 
@@ -259,6 +303,11 @@
     const hexColorInput = document.getElementById('hexColorInput');
     const transparentBgButton = document.getElementById('transparentBgButton');
     const backgroundOnlyMode = document.getElementById('backgroundOnlyMode');
+    const animatedTitle = document.querySelector('[data-animate-split-text]');
+
+    const MIN_ZOOM = parseInt(zoomSlider.min, 10) / 100;
+    const MAX_ZOOM = parseInt(zoomSlider.max, 10) / 100;
+    const INSTRUCTIONS_STORAGE_KEY = 'imageResizerInstructionsDismissed';
 
     const MIN_ZOOM = parseInt(zoomSlider.min, 10) / 100;
     const MAX_ZOOM = parseInt(zoomSlider.max, 10) / 100;
@@ -308,6 +357,103 @@
         { name: '3:4 - 1200x1600', width: 1200, height: 1600 },
         { name: '3:4 - 1800x2400', width: 1800, height: 2400 },
     ];
+
+    function triggerSplitTextAnimation(targetElement) {
+        if (!targetElement) return;
+
+        targetElement.classList.remove('split-text-animate');
+        // Force reflow so animation can restart
+        void targetElement.offsetWidth;
+        targetElement.classList.add('split-text-animate');
+    }
+
+    function initializeSplitTextAnimation(targetElement) {
+        if (!targetElement) return;
+
+        const originalText = targetElement.textContent.replace(/\s+/g, ' ').trim();
+        if (!originalText) return;
+
+        const fragment = document.createDocumentFragment();
+        let characterIndex = 0;
+        const words = originalText.split(' ');
+
+        words.forEach((word, wordIndex) => {
+            const wordWrapper = document.createElement('span');
+            wordWrapper.className = 'split-text-word';
+            wordWrapper.setAttribute('aria-hidden', 'true');
+
+            Array.from(word).forEach((character) => {
+                const characterSpan = document.createElement('span');
+                characterSpan.className = 'split-text-char';
+                characterSpan.style.setProperty('--char-index', characterIndex);
+                characterSpan.textContent = character;
+                wordWrapper.appendChild(characterSpan);
+                characterIndex += 1;
+            });
+
+            fragment.appendChild(wordWrapper);
+
+            if (wordIndex < words.length - 1) {
+                const spaceSpan = document.createElement('span');
+                spaceSpan.className = 'split-text-space';
+                spaceSpan.setAttribute('aria-hidden', 'true');
+                spaceSpan.textContent = ' ';
+                fragment.appendChild(spaceSpan);
+                characterIndex += 1;
+            }
+        });
+
+        targetElement.textContent = '';
+        targetElement.appendChild(fragment);
+        targetElement.classList.add('split-text');
+        targetElement.setAttribute('aria-label', originalText);
+
+        const prefersReducedMotion = typeof window.matchMedia === 'function'
+            ? window.matchMedia('(prefers-reduced-motion: reduce)')
+            : null;
+
+        function handleMotionPreferenceChange(event) {
+            if (event.matches) {
+                targetElement.classList.add('split-text-reduced');
+                targetElement.classList.remove('split-text-animate');
+            } else {
+                targetElement.classList.remove('split-text-reduced');
+                triggerSplitTextAnimation(targetElement);
+            }
+        }
+
+        if (prefersReducedMotion && prefersReducedMotion.matches) {
+            targetElement.classList.add('split-text-reduced');
+        } else {
+            requestAnimationFrame(() => triggerSplitTextAnimation(targetElement));
+        }
+
+        if (prefersReducedMotion) {
+            if (typeof prefersReducedMotion.addEventListener === 'function') {
+                prefersReducedMotion.addEventListener('change', handleMotionPreferenceChange);
+            } else if (typeof prefersReducedMotion.addListener === 'function') {
+                prefersReducedMotion.addListener(handleMotionPreferenceChange);
+            }
+        }
+
+        const reTriggerAnimation = () => {
+            if (!targetElement.classList.contains('split-text-reduced')) {
+                triggerSplitTextAnimation(targetElement);
+            }
+        };
+
+        if (window.PointerEvent) {
+            targetElement.addEventListener('pointerenter', reTriggerAnimation);
+        } else {
+            targetElement.addEventListener('mouseenter', reTriggerAnimation);
+        }
+
+        targetElement.addEventListener('click', reTriggerAnimation);
+    }
+
+    if (animatedTitle) {
+        initializeSplitTextAnimation(animatedTitle);
+    }
 
     function generateImageId() {
         return `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
