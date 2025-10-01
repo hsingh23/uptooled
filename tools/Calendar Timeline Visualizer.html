@@ -494,7 +494,7 @@
                 </div>
               </div>
             </div>
-            <h3 class="text-lg font-semibold mb-4 text-slate-800 flex items-center gap-2">
+            <h3 class="text-lg font-semibold mb-2 text-slate-800 flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   stroke-linecap="round"
@@ -505,6 +505,13 @@
               </svg>
               Phase Breakdown
             </h3>
+            <p class="text-sm text-slate-600 mb-4">
+              Name each phase, then enter a duration using friendly values like
+              <span class="font-medium text-slate-700">"3m"</span> for months,
+              <span class="font-medium text-slate-700">"10d"</span> for days, or
+              <span class="font-medium text-slate-700">"1 year"</span>. Leave the
+              unit off to default to months.
+            </p>
             <div id="phases-container" class="space-y-3 mb-4">
               <!-- Draggable phase inputs will be added here -->
             </div>
@@ -524,8 +531,9 @@
                 + Add Phase
               </button>
               <div class="text-sm font-medium text-slate-700">
-                Total:
-                <span id="total-months-display" class="font-bold text-blue-600">0</span> months
+                Total duration:
+                <span id="total-months-display" class="font-bold text-blue-600">0</span>
+                <span id="total-days-display" class="text-xs text-slate-500 block sm:inline sm:ml-2"></span>
               </div>
             </div>
             <div class="space-y-3">
@@ -637,6 +645,7 @@
               id="timeline-container"
               class="w-full overflow-x-auto pb-4 timeline-container"
             ></div>
+            <div id="onscreen-legend" class="mt-4 flex justify-center"></div>
           </div>
         </div>
       </div>
@@ -711,6 +720,7 @@
       const errorMessageDiv = document.getElementById('error-message');
       const errorTextP = document.getElementById('error-text');
       const totalMonthsDisplay = document.getElementById('total-months-display');
+      const totalDaysDisplay = document.getElementById('total-days-display');
       const exportPngBtn = document.getElementById('export-png-btn');
       const exportArea = document.getElementById('export-area');
       const viewButtons = document.querySelectorAll('.view-btn');
@@ -719,14 +729,18 @@
       const closeModal = document.querySelector('.close');
       const confirmExportPng = document.getElementById('confirm-export-png');
       const closePreview = document.getElementById('close-preview');
+      const onscreenLegend = document.getElementById('onscreen-legend');
 
       // --- CONSTANTS & STATE ---
       const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
       const COLORS = ['#fdba74', '#67e8f9', '#86efac', '#c4b5fd', '#f9a8d4', '#fcd34d', '#5eead4', '#a7f3d0', '#ddd6fe', '#fbcfe8', '#fb923c', '#22d3ee', '#4ade80', '#a78bfa', '#f472b6'];
+      const DAYS_PER_MONTH = 30;
+      const DAYS_PER_YEAR = DAYS_PER_MONTH * 12;
       let phaseIdCounter = 0;
       let currentView = 'month';
       let currentTimelineData = null;
       let currentPhases = null;
+      let currentUnitsPerRow = 0;
 
       // --- INITIALIZATION ---
       function initialize() {
@@ -805,24 +819,275 @@
       });
       }
 
+      function parseDurationInput(rawValue) {
+      if (rawValue === null || rawValue === undefined) return null;
+      const match = rawValue.toString().trim().match(/^([0-9]+(?:\.[0-9]+)?)\s*(d|day|days|m|mo|mon|month|months|y|yr|yrs|year|years)?$/i);
+      if (!match) return null;
+      const quantity = parseFloat(match[1]);
+      if (!Number.isFinite(quantity) || quantity <= 0) return null;
+      const unitToken = (match[2] || 'month').toLowerCase();
+      let unit = 'month';
+      if (unitToken.startsWith('d')) unit = 'day';
+      else if (unitToken.startsWith('y')) unit = 'year';
+      const factor = unit === 'day' ? 1 : unit === 'month' ? DAYS_PER_MONTH : DAYS_PER_YEAR;
+      const rawDays = quantity * factor;
+      const days = Math.max(1, Math.round(rawDays));
+      return { quantity, unit, days };
+      }
+
+      function pluralize(value, singular) {
+      return `${value} ${value === 1 ? singular : singular + 's'}`;
+      }
+
+      function formatDaysToFriendly(days) {
+      const parts = [];
+      let remaining = days;
+      const years = Math.floor(remaining / DAYS_PER_YEAR);
+      if (years > 0) {
+      parts.push(pluralize(years, 'year'));
+      remaining -= years * DAYS_PER_YEAR;
+      }
+      const months = Math.floor(remaining / DAYS_PER_MONTH);
+      if (months > 0) {
+      parts.push(pluralize(months, 'month'));
+      remaining -= months * DAYS_PER_MONTH;
+      }
+      if (remaining > 0 && parts.length < 2) {
+      parts.push(pluralize(remaining, 'day'));
+      }
+      if (!parts.length) {
+      return pluralize(days, 'day');
+      }
+      return parts.join(' ');
+      }
+
+      function buildDayUnits(totalDays) {
+      const days = [];
+      let currentMonth = parseInt(startMonthSelect.value);
+      let currentYear = parseInt(startYearInput.value);
+      let dayOfMonth = 1;
+      for (let i = 0; i < totalDays; i++) {
+      days.push({ monthIndex: currentMonth, year: currentYear, day: dayOfMonth });
+      dayOfMonth++;
+      if (dayOfMonth > DAYS_PER_MONTH) {
+      dayOfMonth = 1;
+      currentMonth = (currentMonth + 1) % 12;
+      if (currentMonth === 0) currentYear++;
+      }
+      }
+      return days;
+      }
+
+      function assignPhasesToDays(dayUnits, phases) {
+      const timeline = [];
+      let cursor = 0;
+      phases.forEach(phase => {
+      for (let i = 0; i < phase.durationDays; i++) {
+      if (cursor >= dayUnits.length) return timeline;
+      const dayInfo = { ...dayUnits[cursor], phaseName: phase.name, color: phase.color };
+      timeline.push(dayInfo);
+      cursor++;
+      }
+      });
+      return timeline;
+      }
+
+      function compressSegments(daysArray) {
+      const segments = [];
+      daysArray.forEach(day => {
+      const lastSegment = segments[segments.length - 1];
+      if (lastSegment && lastSegment.phaseName === day.phaseName) {
+      lastSegment.days += 1;
+      } else {
+      segments.push({ phaseName: day.phaseName, color: day.color, days: 1 });
+      }
+      });
+      return segments;
+      }
+
+      function buildMonthTimeline(dayTimeline) {
+      if (!dayTimeline.length) return [];
+      const months = [];
+      let current = { monthIndex: dayTimeline[0].monthIndex, year: dayTimeline[0].year, days: [] };
+      dayTimeline.forEach(day => {
+      if (day.monthIndex !== current.monthIndex || day.year !== current.year) {
+      months.push(current);
+      current = { monthIndex: day.monthIndex, year: day.year, days: [] };
+      }
+      current.days.push(day);
+      });
+      months.push(current);
+      return months.map(month => ({
+      type: 'month',
+      monthIndex: month.monthIndex,
+      year: month.year,
+      label: MONTH_NAMES[month.monthIndex].substring(0, 3),
+      segments: compressSegments(month.days),
+      capacity: month.days.length
+      }));
+      }
+
+      function chunkWeeks(days, monthIndex, year) {
+      const result = [];
+      for (let i = 0; i < days.length; i += 7) {
+      const slice = days.slice(i, i + 7);
+      result.push({
+      type: 'week',
+      monthIndex,
+      year,
+      weekIndex: Math.floor(i / 7) + 1,
+      label: 'W' + (Math.floor(i / 7) + 1),
+      segments: compressSegments(slice),
+      capacity: slice.length
+      });
+      }
+      return result;
+      }
+
+      function buildWeekTimeline(dayTimeline) {
+      if (!dayTimeline.length) return [];
+      const weeks = [];
+      let monthDays = [];
+      let currentMonth = dayTimeline[0].monthIndex;
+      let currentYear = dayTimeline[0].year;
+      dayTimeline.forEach(day => {
+      if (day.monthIndex !== currentMonth || day.year !== currentYear) {
+      weeks.push(...chunkWeeks(monthDays, currentMonth, currentYear));
+      monthDays = [];
+      currentMonth = day.monthIndex;
+      currentYear = day.year;
+      }
+      monthDays.push(day);
+      });
+      if (monthDays.length) weeks.push(...chunkWeeks(monthDays, currentMonth, currentYear));
+      return weeks;
+      }
+
+      function buildDayViewTimeline(dayTimeline) {
+      return dayTimeline.map(day => ({
+      type: 'day',
+      monthIndex: day.monthIndex,
+      year: day.year,
+      day: day.day,
+      label: day.day,
+      segments: [{ phaseName: day.phaseName, color: day.color, days: 1 }],
+      capacity: 1
+      }));
+      }
+
+      function buildGradientFromSegments(segments, capacity) {
+      if (!segments.length) return '#e2e8f0';
+      const total = segments.reduce((sum, seg) => sum + seg.days, 0);
+      const base = capacity || total || 1;
+      let progress = 0;
+      const gradientParts = segments.map(seg => {
+      const start = (progress / base) * 100;
+      progress += seg.days;
+      const end = (progress / base) * 100;
+      return `${seg.color} ${start}% ${end}%`;
+      });
+      if (progress < base) {
+      gradientParts.push(`#e2e8f0 ${(progress / base) * 100}% 100%`);
+      }
+      return `linear-gradient(90deg, ${gradientParts.join(', ')})`;
+      }
+
+      function getLuminanceFromHex(hexColor) {
+      if (!hexColor) return 1;
+      let hex = hexColor.replace('#', '');
+      if (hex.length === 3) {
+      hex = hex.split('').map(ch => ch + ch).join('');
+      }
+      const numeric = parseInt(hex, 16);
+      if (Number.isNaN(numeric)) return 1;
+      const r = (numeric >> 16) & 255;
+      const g = (numeric >> 8) & 255;
+      const b = numeric & 255;
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      }
+
+      function getContrastingTextColor(hexColor) {
+      const luminance = getLuminanceFromHex(hexColor);
+      return luminance > 0.6 ? '#0f172a' : '#f8fafc';
+      }
+
+      function getAverageLuminance(segments) {
+      if (!segments.length) return 1;
+      const totalWeight = segments.reduce((sum, seg) => sum + (seg.days || 1), 0) || segments.length;
+      let luminanceSum = 0;
+      segments.forEach(seg => {
+      luminanceSum += getLuminanceFromHex(seg.color) * (seg.days || 1);
+      });
+      return luminanceSum / totalWeight;
+      }
+
+      function applySegmentsStyles(element, unit) {
+      const segments = unit.segments || [];
+      if (!segments.length) {
+      element.style.background = '#e2e8f0';
+      element.style.backgroundImage = 'none';
+      element.style.color = '#0f172a';
+      element.style.border = '1px solid rgba(15, 23, 42, 0.08)';
+      return;
+      }
+      if (segments.length === 1) {
+      element.style.background = segments[0].color;
+      element.style.backgroundImage = 'none';
+      element.style.color = getContrastingTextColor(segments[0].color);
+      element.style.border = 'none';
+      return;
+      }
+      const gradient = buildGradientFromSegments(segments, unit.capacity);
+      element.style.background = gradient;
+      element.style.backgroundImage = gradient;
+      element.style.color = getAverageLuminance(segments) > 0.6 ? '#0f172a' : '#f8fafc';
+      element.style.border = '1px solid rgba(15, 23, 42, 0.12)';
+      }
+
+      function createUnitTooltip(unit) {
+      const segments = unit.segments || [];
+      if (!segments.length) {
+      if (unit.type === 'day') {
+      return `${MONTH_NAMES[unit.monthIndex]} ${unit.day}, ${unit.year}`;
+      }
+      if (unit.type === 'week') {
+      return `${MONTH_NAMES[unit.monthIndex]} ${unit.year} • Week ${unit.weekIndex}`;
+      }
+      return `${MONTH_NAMES[unit.monthIndex]} ${unit.year}`;
+      }
+      const header = unit.type === 'day'
+      ? `${MONTH_NAMES[unit.monthIndex]} ${unit.day}, ${unit.year}`
+      : unit.type === 'week'
+      ? `${MONTH_NAMES[unit.monthIndex]} ${unit.year} • Week ${unit.weekIndex}`
+      : `${MONTH_NAMES[unit.monthIndex]} ${unit.year}`;
+      const details = segments.map(seg => `${seg.phaseName} – ${formatDaysToFriendly(seg.days)}`);
+      return `${header}\n${details.join('\n')}`;
+      }
+
       function addDefaultPhases() {
-      addPhaseRow("Planning", 1);
-      addPhaseRow("Design & Development", 5);
-      addPhaseRow("Testing & QA", 3);
-      addPhaseRow("Deployment", 1);
-      addPhaseRow("Post-Launch Support", 2);
+      addPhaseRow("Planning", '1 month');
+      addPhaseRow("Design & Development", '5 months');
+      addPhaseRow("Testing & QA", '3 months');
+      addPhaseRow("Deployment", '1 month');
+      addPhaseRow("Post-Launch Support", '2 months');
       }
 
       // --- DYNAMIC PHASE MANAGEMENT ---
       function addPhaseRow(name = '', duration = '') {
       phaseIdCounter++;
       const phaseDiv = document.createElement('div');
-      phaseDiv.className = 'flex items-center gap-2 phase-row p-2 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors';
+      phaseDiv.className = 'flex flex-wrap md:flex-nowrap items-start gap-3 phase-row p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors';
       phaseDiv.setAttribute('data-id', phaseIdCounter);
       phaseDiv.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-400 flex-shrink-0 drag-handle cursor-grab" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-      <input type="text" placeholder="Phase Name" class="phase-name w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" value="${name}">
-      <input type="number" placeholder="Months" class="phase-duration w-28 p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" min="1" value="${duration}">
+      <div class="flex-1 min-w-[200px]">
+        <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1">Phase name</label>
+        <input type="text" placeholder="Phase Name" class="phase-name w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" value="${name}">
+      </div>
+      <div class="w-full md:w-32">
+        <label class="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1">Duration</label>
+        <input type="text" placeholder="e.g. 3m or 10d" class="phase-duration w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all" value="${duration}">
+      </div>
       <button type="button" class="remove-phase-btn text-slate-400 hover:text-red-500 p-1 rounded-full transition-all hover:bg-red-50">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
       </button>
@@ -836,8 +1101,23 @@
       }
 
       function updateTotalMonths() {
-      const durations = [...document.querySelectorAll('.phase-duration')].map(input => parseInt(input.value) || 0);
-      totalMonthsDisplay.textContent = durations.reduce((sum, current) => sum + current, 0);
+      const durationInputs = document.querySelectorAll('.phase-duration');
+      let totalDays = 0;
+      durationInputs.forEach(input => {
+      const parsed = parseDurationInput(input.value);
+      if (parsed) {
+      totalDays += parsed.days;
+      }
+      });
+      if (totalDays === 0) {
+      totalMonthsDisplay.textContent = 0;
+      totalDaysDisplay.textContent = '';
+      return;
+      }
+      const totalMonths = totalDays / DAYS_PER_MONTH;
+      const monthsText = Number.isInteger(totalMonths) ? totalMonths : totalMonths.toFixed(1);
+      totalMonthsDisplay.textContent = monthsText;
+      totalDaysDisplay.textContent = `(${pluralize(totalDays, 'day')})`;
       }
 
       // --- CORE LOGIC ---
@@ -845,20 +1125,28 @@
       hideError();
       const phases = getPhaseData();
       if (!phases) return;
-      const totalDuration = phases.reduce((acc, p) => acc + p.duration, 0);
-      if (totalDuration === 0) {
+      const totalDays = phases.reduce((acc, p) => acc + p.durationDays, 0);
+      if (totalDays === 0) {
       showError("Please add at least one phase with a duration > 0.");
       return;
       }
-      const unitsPerRow = parseInt(unitsPerRowInput.value) || totalDuration;
-      const months = buildMonthArray(totalDuration);
-      let units = months;
-      if (currentView === 'week') units = buildSubUnits(months, 4, 'week');
-      if (currentView === 'day') units = buildSubUnits(months, 30, 'day');
-      const timelineData = assignPhases(units, phases, currentView);
+      const dayUnits = buildDayUnits(totalDays);
+      const dayTimeline = assignPhasesToDays(dayUnits, phases);
+      let timelineData = [];
+      if (currentView === 'week') {
+      timelineData = buildWeekTimeline(dayTimeline);
+      } else if (currentView === 'day') {
+      timelineData = buildDayViewTimeline(dayTimeline);
+      } else {
+      timelineData = buildMonthTimeline(dayTimeline);
+      }
+      const estimatedMonths = Math.max(1, Math.ceil(totalDays / DAYS_PER_MONTH));
+      const requestedPerRow = parseInt(unitsPerRowInput.value);
+      const unitsPerRow = requestedPerRow > 0 ? requestedPerRow : estimatedMonths;
       currentTimelineData = timelineData;
       currentPhases = phases;
-      renderTimeline(timelineData, unitsPerRow, currentView);
+      currentUnitsPerRow = unitsPerRow;
+      renderTimeline(timelineData, unitsPerRow, currentView, phases);
       outputContainer.classList.add('hidden');
       timelineWrapper.classList.remove('hidden');
       previewBtn.disabled = false;
@@ -873,91 +1161,72 @@
       const nameInput = row.querySelector('.phase-name');
       const durationInput = row.querySelector('.phase-duration');
       const name = nameInput.value.trim() || `Phase ${index + 1}`;
-      const duration = parseInt(durationInput.value);
-      if (isNaN(duration) || duration <= 0) {
+      const parsedDuration = parseDurationInput(durationInput.value);
+      if (!parsedDuration) {
       showError(`Enter a valid duration for "${name}".`);
       validationPassed = false;
       return;
       }
-      phases.push({ name, duration, color: COLORS[index % COLORS.length] });
+      phases.push({
+      name,
+      durationDays: parsedDuration.days,
+      color: COLORS[index % COLORS.length],
+      friendlyDuration: formatDaysToFriendly(parsedDuration.days)
+      });
       });
       return validationPassed ? phases : null;
       }
 
-      function buildMonthArray(totalDuration) {
-      const monthArray = [];
-      let currentMonth = parseInt(startMonthSelect.value);
-      let currentYear = parseInt(startYearInput.value);
-      for (let i = 0; i < totalDuration; i++) {
-      monthArray.push({ monthIndex: currentMonth, year: currentYear });
-      currentMonth = (currentMonth + 1) % 12;
-      if (currentMonth === 0) currentYear++;
-      }
-      return monthArray;
-      }
-
-      function buildSubUnits(months, count, type) {
-      const arr = [];
-      months.forEach(m => {
-      for (let i = 0; i < count; i++) {
-      const unit = { monthIndex: m.monthIndex, year: m.year };
-      if (type === 'week') unit.weekIndex = i + 1;
-      if (type === 'day') unit.day = i + 1;
-      arr.push(unit);
-      }
-      });
-      return arr;
-      }
-
-      function assignPhases(units, phases, view) {
-      const timeline = [];
-      let cursor = 0;
-      const factor = view === 'week' ? 4 : view === 'day' ? 30 : 1;
-      phases.forEach(phase => {
-      const unitsNeeded = phase.duration * factor;
-      for (let i = 0; i < unitsNeeded; i++) {
-      if (cursor < units.length) {
-      timeline.push({ ...units[cursor], phaseName: phase.name, color: phase.color });
-      cursor++;
-      }
-      }
-      });
-      return timeline;
-      }
-
       // --- RENDERING ---
-      function renderTimeline(timelineData, perRow, view) {
+      function renderTimeline(timelineData, perRow, view, phases) {
       timelineContainer.innerHTML = '';
+      if (onscreenLegend) {
+      onscreenLegend.innerHTML = '';
+      }
+      if (!timelineData.length) return;
       for (let i = 0; i < timelineData.length; i += perRow) {
       const row = document.createElement('div');
       row.className = 'flex items-stretch mt-2 justify-center';
       timelineData.slice(i, i + perRow).forEach(item => {
       const cell = document.createElement('div');
-      cell.className = 'flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 m-1 rounded-lg text-xs sm:text-sm font-semibold shadow-md text-white transition-transform hover:scale-105';
-      cell.style.backgroundColor = item.color;
-      if (view === 'week') {
-      cell.textContent = 'W' + item.weekIndex;
-      } else if (view === 'day') {
-      cell.textContent = item.day;
-      } else {
-      cell.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
-      }
-      cell.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
+      cell.className = 'flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 m-1 rounded-lg text-xs sm:text-sm font-semibold shadow-md transition-transform hover:scale-105';
+      applySegmentsStyles(cell, item);
+      cell.textContent = item.label;
+      cell.title = createUnitTooltip(item);
       row.appendChild(cell);
       });
       timelineContainer.appendChild(row);
+      }
+      if (onscreenLegend && phases && phases.length) {
+      const legend = createLegend(phases, 'bottom', document.body.classList.contains('dark-mode'));
+      legend.classList.add('justify-center', 'flex-wrap');
+      onscreenLegend.appendChild(legend);
       }
       }
 
       function createLegend(phases, position, isDarkMode) {
       const legend = document.createElement('div');
       legend.className = `legend-container flex gap-4 ${position === 'top' ? 'legend-top legend-horizontal' : position === 'bottom' ? 'legend-bottom legend-horizontal' : position === 'left' ? 'legend-left legend-vertical' : 'legend-right legend-vertical'}`;
-      legend.innerHTML = phases.map(phase => `
-      <div class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 transition-colors">
-      <div class="w-6 h-6 rounded-md shadow-sm flex-shrink-0" style="background-color: ${phase.color};"></div>
-      <span class="text-sm font-medium ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}">${phase.name}</span>
-      </div>
-      `).join('');
+      legend.style.flexWrap = 'wrap';
+      legend.style.alignItems = 'center';
+      phases.forEach(phase => {
+      const item = document.createElement('div');
+      item.className = 'flex items-center gap-2 rounded-lg';
+      item.style.padding = '0.5rem 0.75rem';
+      item.style.backgroundColor = isDarkMode ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.08)';
+      item.style.border = isDarkMode ? '1px solid rgba(148, 163, 184, 0.2)' : '1px solid rgba(148, 163, 184, 0.3)';
+      item.style.margin = '0.25rem';
+      const swatch = document.createElement('div');
+      swatch.className = 'w-6 h-6 rounded-md shadow-sm flex-shrink-0';
+      swatch.style.backgroundColor = phase.color;
+      const label = document.createElement('span');
+      label.className = 'text-sm font-medium';
+      label.style.color = isDarkMode ? '#f8fafc' : '#0f172a';
+      label.textContent = phase.friendlyDuration ? `${phase.name} · ${phase.friendlyDuration}` : phase.name;
+      item.appendChild(swatch);
+      item.appendChild(label);
+      legend.appendChild(item);
+      });
       return legend;
       }
 
@@ -988,9 +1257,12 @@
       mainContent.style.justifyContent = 'center';
       mainContent.style.gap = '30px';
 
+      const isBodyDark = document.body.classList.contains('dark-mode');
+      const legendDarkMode = transparentBg ? isBodyDark : false;
+
       // Add legend if positioned on top or left
       if (legendPosition === 'top' || legendPosition === 'left') {
-      mainContent.appendChild(createLegend(phases, legendPosition, transparentBg || document.body.classList.contains('dark-mode')));
+      mainContent.appendChild(createLegend(phases, legendPosition, legendDarkMode));
       }
 
       // Add timeline
@@ -1022,18 +1294,10 @@
       cell.style.fontSize = '14px';
       cell.style.fontWeight = '600';
       cell.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
-      cell.style.color = 'white';
-      cell.style.backgroundColor = item.color;
       cell.style.transition = 'transform 0.2s';
-
-      if (view === 'week') {
-      cell.textContent = 'W' + item.weekIndex;
-      } else if (view === 'day') {
-      cell.textContent = item.day;
-      } else {
-      cell.textContent = MONTH_NAMES[item.monthIndex].substring(0, 3);
-      }
-      cell.title = `${MONTH_NAMES[item.monthIndex]} ${item.year} - ${item.phaseName}`;
+      applySegmentsStyles(cell, item);
+      cell.textContent = item.label;
+      cell.title = createUnitTooltip(item);
       row.appendChild(cell);
       });
       timelineWrapper.appendChild(row);
@@ -1042,7 +1306,7 @@
 
       // Add legend if positioned on bottom or right
       if (legendPosition === 'bottom' || legendPosition === 'right') {
-      mainContent.appendChild(createLegend(phases, legendPosition, transparentBg || document.body.classList.contains('dark-mode')));
+      mainContent.appendChild(createLegend(phases, legendPosition, legendDarkMode));
       }
 
       container.appendChild(mainContent);
@@ -1072,7 +1336,8 @@
       const width = parseInt(imageWidthInput.value) || 1200;
       const legendPosition = legendPositionSelect.value;
       const transparentBg = transparentBackgroundCheckbox.checked;
-      const perRow = parseInt(unitsPerRowInput.value) || currentTimelineData.length;
+      const perRowInput = parseInt(unitsPerRowInput.value);
+      const perRow = perRowInput > 0 ? perRowInput : (currentUnitsPerRow || currentTimelineData.length || 1);
 
       previewContent.innerHTML = '';
       const previewElement = createExportContainer(currentTimelineData, perRow, currentView, currentPhases, width, legendPosition, transparentBg);
@@ -1099,7 +1364,8 @@
       const width = parseInt(imageWidthInput.value) || 1200;
       const legendPosition = legendPositionSelect.value;
       const transparentBg = transparentBackgroundCheckbox.checked;
-      const perRow = parseInt(unitsPerRowInput.value) || currentTimelineData.length;
+      const perRowInput = parseInt(unitsPerRowInput.value);
+      const perRow = perRowInput > 0 ? perRowInput : (currentUnitsPerRow || currentTimelineData.length || 1);
 
       const exportElement = createExportContainer(currentTimelineData, perRow, currentView, currentPhases, width, legendPosition, transparentBg);
       document.body.appendChild(exportElement);
