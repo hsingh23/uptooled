@@ -24,7 +24,6 @@
     <meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Image+Resizer\n&cropper">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -100,59 +99,71 @@
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-  <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
     <header class="mb-6 text-center">
       <h1 class="text-3xl sm:text-4xl font-bold text-blue-600">Image Resizer & Cropper</h1>
       <p class="text-gray-600 mt-1">Upload, zoom, position, set background, and download your images.</p>
     </header>
 
     <!-- How to Use Guide -->
-    <div class="bg-white p-5 rounded-lg shadow-md mb-6">
-        <h2 class="text-xl font-semibold text-gray-700 mb-3">How to Use This Tool</h2>
-        <ol class="list-decimal list-inside space-y-2 text-gray-600">
-            <li><strong>Upload:</strong> Click "Choose Files" to select one or more images from your device.</li>
-            <li><strong>Select:</strong> Click on any image in the "Uploaded Images" list to activate it in the editor.</li>
-            <li><strong>Set Size:</strong> Pick a preset size (e.g., for icons) or enter custom dimensions and click "Set".</li>
-            <li><strong>Adjust:</strong> Use the zoom slider and drag the image in the preview window to get the perfect crop. You can also pick a background color or make it transparent.</li>
-            <li><strong>Download:</strong>
-                <ul class="list-disc list-inside ml-4 mt-1 text-sm">
-                    <li>Download just the current edited version.</li>
-                    <li>Download all processed versions for the selected image.</li>
-                    <li>Download a ZIP file of every image you've edited.</li>
-                </ul>
-            </li>
-        </ol>
-    </div>
+    <section id="instructionsCard" class="bg-white p-6 rounded-2xl shadow-md border border-blue-100" aria-live="polite">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="space-y-3">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-700">How to Use This Tool</h2>
+            <p class="text-sm text-gray-500 mt-1">Follow these quick steps to get started.</p>
+          </div>
+          <ol class="list-decimal list-inside space-y-2 text-gray-600">
+            <li><strong>Upload:</strong> Choose one or more images from your device.</li>
+            <li><strong>Select:</strong> Pick an image from the uploaded list to load it into the editor.</li>
+            <li><strong>Set Size:</strong> Use a preset or enter custom dimensions, then click <span class="font-semibold">Set</span>.</li>
+            <li><strong>Adjust:</strong> Pinch, scroll, or drag directly on the preview, or refine it with the zoom slider.</li>
+            <li><strong>Download:</strong> Save the current size with the single download button below the editor.</li>
+          </ol>
+        </div>
+        <button id="dismissInstructionsButton" type="button" class="self-start px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300">
+          Dismiss guide
+        </button>
+      </div>
+    </section>
 
 
-    <div class="flex flex-col xl:flex-row gap-6 items-start">
-      <!-- Left Column: Uploads and Image List -->
-      <aside class="w-full xl:w-80 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">1. Upload &amp; Manage</h2>
-        <p class="text-sm text-gray-500 mb-4">Drop multiple images in one go, then tap a thumbnail to start editing.</p>
-        <input type="file" id="fileInput" multiple accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-5 cursor-pointer">
-
-        <h3 class="text-lg font-semibold mb-3 text-gray-700">Uploaded Images</h3>
-        <div id="imageListContainer" class="space-y-3 max-h-[520px] overflow-y-auto pr-2">
+    <section id="uploadPanel" class="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-lg p-6">
+      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 class="text-2xl font-semibold text-gray-800">Upload &amp; Manage Images</h2>
+          <p class="text-sm text-gray-500 mt-1">Drop multiple images at once, then tap a thumbnail to begin editing.</p>
+        </div>
+        <label class="w-full md:w-auto">
+          <span class="sr-only">Choose images to upload</span>
+          <input type="file" id="fileInput" multiple accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+        </label>
+      </div>
+      <div class="mt-5">
+        <h3 class="text-lg font-semibold text-gray-700 mb-3">Uploaded Images</h3>
+        <div id="imageListContainer" class="space-y-3 max-h-[22rem] lg:max-h-[26rem] overflow-y-auto pr-1">
           <p id="noImagesMessage" class="text-gray-500 italic">No images uploaded yet.</p>
         </div>
-      </aside>
+      </div>
+    </section>
 
-      <!-- Right Column: Editor and Controls -->
-      <section id="editorArea" class="flex-1 w-full bg-white/80 border border-gray-200 rounded-2xl shadow-xl p-6 hidden">
-        <h2 class="text-xl font-semibold mb-6 text-gray-800">2. Adjust &amp; Export: <span id="currentImageNameDisplay" class="text-blue-600 font-medium"></span></h2>
-
-        <div class="flex flex-col xl:flex-row gap-6">
-          <div class="flex-1 flex flex-col gap-4">
+    <section id="editorArea" class="w-full bg-white/80 border border-gray-200 rounded-2xl shadow-xl p-6 hidden">
+      <div class="flex flex-col gap-8">
+        <header class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
+          <h2 class="text-2xl font-semibold text-gray-800">Adjust &amp; Export</h2>
+          <p class="text-sm text-gray-500">Editing: <span id="currentImageNameDisplay" class="text-blue-600 font-medium"></span></p>
+        </header>
+        <div class="flex flex-col xl:flex-row gap-8 items-start">
+          <div class="flex-1 w-full space-y-6">
             <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 shadow-inner">
               <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
                 <div>
                   <h3 class="text-lg font-semibold text-gray-800">Preview &amp; Position</h3>
                   <p class="text-sm text-gray-500">Canvas: <span id="canvasSizeDisplay" class="font-medium">N/A</span></p>
                 </div>
-                <p class="text-xs text-gray-400">Drag to pan · Pinch or use the slider to zoom</p>
+                <p class="text-xs text-gray-400">Drag to pan · Pinch, scroll, or use the slider to zoom</p>
               </div>
-              <div id="canvasContainer" class="relative flex items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md h-[320px] sm:h-[420px] lg:h-[520px]">
+              <div id="canvasContainer" class="relative flex items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md h-[360px] sm:h-[480px] lg:h-[640px]">
                 <canvas id="editorCanvas" class="cursor-grab active:cursor-grabbing"></canvas>
               </div>
             </div>
@@ -166,7 +177,7 @@
             </div>
           </div>
 
-          <div class="w-full xl:w-80 flex-shrink-0 space-y-5">
+          <div class="w-full xl:max-w-sm flex-shrink-0 space-y-5">
             <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
               <h3 class="text-lg font-semibold mb-3 text-gray-800">Target Size</h3>
               <div id="sizeSelectionContainer" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2 mb-4"></div>
@@ -196,29 +207,23 @@
           </div>
         </div>
 
-        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          <button id="downloadCurrentImageVersionButton" class="w-full px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-              Download This Size (<span id="currentVersionSizeDisplay">N/A</span>)
-          </button>
-          <button id="downloadAllForCurrentImageButton" class="w-full px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
-              Download All Sizes for This Image
-          </button>
-          <button id="downloadAllProcessedButton" class="w-full px-6 py-3 bg-teal-500 text-white rounded-xl hover:bg-teal-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 13.5l3 3m0 0l3-3m-3 3v-6m1.06-4.19l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
-              Download Everything (ZIP)
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h3 class="text-lg font-semibold text-gray-800">Download this size</h3>
+          <button id="downloadCurrentImageVersionButton" class="w-full sm:w-auto px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+            Download <span id="currentVersionSizeDisplay">N/A</span>
           </button>
         </div>
-      </section>
-      <div id="editorPlaceholder" class="flex-1 w-full bg-white/80 border border-dashed border-gray-300 p-8 rounded-2xl shadow-inner flex flex-col items-center justify-center text-center text-gray-500 min-h-[420px]">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-20 h-20 mb-4 text-gray-400">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-        </svg>
-        <p class="text-xl font-medium">Select or upload an image to begin.</p>
-        <p class="text-sm mt-1">Your preview will fill this workspace once an image is selected.</p>
       </div>
-    </div>
+    </section>
+
+    <section id="editorPlaceholder" class="w-full bg-white/80 border border-dashed border-gray-300 p-10 rounded-2xl shadow-inner flex flex-col items-center justify-center text-center text-gray-500 min-h-[440px]">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-20 h-20 mb-4 text-gray-400">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+      </svg>
+      <p class="text-xl font-medium">Select or upload an image to begin.</p>
+      <p class="text-sm mt-1">Your preview will fill this workspace once an image is selected.</p>
+    </section>
     <footer class="text-center mt-8 text-gray-500 text-sm">
         <p>&copy; 2025 Image Resizer & Cropper. Created with Gemini.</p>
     </footer>
@@ -229,6 +234,8 @@
 
 <script>
     // DOM Elements
+    const instructionsCard = document.getElementById('instructionsCard');
+    const dismissInstructionsButton = document.getElementById('dismissInstructionsButton');
     const fileInput = document.getElementById('fileInput');
     const imageListContainer = document.getElementById('imageListContainer');
     const noImagesMessage = document.getElementById('noImagesMessage');
@@ -245,8 +252,6 @@
     const canvasSizeDisplay = document.getElementById('canvasSizeDisplay');
     const downloadCurrentImageVersionButton = document.getElementById('downloadCurrentImageVersionButton');
     const currentVersionSizeDisplay = document.getElementById('currentVersionSizeDisplay');
-    const downloadAllForCurrentImageButton = document.getElementById('downloadAllForCurrentImageButton');
-    const downloadAllProcessedButton = document.getElementById('downloadAllProcessedButton');
     const toastContainer = document.getElementById('toastContainer');
     const zoomSlider = document.getElementById('zoomSlider');
     const zoomValueDisplay = document.getElementById('zoomValueDisplay');
@@ -257,6 +262,7 @@
 
     const MIN_ZOOM = parseInt(zoomSlider.min, 10) / 100;
     const MAX_ZOOM = parseInt(zoomSlider.max, 10) / 100;
+    const INSTRUCTIONS_STORAGE_KEY = 'imageResizerInstructionsDismissed';
 
     // App State
     let imagesData = []; 
@@ -274,6 +280,7 @@
     let initialPinchDistance = 0;
     let initialPinchZoom = 1;
     let lastPinchMidpoint = null;
+    let gestureStartZoom = null;
 
     const PREDEFINED_SIZES = [
         // Original icon sizes
@@ -463,6 +470,48 @@
         };
     }
 
+    function handleWheelZoom(event) {
+        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
+        if (!event.ctrlKey && !event.metaKey) return;
+
+        event.preventDefault();
+
+        const zoomIntensity = Math.exp(-event.deltaY * 0.0025);
+        const nextZoom = clampZoom(currentZoom * zoomIntensity);
+
+        if (Math.abs(nextZoom - currentZoom) < 0.0001) {
+            return;
+        }
+
+        applyZoom(nextZoom, { origin: { x: event.clientX, y: event.clientY } });
+    }
+
+    function handleGestureStart(event) {
+        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
+        event.preventDefault();
+        gestureStartZoom = currentZoom;
+    }
+
+    function handleGestureChange(event) {
+        if (gestureStartZoom === null) return;
+        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
+
+        event.preventDefault();
+
+        const scale = typeof event.scale === 'number' && event.scale > 0 ? event.scale : 1;
+        const nextZoom = clampZoom(gestureStartZoom * scale);
+
+        if (Math.abs(nextZoom - currentZoom) < 0.0001) {
+            return;
+        }
+
+        applyZoom(nextZoom);
+    }
+
+    function handleGestureEnd() {
+        gestureStartZoom = null;
+    }
+
     function applyZoom(newZoom, options = {}) {
         if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
 
@@ -515,6 +564,37 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        let instructionsDismissed = false;
+        try {
+            instructionsDismissed = localStorage.getItem(INSTRUCTIONS_STORAGE_KEY) === 'true';
+        } catch (error) {
+            instructionsDismissed = false;
+        }
+
+        if (instructionsCard) {
+            if (instructionsDismissed) {
+                instructionsCard.classList.add('hidden');
+                instructionsCard.setAttribute('aria-hidden', 'true');
+            } else {
+                instructionsCard.classList.remove('hidden');
+                instructionsCard.removeAttribute('aria-hidden');
+            }
+        }
+
+        if (dismissInstructionsButton) {
+            dismissInstructionsButton.addEventListener('click', () => {
+                if (instructionsCard) {
+                    instructionsCard.classList.add('hidden');
+                    instructionsCard.setAttribute('aria-hidden', 'true');
+                }
+                try {
+                    localStorage.setItem(INSTRUCTIONS_STORAGE_KEY, 'true');
+                } catch (error) {
+                    // Ignore storage errors (e.g., private browsing).
+                }
+            });
+        }
+
         fileInput.addEventListener('change', handleFileSelect);
         setCustomSizeButton.addEventListener('click', handleSetCustomSize);
 
@@ -527,6 +607,13 @@
         editorCanvas.addEventListener('touchend', endPan);
         editorCanvas.addEventListener('touchcancel', endPan);
 
+        if (canvasContainer) {
+            canvasContainer.addEventListener('wheel', handleWheelZoom, { passive: false });
+            canvasContainer.addEventListener('gesturestart', handleGestureStart);
+            canvasContainer.addEventListener('gesturechange', handleGestureChange);
+            canvasContainer.addEventListener('gestureend', handleGestureEnd);
+        }
+
         zoomSlider.addEventListener('input', handleZoomChange);
         bgColorPicker.addEventListener('input', handleBgColorChange);
         hexColorInput.addEventListener('input', handleHexColorChange);
@@ -535,8 +622,6 @@
         backgroundOnlyMode.addEventListener('change', handleBackgroundOnlyModeChange);
 
         downloadCurrentImageVersionButton.addEventListener('click', downloadCurrentVersion);
-        downloadAllForCurrentImageButton.addEventListener('click', downloadAllVersionsForCurrentImage);
-        downloadAllProcessedButton.addEventListener('click', downloadAllProcessedZip);
 
         populatePredefinedSizes();
         updateEditorVisibility();
@@ -641,6 +726,7 @@
         if (!imgData) {
             activeImageId = null;
             originalImageToDraw = null;
+            currentImageNameDisplay.textContent = '';
             updateEditorVisibility();
             return;
         }
@@ -756,12 +842,12 @@
 
         const canvasAspectRatio = editorCanvas.width / editorCanvas.height;
         const containerWidth = canvasContainer.clientWidth || editorCanvas.width;
-        const containerHeight = canvasContainer.clientHeight || Math.min(520, window.innerHeight * 0.6);
+        const containerHeight = canvasContainer.clientHeight || Math.min(640, window.innerHeight * 0.75);
 
         let displayW = containerWidth;
         let displayH = displayW / canvasAspectRatio;
 
-        const maxDisplayHeight = Math.min(containerHeight, window.innerHeight * 0.7);
+        const maxDisplayHeight = Math.min(containerHeight, window.innerHeight * 0.85);
 
         if (displayH > maxDisplayHeight) {
             displayH = maxDisplayHeight;
@@ -1030,43 +1116,23 @@
 
     function updateDownloadButtonsState() {
         let currentVersionExists = false;
-        let anyVersionExistsForCurrentImage = false;
-        let anyVersionExistsAtAll = false;
 
-        if (isBackgroundOnlyMode && currentTargetSize) {
-            // Check background-only versions
+        if (currentTargetSize) {
             const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-            if (window.backgroundOnlyVersions && window.backgroundOnlyVersions[sizeKey]) {
-                currentVersionExists = true;
-                anyVersionExistsForCurrentImage = true;
-            }
-        } else {
-            const imgData = imagesData.find(img => img.id === activeImageId);
-            if (imgData && currentTargetSize) {
-                const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-                if (imgData.processedVersions[sizeKey] && imgData.processedVersions[sizeKey].dataURL) {
+
+            if (isBackgroundOnlyMode) {
+                if (window.backgroundOnlyVersions && window.backgroundOnlyVersions[sizeKey]) {
                     currentVersionExists = true;
                 }
-                if (Object.keys(imgData.processedVersions).length > 0) {
-                    anyVersionExistsForCurrentImage = true;
+            } else {
+                const imgData = imagesData.find(img => img.id === activeImageId);
+                if (imgData && imgData.processedVersions[sizeKey] && imgData.processedVersions[sizeKey].dataURL) {
+                    currentVersionExists = true;
                 }
             }
-        }
-        
-        imagesData.forEach(img => {
-            if (Object.keys(img.processedVersions).length > 0) {
-                anyVersionExistsAtAll = true;
-            }
-        });
-        
-        // Also check background-only versions
-        if (window.backgroundOnlyVersions && Object.keys(window.backgroundOnlyVersions).length > 0) {
-            anyVersionExistsAtAll = true;
         }
 
         downloadCurrentImageVersionButton.disabled = !currentVersionExists;
-        downloadAllForCurrentImageButton.disabled = !anyVersionExistsForCurrentImage;
-        downloadAllProcessedButton.disabled = !anyVersionExistsAtAll;
     }
 
     function downloadCurrentVersion() {
@@ -1095,86 +1161,6 @@
         }
     }
 
-    function downloadAllVersionsForCurrentImage() {
-        if (!activeImageId) return;
-        
-        if (isBackgroundOnlyMode) {
-            if (!window.backgroundOnlyVersions || Object.keys(window.backgroundOnlyVersions).length === 0) {
-                showToast('No processed background versions.', 'info');
-                return;
-            }
-
-            Object.values(window.backgroundOnlyVersions).forEach(version => {
-                if (version.dataURL) {
-                    triggerDownload(version.dataURL, `background_${version.targetWidth}x${version.targetHeight}.png`);
-                }
-            });
-            showToast(`Downloading all background versions.`, 'success');
-        } else {
-            const imgData = imagesData.find(img => img.id === activeImageId);
-            if (!imgData || Object.keys(imgData.processedVersions).length === 0) {
-                showToast('No processed versions for this image.', 'info');
-                return;
-            }
-
-            Object.values(imgData.processedVersions).forEach(version => {
-                if (version.dataURL) {
-                    triggerDownload(version.dataURL, `${getSafeFilenameBase(imgData.name)}_${version.targetWidth}x${version.targetHeight}.png`);
-                }
-            });
-            showToast(`Downloading all processed versions for ${imgData.name}.`, 'success');
-        }
-    }
-
-    async function downloadAllProcessedZip() {
-        const zip = new JSZip();
-        let filesAdded = 0;
-
-        // Add regular image versions
-        imagesData.forEach(imgData => {
-            const safeOriginalNameBase = getSafeFilenameBase(imgData.name);
-            Object.values(imgData.processedVersions).forEach(versionData => {
-                if (versionData.dataURL) {
-                    const base64Data = versionData.dataURL.split(',')[1];
-                    zip.file(`${safeOriginalNameBase}_${versionData.targetWidth}x${versionData.targetHeight}.png`, base64Data, { base64: true });
-                    filesAdded++;
-                }
-            });
-        });
-
-        // Add background-only versions
-        if (window.backgroundOnlyVersions) {
-            Object.values(window.backgroundOnlyVersions).forEach(versionData => {
-                if (versionData.dataURL) {
-                    const base64Data = versionData.dataURL.split(',')[1];
-                    zip.file(`background_${versionData.targetWidth}x${versionData.targetHeight}.png`, base64Data, { base64: true });
-                    filesAdded++;
-                }
-            });
-        }
-
-        if (filesAdded === 0) {
-            showToast('No processed images to download.', 'info');
-            return;
-        }
-
-        try {
-            showToast(`Generating ZIP with ${filesAdded} images...`, 'info');
-            const content = await zip.generateAsync({ type: "blob" });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(content);
-            link.download = "resized_images_pack.zip";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
-            showToast(`Downloaded ZIP with ${filesAdded} images.`, 'success');
-        } catch (err) {
-            console.error("Error generating ZIP:", err);
-            showToast('Error creating ZIP file.', 'error');
-        }
-    }
-    
     function getSafeFilenameBase(originalName) {
         const nameWithoutExt = originalName.includes('.') ? originalName.substring(0, originalName.lastIndexOf('.')) : originalName;
         return nameWithoutExt.replace(/[^a-zA-Z0-9_-]/g, '_') || 'image';
