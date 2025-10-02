@@ -59,7 +59,6 @@
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
-            border-radius: 0.75rem;
             background-image:
                 linear-gradient(45deg, #eee 25%, transparent 25%),
                 linear-gradient(-45deg, #eee 25%, transparent 25%),
@@ -153,34 +152,14 @@
           <h2 class="text-2xl font-semibold text-gray-800">Adjust &amp; Export</h2>
           <p class="text-sm text-gray-500">Editing: <span id="currentImageNameDisplay" class="text-blue-600 font-medium"></span></p>
         </header>
-        <div class="flex flex-col xl:flex-row gap-8 items-start">
-          <div class="flex-1 w-full space-y-6">
-            <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 shadow-inner">
-              <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-800">Preview &amp; Position</h3>
-                  <p class="text-sm text-gray-500">Canvas: <span id="canvasSizeDisplay" class="font-medium">N/A</span></p>
-                </div>
-                <p class="text-xs text-gray-400">Drag to pan · Pinch, scroll, or use the slider to zoom</p>
-              </div>
-              <div id="canvasContainer" class="relative flex items-center justify-center overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md h-[360px] sm:h-[480px] lg:h-[640px]">
-                <canvas id="editorCanvas" class="cursor-grab active:cursor-grabbing"></canvas>
-              </div>
-            </div>
-
-            <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm">
-              <label for="zoomSlider" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-                <span>Zoom</span>
-                <span class="text-gray-500"><span id="zoomValueDisplay">100</span>%</span>
-              </label>
-              <input type="range" id="zoomSlider" min="10" max="500" value="100" class="w-full">
-            </div>
-          </div>
-
-          <div class="w-full xl:max-w-sm flex-shrink-0 space-y-5">
+        <div class="flex flex-col gap-8">
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
               <h3 class="text-lg font-semibold mb-3 text-gray-800">Target Size</h3>
-              <div id="sizeSelectionContainer" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-2 mb-4"></div>
+              <label for="targetSizeSelect" class="sr-only">Choose a preset size</label>
+              <select id="targetSizeSelect" class="w-full mb-4 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Select a preset size</option>
+              </select>
               <div>
                 <h4 class="text-sm font-semibold mb-2 text-gray-700">Custom Size (px)</h4>
                 <div class="flex flex-wrap items-center gap-2">
@@ -204,6 +183,27 @@
                 <span>Background only (no image)</span>
               </label>
             </div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 shadow-inner">
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-800">Preview &amp; Position</h3>
+                <p class="text-sm text-gray-500">Canvas: <span id="canvasSizeDisplay" class="font-medium">N/A</span></p>
+              </div>
+              <p class="text-xs text-gray-400">Drag to pan · Pinch, scroll, or use the slider to zoom</p>
+            </div>
+            <div id="canvasContainer" class="relative flex h-[60vh] min-h-[320px] max-h-[85vh] w-full items-center justify-center overflow-hidden border border-gray-300 bg-white shadow-md">
+              <canvas id="editorCanvas" class="cursor-grab active:cursor-grabbing"></canvas>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm">
+            <label for="zoomSlider" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
+              <span>Zoom</span>
+              <span class="text-gray-500"><span id="zoomValueDisplay">100</span>%</span>
+            </label>
+            <input type="range" id="zoomSlider" min="10" max="500" value="100" class="w-full">
           </div>
         </div>
 
@@ -242,7 +242,7 @@
     const editorArea = document.getElementById('editorArea');
     const editorPlaceholder = document.getElementById('editorPlaceholder');
     const currentImageNameDisplay = document.getElementById('currentImageNameDisplay');
-    const sizeSelectionContainer = document.getElementById('sizeSelectionContainer');
+    const targetSizeSelect = document.getElementById('targetSizeSelect');
     const customWidthInput = document.getElementById('customWidthInput');
     const customHeightInput = document.getElementById('customHeightInput');
     const setCustomSizeButton = document.getElementById('setCustomSizeButton');
@@ -392,7 +392,7 @@
                 currentTargetSize = { width: PREDEFINED_SIZES[7].width, height: PREDEFINED_SIZES[7].height };
                 customWidthInput.value = currentTargetSize.width;
                 customHeightInput.value = currentTargetSize.height;
-                highlightActiveSizeButton();
+                syncTargetSizeSelect();
             }
 
             currentZoom = 1.0;
@@ -615,6 +615,9 @@
         }
 
         zoomSlider.addEventListener('input', handleZoomChange);
+        if (targetSizeSelect) {
+            targetSizeSelect.addEventListener('change', handleTargetSizeSelectChange);
+        }
         bgColorPicker.addEventListener('input', handleBgColorChange);
         hexColorInput.addEventListener('input', handleHexColorChange);
         hexColorInput.addEventListener('blur', validateHexColor);
@@ -624,43 +627,82 @@
         downloadCurrentImageVersionButton.addEventListener('click', downloadCurrentVersion);
 
         populatePredefinedSizes();
+        syncTargetSizeSelect();
         updateEditorVisibility();
         updateDownloadButtonsState();
         document.addEventListener('paste', handlePasteEvent);
     });
 
     function populatePredefinedSizes() {
+        if (!targetSizeSelect) return;
+
+        targetSizeSelect.innerHTML = '';
+
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = 'Select a preset size';
+        targetSizeSelect.appendChild(placeholderOption);
+
         PREDEFINED_SIZES.forEach(size => {
-            const button = document.createElement('button');
-            button.textContent = `${size.name} (${size.width}x${size.height})`;
-            button.classList.add('w-full', 'text-sm', 'text-left', 'px-3', 'py-2', 'bg-gray-200', 'text-gray-700', 'rounded-md', 'hover:bg-gray-300', 'transition-colors', 'focus:outline-none', 'focus:ring-2', 'focus:ring-blue-500');
-            button.onclick = () => {
-                currentTargetSize = { width: size.width, height: size.height };
-                customWidthInput.value = size.width;
-                customHeightInput.value = size.height;
+            const option = document.createElement('option');
+            option.value = `${size.width}x${size.height}`;
+            option.textContent = `${size.name} (${size.width}x${size.height})`;
+            targetSizeSelect.appendChild(option);
+        });
+
+        const customIndicatorOption = document.createElement('option');
+        customIndicatorOption.value = '__custom__';
+        customIndicatorOption.textContent = 'Custom size (use fields below)';
+        targetSizeSelect.appendChild(customIndicatorOption);
+    }
+
+    function syncTargetSizeSelect() {
+        if (!targetSizeSelect) return;
+
+        if (!currentTargetSize) {
+            targetSizeSelect.value = '';
+            return;
+        }
+
+        const value = `${currentTargetSize.width}x${currentTargetSize.height}`;
+        const matchingOption = Array.from(targetSizeSelect.options).find(option => option.value === value);
+        targetSizeSelect.value = matchingOption ? value : '__custom__';
+    }
+
+    function handleTargetSizeSelectChange(event) {
+        const value = event.target.value;
+
+        if (!value) {
+            return;
+        }
+
+        if (value === '__custom__') {
+            const width = parseInt(customWidthInput.value, 10);
+            const height = parseInt(customHeightInput.value, 10);
+            if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+                currentTargetSize = { width, height };
                 ensureBackgroundModeIfNoImage();
                 resetZoomAndBgToDefaultsOrStored();
-                highlightActiveSizeButton();
-            };
-            sizeSelectionContainer.appendChild(button);
-        });
-    }
-    
-    function highlightActiveSizeButton() {
-        Array.from(sizeSelectionContainer.children).forEach(button => {
-            button.classList.remove('bg-blue-500', 'text-white', 'ring-2', 'ring-blue-300');
-            button.classList.add('bg-gray-200', 'text-gray-700');
-            if (currentTargetSize) {
-                 const sizeFromButtonText = button.textContent.match(/(\d+)x(\d+)/);
-                 if (sizeFromButtonText && parseInt(sizeFromButtonText[1]) === currentTargetSize.width && parseInt(sizeFromButtonText[2]) === currentTargetSize.height) {
-                    const matchingPredefined = PREDEFINED_SIZES.find(s => s.width === currentTargetSize.width && s.height === currentTargetSize.height && button.textContent.startsWith(s.name));
-                    if (matchingPredefined) {
-                         button.classList.add('bg-blue-500', 'text-white', 'ring-2', 'ring-blue-300');
-                         button.classList.remove('bg-gray-200', 'text-gray-700');
-                    }
-                 }
+                syncTargetSizeSelect();
+            } else {
+                showToast('Enter a custom width and height, then press Set.', 'info');
+                syncTargetSizeSelect();
             }
-        });
+            return;
+        }
+
+        const [widthStr, heightStr] = value.split('x');
+        const width = parseInt(widthStr, 10);
+        const height = parseInt(heightStr, 10);
+
+        if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+            currentTargetSize = { width, height };
+            customWidthInput.value = width;
+            customHeightInput.value = height;
+            ensureBackgroundModeIfNoImage();
+            resetZoomAndBgToDefaultsOrStored();
+            syncTargetSizeSelect();
+        }
     }
 
     function handleFileSelect(event) {
@@ -752,7 +794,7 @@
                  customWidthInput.value = currentTargetSize.width;
                  customHeightInput.value = currentTargetSize.height;
                  resetZoomAndBgToDefaultsOrStored();
-                 highlightActiveSizeButton();
+                 syncTargetSizeSelect();
             }
         }
         updateDownloadButtonsState();
@@ -769,7 +811,7 @@
         currentTargetSize = { width, height };
         ensureBackgroundModeIfNoImage();
         resetZoomAndBgToDefaultsOrStored();
-        highlightActiveSizeButton();
+        syncTargetSizeSelect();
     }
 
     function resetZoomAndBgToDefaultsOrStored() {
