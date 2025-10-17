@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Injury Prevention Crash Course</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F5F4; /* stone-100 */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+        .accordion-item.open .accordion-content {
+            max-height: 1000px; /* Adjust as needed */
+        }
+        .accordion-item.open .accordion-icon {
+            transform: rotate(45deg);
+        }
+        .text-on-circle {
+            font-size: 1.1rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <!-- Header -->
+    <header class="bg-stone-50/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <nav class="flex justify-between items-center">
+                <a href="#" class="text-2xl font-bold tracking-tight text-stone-900">
+                    CRDT
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#self-care" class="text-stone-600 hover:text-violet-600 transition-colors">Self-Care</a>
+                    <a href="#physical-prep" class="text-stone-600 hover:text-violet-600 transition-colors">Physical Prep</a>
+                    <a href="#cross-training" class="text-stone-600 hover:text-violet-600 transition-colors">Cross-Training</a>
+                    <a href="#mental-health" class="text-stone-600 hover:text-violet-600 transition-colors">Mental Health</a>
+                    <a href="#resources" class="text-stone-600 hover:text-violet-600 transition-colors">Resources</a>
+                </div>
+                <button class="hidden md:inline-block bg-stone-800 text-white px-6 py-2 rounded-lg hover:bg-violet-700 transition-colors">
+                    Contact
+                </button>
+                <button class="md:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="container mx-auto px-6 py-16 md:py-24">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="relative">
+                     <div class="absolute -top-16 -left-16 w-80 h-80 pointer-events-none opacity-50">
+                         <svg viewBox="0 0 500 500">
+                            <path id="circlePath" fill="none" d=" M 250, 250 m -200, 0 a 200,200 0 1,1 400,0 a 200,200 0 1,1 -400,0 "/>
+                            <text class="text-on-circle fill-current text-violet-400">
+                                <textPath xlink:href="#circlePath">
+                                    Injury Prevention
+                                </textPath>
+                            </text>
+                        </svg>
+                    </div>
+                    <p class="text-violet-600 font-semibold mb-2">A Crash Course</p>
+                    <h1 class="text-4xl md:text-6xl font-bold tracking-tighter text-stone-900 leading-tight">Injury Prevention for the Chicago Dancer.</h1>
+                    <p class="mt-6 text-lg text-stone-600 max-w-lg">A guide to the intentional actions that support your physical, mental, and emotional well-being—the things you do to stay healthy, balanced, and connected to yourself.</p>
+                </div>
+                <div class="rounded-2xl overflow-hidden shadow-2xl h-[500px]">
+                    <img src="https://images.pexels.com/photos/209948/pexels-photo-209948.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Dancer leaping in a studio" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </section>
+
+        <!-- Self-Care Section -->
+        <section id="self-care" class="bg-stone-100 py-20 md:py-28">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-4xl md:text-5xl font-bold tracking-tighter text-stone-900">Practicing Self-Care</h2>
+                    <p class="mt-6 text-lg text-stone-600">It's not just bubble baths. It’s about anticipating your needs and giving yourself what you need to feel grounded and strong. As an artist, this is part of your job.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
+                    <div class="bg-white p-6 rounded-2xl shadow-md">
+                        <h3 class="font-bold text-lg text-stone-900">Warm-Up & Cool-Down</h3>
+                        <p class="text-stone-600 mt-2">Properly warm up before class and roll out/stretch after, even if you don't feel sore.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl shadow-md">
+                        <h3 class="font-bold text-lg text-stone-900">Physical Therapy</h3>
+                        <p class="text-stone-600 mt-2">Stay on top of your PT exercises. If you have a nagging overuse injury, get it looked at.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl shadow-md">
+                        <h3 class="font-bold text-lg text-stone-900">Nutrition & Sleep</h3>
+                        <p class="text-stone-600 mt-2">Eat a balanced diet and get adequate SLEEP. They are foundational to recovery.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl shadow-md">
+                        <h3 class="font-bold text-lg text-stone-900">Cross-Training</h3>
+                        <p class="text-stone-600 mt-2">Integrate different workouts to improve overall performance and prevent injury.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl shadow-md">
+                        <h3 class="font-bold text-lg text-stone-900">Mental Health</h3>
+                        <p class="text-stone-600 mt-2">Talk to a licensed mental health professional. Your mind and body are connected.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl shadow-md">
+                        <h3 class="font-bold text-lg text-stone-900">Body Work</h3>
+                        <p class="text-stone-600 mt-2">Invest in regular massages or other forms of body work to aid recovery and release tension.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Physical Prep Section -->
+        <section id="physical-prep" class="container mx-auto px-6 py-20 md:py-28">
+             <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-4xl md:text-5xl font-bold tracking-tighter text-stone-900">Warm-Up & Cool-Down</h2>
+                <p class="mt-6 text-lg text-stone-600">Your warm-up is arguably the most important part of your day for protecting your body’s longevity. Do not skip your cool-down.</p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-12 mt-16 items-start">
+                <div>
+                    <h3 class="text-3xl font-bold text-stone-900 mb-6">The Ideal Warm-Up (Prehab)</h3>
+                    <ul class="space-y-4 text-stone-700">
+                        <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Duration:</strong> It should not take more than 30 minutes.</div></li>
+                        <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Mobilize & Stabilize:</strong> Include your PT exercises and work evenly between sides.</div></li>
+                        <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Core & Resistance:</strong> Abdominal work and Thera-Bands for upper body/back support stability and posture.</div></li>
+                         <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Key Exercises:</strong> Toe Taps, Bridges, Clam Shells, Side Steps/Monster Walks, Single Leg RDLs.</div></li>
+                        <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Elevate Heart Rate:</strong> Use HIIT-style movements to get your heart rate up so you don't start cold. Fatigue leads to mistakes.</div></li>
+                        <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Focus on Stabilizers:</strong> Prioritize strengthening smaller stabilizer muscles (rotators, inner thighs) as larger ones overfire with fatigue.</div></li>
+                    </ul>
+                </div>
+                 <div>
+                    <h3 class="text-3xl font-bold text-stone-900 mb-6">Effective Cool-Down</h3>
+                     <ul class="space-y-4 text-stone-700">
+                        <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Roll Out:</strong> Use a foam roller on quads, glutes, psoas, QL/low back, and hamstrings.</div></li>
+                        <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Stretch:</strong> Perform static stretches on key muscle groups to improve flexibility and reduce tightness.</div></li>
+                        <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Ice & Heat:</strong> Use ice for inflammation after dancing and heat before to loosen muscles.</div></li>
+                        <li class="flex items-start"><span class="text-violet-500 mr-3 mt-1">✓</span><div><strong class="font-semibold text-stone-800">Anti-Inflammatories:</strong> When needed, consider topical solutions like Voltaren, CBD, Tiger Balm, or Arnica.</div></li>
+                    </ul>
+                     <div class="mt-8 bg-violet-50 p-6 rounded-2xl border border-violet-200">
+                        <h4 class="font-bold text-violet-800">Note on Cardio</h4>
+                        <p class="text-violet-700 mt-2">Cardio like running or cycling tightens muscles (hip flexors, hamstrings). Always stretch/cool down thoroughly afterward. Differentiate between warm-up cardio and a full workout training session.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cross-Training Section -->
+        <section id="cross-training" class="bg-stone-900 text-white py-20 md:py-28">
+            <div class="container mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="text-4xl md:text-5xl font-bold tracking-tighter">The Power of Cross-Training</h2>
+                        <p class="mt-6 text-lg text-stone-400">Dancers are athletes who train intensely year-round. Cross-training is a first line of defense against injuries caused by repetition and asymmetry in choreography.</p>
+                         <div class="mt-8 space-y-3 text-stone-300">
+                            <p>✓ Reduces risk of overuse injuries</p>
+                            <p>✓ Builds strength in underused muscles</p>
+                            <p>✓ Boosts endurance and overall fitness</p>
+                            <p>✓ Helps prevent burnout by adding variety</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-stone-800 p-6 rounded-2xl text-center">
+                            <img src="https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-32 object-cover rounded-lg" alt="Pilates">
+                            <h4 class="font-bold mt-4">Pilates, Yoga, Gyrotonic</h4>
+                            <p class="text-sm text-stone-400">For core strength, flexibility, and alignment.</p>
+                        </div>
+                        <div class="bg-stone-800 p-6 rounded-2xl text-center">
+                             <img src="https://images.pexels.com/photos/7993333/pexels-photo-7993333.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-32 object-cover rounded-lg" alt="Somatic training">
+                            <h4 class="font-bold mt-4">Somatic Training</h4>
+                             <p class="text-sm text-stone-400">Calm the nervous system and rework neuromuscular body patterning.</p>
+                        </div>
+                         <div class="bg-stone-800 p-6 rounded-2xl text-center">
+                             <img src="https://images.pexels.com/photos/1552242/pexels-photo-1552242.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-32 object-cover rounded-lg" alt="Strength training">
+                            <h4 class="font-bold mt-4">Strength Training</h4>
+                             <p class="text-sm text-stone-400">Build muscle endurance and power.</p>
+                        </div>
+                         <div class="bg-stone-800 p-6 rounded-2xl text-center">
+                             <img src="https://images.pexels.com/photos/1954524/pexels-photo-1954524.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" class="w-full h-32 object-cover rounded-lg" alt="Cardio">
+                            <h4 class="font-bold mt-4">Cardio</h4>
+                             <p class="text-sm text-stone-400">Running, cycling, or swimming to improve stamina.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mental Health Section -->
+        <section id="mental-health" class="container mx-auto px-6 py-20 md:py-28">
+             <div class="grid lg:grid-cols-2 gap-12 items-center">
+                 <div class="rounded-2xl overflow-hidden shadow-2xl h-[500px]">
+                    <img src="https://images.pexels.com/photos/3771045/pexels-photo-3771045.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Person looking out a window thoughtfully" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-bold tracking-tighter text-stone-900">Mental Health is Health.</h2>
+                    <p class="mt-6 text-lg text-stone-600">Dance is deeply emotional and demanding. Your thoughts, emotions, and stress levels directly affect how your body performs. You are a person first.</p>
+                    <div class="mt-8 space-y-4">
+                        <h4 class="font-bold text-xl text-stone-800">Healthy Habits to Practice:</h4>
+                        <ul class="list-disc list-inside text-stone-700 space-y-2">
+                           <li>Mindful movement before class: breathing, visualizing alignment.</li>
+                           <li>Journaling about what went well, not only what to fix.</li>
+                           <li>Talking with mentors, friends, or therapists who understand performance pressure.</li>
+                           <li>Setting boundaries with rehearsal hours or social media.</li>
+                           <li>Taking rest seriously—physical and mental breaks allow artistry to flourish.</li>
+                           <li>Balancing work and play to cultivate a full life outside your craft.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        <section id="resources" class="bg-stone-100 py-20 md:py-28">
+            <div class="container mx-auto px-6" id="accordion-container">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-4xl md:text-5xl font-bold tracking-tighter text-stone-900">Resources, Networking & Tools</h2>
+                    <p class="mt-6 text-lg text-stone-600">Creating a network that gives you access to knowledge and resources is a vital skill. Your voice is a powerful tool to advocate for your needs.</p>
+                </div>
+
+                <div class="max-w-4xl mx-auto mt-16 space-y-4">
+                     <!-- Accordion Item 1 -->
+                    <div class="accordion-item bg-white p-6 rounded-2xl shadow-sm open">
+                        <button class="accordion-header w-full flex justify-between items-center text-left text-xl font-semibold">
+                            Financial & Medical Organizations
+                            <span class="accordion-icon text-2xl font-light text-violet-600 transition-transform">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <ul class="pt-4 text-stone-600 space-y-4">
+                                <li><strong>Chicago Dance Health Fund:</strong> Provides financial assistance for dancers' health needs. <a href="https://www.cdhf.org/" target="_blank" class="text-violet-600 hover:underline">Visit Site</a></li>
+                                <li><strong>IADMS:</strong> International Association for Dance Medicine & Science offers educational resources, mental health support, and PT directories. <a href="#" class="text-violet-600 hover:underline">Learn More</a></li>
+                                 <li><strong>Westside Dance DPT:</strong> A great resource hub for connecting with dance medicine specialists. <a href="https://www.westsidedancept.com/dancer-resources" target="_blank" class="text-violet-600 hover:underline">View Resources</a></li>
+                                 <li><strong>NAMI Chicago:</strong> Offers free mental health support groups, including a dedicated LGBTQ+ group. <a href="https://www.namichicago.org/helpline" target="_blank" class="text-violet-600 hover:underline">Get Help</a></li>
+                                 <li><strong>Biscuit Ballerina:</strong> Features articles and resources focused on dancer mental health. <a href="https://www.biscuitballerina.com/dancer-resources" target="_blank" class="text-violet-600 hover:underline">Read Articles</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- Accordion Item 2 -->
+                     <div class="accordion-item bg-white p-6 rounded-2xl shadow-sm open">
+                        <button class="accordion-header w-full flex justify-between items-center text-left text-xl font-semibold">
+                            Chicago-Area Dance Physical Therapists
+                            <span class="accordion-icon text-2xl font-light text-violet-600 transition-transform">+</span>
+                        </button>
+                        <div class="accordion-content">
+                             <div class="pt-4 text-stone-600">
+                                <p class="mb-4">It is vital to be seen by a dance-specific DPT. Athletico offers free 30-minute screenings without requiring health insurance.</p>
+                                <ul class="grid sm:grid-cols-2 gap-x-8 gap-y-2">
+                                    <li><a href="https://www.athletico.com/services/performing-arts-rehabilitation/" target="_blank" class="text-violet-600 hover:underline">Julie O'Connell (Athletico)</a></li>
+                                    <li><a href="https://www.athletico.com/services/performing-arts-rehabilitation/" target="_blank" class="text-violet-600 hover:underline">Jennifer Janowski (Athletico)</a></li>
+                                    <li><a href="https://www.athletico.com/services/performing-arts-rehabilitation/" target="_blank" class="text-violet-600 hover:underline">April Vercellino (Athletico)</a></li>
+                                    <li><a href="https://www.athletico.com/services/performing-arts-rehabilitation/" target="_blank" class="text-violet-600 hover:underline">Caitlin Carroll (Athletico)</a></li>
+                                    <li><a href="https://symmetry-physicaltherapy.com/therapists/katie-warner-pt-dpt-ocs/" target="_blank" class="text-violet-600 hover:underline">Katie Warner (Symmetry)</a></li>
+                                    <li><a href="https://www.athletico.com/services/performing-arts-rehabilitation/" target="_blank" class="text-violet-600 hover:underline">Liz Utter (Athletico)</a></li>
+                                    <li><a href="https://www.sralab.org/clinicians/kathleen-darley-pt" target="_blank" class="text-violet-600 hover:underline">Kathleen Darley (Shirley Ryan)</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Accordion Item 3 -->
+                     <div class="accordion-item bg-white p-6 rounded-2xl shadow-sm open">
+                        <button class="accordion-header w-full flex justify-between items-center text-left text-xl font-semibold">
+                            Networking & Cost-Saving Strategies
+                            <span class="accordion-icon text-2xl font-light text-violet-600 transition-transform">+</span>
+                        </button>
+                        <div class="accordion-content">
+                             <ul class="pt-4 text-stone-600 space-y-2 list-disc list-inside">
+                               <li>Talk with coworkers in the fitness industry for free or discounted cross-training.</li>
+                               <li>Find a side job that provides something you value: gym access, PT, food, studio access, or health insurance.</li>
+                               <li>Utilize work/study programs to get free dance classes.</li>
+                               <li>Build a safety net of people who want to cheer you on and see you succeed.</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <!-- Accordion Item 4 -->
+                     <div class="accordion-item bg-white p-6 rounded-2xl shadow-sm open">
+                        <button class="accordion-header w-full flex justify-between items-center text-left text-xl font-semibold">
+                            Recommended Maintenance Tools
+                            <span class="accordion-icon text-2xl font-light text-violet-600 transition-transform">+</span>
+                        </button>
+                        <div class="accordion-content">
+                             <div class="pt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <a href="https://www.triggerpoint.com/" target="_blank" class="group block bg-stone-50 p-4 rounded-xl hover:shadow-lg transition-all duration-300 border border-stone-200">
+                                    <img src="https://images.pexels.com/photos/863977/pexels-photo-863977.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Massage Ball" class="w-full h-32 object-cover rounded-lg mb-3">
+                                    <h4 class="font-semibold text-stone-800 group-hover:text-violet-600">Massage Balls</h4>
+                                    <p class="text-sm text-stone-600">For trigger point release.</p>
+                                </a>
+                                <a href="https://www.amazon.com/s?k=foam+roller" target="_blank" class="group block bg-stone-50 p-4 rounded-xl hover:shadow-lg transition-all duration-300 border border-stone-200">
+                                    <img src="https://images.pexels.com/photos/4162451/pexels-photo-4162451.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Foam Roller" class="w-full h-32 object-cover rounded-lg mb-3">
+                                    <h4 class="font-semibold text-stone-800 group-hover:text-violet-600">Foam Roller</h4>
+                                    <p class="text-sm text-stone-600">For muscle rollout and recovery.</p>
+                                </a>
+                                <a href="https://www.theraband.com/" target="_blank" class="group block bg-stone-50 p-4 rounded-xl hover:shadow-lg transition-all duration-300 border border-stone-200">
+                                    <img src="https://images.pexels.com/photos/4752861/pexels-photo-4752861.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Therabands" class="w-full h-32 object-cover rounded-lg mb-3">
+                                    <h4 class="font-semibold text-stone-800 group-hover:text-violet-600">Therabands</h4>
+                                    <p class="text-sm text-stone-600">For resistance and stability work.</p>
+                                </a>
+                                <a href="https://www.amazon.com/s?k=cupping+set" target="_blank" class="group block bg-stone-50 p-4 rounded-xl hover:shadow-lg transition-all duration-300 border border-stone-200">
+                                    <img src="https://images.pexels.com/photos/7191136/pexels-photo-7191136.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Cupping Set" class="w-full h-32 object-cover rounded-lg mb-3">
+                                    <h4 class="font-semibold text-stone-800 group-hover:text-violet-600">Cupping Set</h4>
+                                    <p class="text-sm text-stone-600">For myofascial release.</p>
+                                </a>
+                                <a href="https://www.amazon.com/s?k=iastm+tools" target="_blank" class="group block bg-stone-50 p-4 rounded-xl hover:shadow-lg transition-all duration-300 border border-stone-200">
+                                    <img src="https://images.pexels.com/photos/7135048/pexels-photo-7135048.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Scraping Tools" class="w-full h-32 object-cover rounded-lg mb-3">
+                                    <h4 class="font-semibold text-stone-800 group-hover:text-violet-600">Scraping Tools</h4>
+                                    <p class="text-sm text-stone-600">For soft tissue mobilization.</p>
+                                </a>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // JavaScript for Accordion
+        const accordionContainer = document.getElementById('accordion-container');
+        if (accordionContainer) {
+            const accordionItems = accordionContainer.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                header.addEventListener('click', () => {
+                    const isOpen = item.classList.contains('open');
+                    
+                    // Optional: Close all other items
+                    // accordionItems.forEach(otherItem => {
+                    //     if (otherItem !== item) {
+                    //         otherItem.classList.remove('open');
+                    //     }
+                    // });
+
+                    // Toggle the clicked item
+                    if (isOpen) {
+                        item.classList.remove('open');
+                    } else {
+                        item.classList.add('open');
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
