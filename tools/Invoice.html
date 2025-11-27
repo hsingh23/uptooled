@@ -1,1191 +1,1268 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI-Powered Invoice Generator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: #f5f7fa;
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .header h1 {
-            color: #2c5aa0;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-        }
-        
-        .header p {
-            color: #666;
-            font-size: 1.1em;
-        }
-        
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f7fa;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h1 {
+        color: #2c5aa0;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+      }
+
+      .header p {
+        color: #666;
+        font-size: 1.1em;
+      }
+
+      .main-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .panel {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        height: fit-content;
+      }
+
+      .panel h2 {
+        color: #2c5aa0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #2c5aa0;
+        padding-bottom: 10px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e1e8ed;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #2c5aa0;
+      }
+
+      .form-group textarea {
+        resize: vertical;
+        min-height: 200px;
+        font-family: "Courier New", monospace;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.1s;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+
+      .btn-primary {
+        background: #2c5aa0;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #1e3d72;
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #545b62;
+      }
+
+      .btn-danger {
+        background: #dc3545;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #c82333;
+      }
+
+      .btn-success {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #218838;
+      }
+
+      .status {
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+
+      .status.success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+
+      .status.error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+
+      .status.info {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+      }
+
+      /* Invoice Preview Styles */
+      .invoice-preview {
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+      }
+
+      .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 40px;
+        border-bottom: 3px solid #2c5aa0;
+        padding-bottom: 20px;
+      }
+
+      .company-info h1 {
+        color: #2c5aa0;
+        margin: 0;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .company-info p {
+        margin: 5px 0;
+        color: #666;
+      }
+
+      .invoice-title {
+        text-align: right;
+      }
+
+      .invoice-title h2 {
+        color: #2c5aa0;
+        font-size: 36px;
+        margin: 0;
+      }
+
+      .invoice-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
+      }
+
+      .bill-to,
+      .invoice-info {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+      }
+
+      .bill-to h3,
+      .invoice-info h3 {
+        color: #2c5aa0;
+        margin-top: 0;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 5px;
+      }
+
+      .services-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .services-table th {
+        background: #2c5aa0;
+        color: white;
+        padding: 15px;
+        text-align: left;
+        font-weight: bold;
+      }
+
+      .services-table td {
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .services-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .services-table tr:nth-child(even) {
+        background: #f8f9fa;
+      }
+
+      .total-section {
+        text-align: right;
+        margin-bottom: 30px;
+      }
+
+      .total-table {
+        display: inline-block;
+        border: 2px solid #2c5aa0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .total-table td {
+        padding: 12px 20px;
+        border-bottom: 1px solid #dee2e6;
+      }
+
+      .total-table tr:last-child td {
+        border-bottom: none;
+        background: #2c5aa0;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+      }
+
+      .payment-terms {
+        background: #e3f2fd;
+        padding: 20px;
+        border-radius: 8px;
+        border-left: 4px solid #2c5aa0;
+      }
+
+      .payment-terms h3 {
+        color: #2c5aa0;
+        margin-top: 0;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid #dee2e6;
+        color: #666;
+        font-size: 14px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .ai-setup {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+
+      .ai-setup h4 {
+        color: #856404;
+        margin-bottom: 10px;
+      }
+
+      .ai-setup a {
+        color: #856404;
+        font-weight: bold;
+      }
+
+      @media (max-width: 768px) {
         .main-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
+          grid-template-columns: 1fr;
         }
-        
-        .panel {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            height: fit-content;
-        }
-        
-        .panel h2 {
-            color: #2c5aa0;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #2c5aa0;
-            padding-bottom: 10px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e8ed;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #2c5aa0;
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 200px;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-        
-        .btn:hover {
-            transform: translateY(-1px);
-        }
-        
-        .btn-primary {
-            background: #2c5aa0;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #1e3d72;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #545b62;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #c82333;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #218838;
-        }
-        
-        .status {
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-        
-        .status.success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-        
-        .status.error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
-        
-        .status.info {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            color: #0c5460;
-        }
-        
-        /* Invoice Preview Styles */
-        .invoice-preview {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-        
-        .invoice-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 40px;
-            border-bottom: 3px solid #2c5aa0;
-            padding-bottom: 20px;
-        }
-        
-        .company-info h1 {
-            color: #2c5aa0;
-            margin: 0;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        
-        .company-info p {
-            margin: 5px 0;
-            color: #666;
-        }
-        
-        .invoice-title {
-            text-align: right;
-        }
-        
-        .invoice-title h2 {
-            color: #2c5aa0;
-            font-size: 36px;
-            margin: 0;
-        }
-        
+
         .invoice-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
+          grid-template-columns: 1fr;
+          gap: 20px;
         }
-        
-        .bill-to, .invoice-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
+
+        .invoice-header {
+          flex-direction: column;
+          text-align: center;
+          gap: 20px;
         }
-        
-        .bill-to h3, .invoice-info h3 {
-            color: #2c5aa0;
-            margin-top: 0;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 5px;
+
+        .invoice-title {
+          text-align: center;
         }
-        
-        .services-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      @media print {
+        body {
+          background: white;
         }
-        
-        .services-table th {
-            background: #2c5aa0;
-            color: white;
-            padding: 15px;
-            text-align: left;
-            font-weight: bold;
+
+        .container > *:not(.invoice-preview) {
+          display: none;
         }
-        
-        .services-table td {
-            padding: 15px;
-            border-bottom: 1px solid #dee2e6;
+
+        .invoice-preview {
+          box-shadow: none;
+          margin: 0;
+          padding: 0;
         }
-        
-        .services-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .services-table tr:nth-child(even) {
-            background: #f8f9fa;
-        }
-        
-        .total-section {
-            text-align: right;
-            margin-bottom: 30px;
-        }
-        
-        .total-table {
-            display: inline-block;
-            border: 2px solid #2c5aa0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .total-table td {
-            padding: 12px 20px;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .total-table tr:last-child td {
-            border-bottom: none;
-            background: #2c5aa0;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .payment-terms {
-            background: #e3f2fd;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #2c5aa0;
-        }
-        
-        .payment-terms h3 {
-            color: #2c5aa0;
-            margin-top: 0;
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #dee2e6;
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .ai-setup {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-        
-        .ai-setup h4 {
-            color: #856404;
-            margin-bottom: 10px;
-        }
-        
-        .ai-setup a {
-            color: #856404;
-            font-weight: bold;
-        }
-        
-        @media (max-width: 768px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-            }
-            
-            .invoice-details {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-            
-            .invoice-header {
-                flex-direction: column;
-                text-align: center;
-                gap: 20px;
-            }
-            
-            .invoice-title {
-                text-align: center;
-            }
-        }
-        
-        @media print {
-            body {
-                background: white;
-            }
-            
-            .container > *:not(.invoice-preview) {
-                display: none;
-            }
-            
-            .invoice-preview {
-                box-shadow: none;
-                margin: 0;
-                padding: 0;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <header class="header">
-            <h1>🤖 AI-Powered Invoice Generator</h1>
-            <p>Generate professional invoices with AI assistance using Gemini 2.5 Flash</p>
-        </header>
-        
-        <div class="main-layout">
-            <!-- Input Panel -->
-            <div class="panel">
-                <h2>📝 Invoice Details</h2>
-                
-                <!-- AI Setup Section -->
-                <div class="ai-setup">
-                    <h4>🔑 AI Setup Required</h4>
-                    <p>Get your free Gemini API key from <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a></p>
-                </div>
-                
-                <div class="form-group">
-                    <label for="geminiApiKey">Gemini API Key:</label>
-                    <input type="password" id="geminiApiKey" placeholder="Enter your Gemini API key from AI Studio">
-                </div>
-                
-                <div class="form-group">
-                    <label for="invoiceType">Invoice Type:</label>
-                    <select id="invoiceType">
-                        <option value="standard">Standard Invoice</option>
-                        <option value="consulting">Consulting Services</option>
-                        <option value="web_development">Web Development</option>
-                        <option value="design">Design Services</option>
-                        <option value="maintenance">Maintenance & Support</option>
-                        <option value="custom">Custom</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="clientType">Client Type:</label>
-                    <select id="clientType">
-                        <option value="business">Business</option>
-                        <option value="individual">Individual</option>
-                        <option value="nonprofit">Non-profit</option>
-                        <option value="student">Student</option>
-                        <option value="friend">Friend</option>
-                    </select>
-                </div>
-                
-                <!-- Pricing Calculator Section -->
-                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #2c5aa0;">
-                    <h4 style="color: #2c5aa0; margin-bottom: 15px;">💰 Pricing Calculator</h4>
-                    
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="valueComplexity">Value/Complexity:</label>
-                        <select id="valueComplexity">
-                            <option value="0.8">Low complexity/maintenance (0.8x) - Basic fixes, updates</option>
-                            <option value="1.0" selected>Medium complexity (1.0x) - Standard development</option>
-                            <option value="1.5">High value/specialized (1.5x) - Custom solutions</option>
-                            <option value="2.0">Business-critical (2.0x) - Mission critical work</option>
-                            <option value="2.5">Unique expertise (2.5x) - Specialized knowledge</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="clientCapacity">Client Capacity:</label>
-                        <select id="clientCapacity">
-                            <option value="0.5">Student/nonprofit (50% rate)</option>
-                            <option value="0.7">Small business/freelancer (70% rate)</option>
-                            <option value="0.8">Friend acquaintance (80% rate)</option>
-                            <option value="1.0" selected>Standard business (100% rate)</option>
-                            <option value="1.2">Mid-size business (120% rate)</option>
-                            <option value="1.5">Large company (150% rate)</option>
-                            <option value="2.0">Enterprise/high-income (200% rate)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label for="friendDiscount">Friend Discount:</label>
-                        <select id="friendDiscount">
-                            <option value="1.0" selected>No friend discount</option>
-                            <option value="0.9">Acquaintance (10% off)</option>
-                            <option value="0.7">Friend (30% off)</option>
-                            <option value="0.5">Close friend (50% off - cost coverage)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 10px;">
-                        <label for="baseRate">Base Rate ($/hour):</label>
-                        <input type="number" id="baseRate" value="80" step="1" min="1">
-                    </div>
-                    
-                    <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #dee2e6;">
-                        <strong>Calculated Rate: $<span id="calculatedRate">80.00</span>/hour</strong>
-                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                            Base ($<span id="calcBaseRate">80</span>) × Complexity (<span id="calcComplexity">1.0</span>) × Capacity (<span id="calcCapacity">1.0</span>) × Friend (<span id="calcFriend">1.0</span>)
-                        </div>
-                    </div>
-                    
-                    <button type="button" class="btn btn-secondary" style="margin-top: 10px; width: 100%;" onclick="applyCalculatedRate()">📊 Apply Calculated Rate</button>
-                </div>
-                
-                <div class="form-group">
-                    <label for="invoiceData">Invoice Details (Natural Language):</label>
-                    <textarea id="invoiceData" placeholder="Example:
+      <header class="header">
+        <h1>🤖 AI-Powered Invoice Generator</h1>
+        <p>Generate professional invoices with AI assistance using Gemini 2.5 Flash</p>
+      </header>
 
-Client: Annabel Hauk
-Email: annabel.hauk@hotmail.de  
-Business: Celerity Tech Consulting
-Website: celeritytechconsulting.com
-Location: Chicago, IL
-Payment: Venmo @hisingh1
+      <div class="main-layout">
+        <!-- Input Panel -->
+        <div class="panel">
+          <h2>📝 Invoice Details</h2>
 
-Work: WordPress development for annabel-hauk.de
+          <!-- AI Setup Section -->
+          <div class="ai-setup">
+            <h4>🔑 AI Setup Required</h4>
+            <p>
+              Get your free Gemini API key from
+              <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="geminiApiKey">Gemini API Key:</label>
+            <input
+              type="password"
+              id="geminiApiKey"
+              placeholder="Enter your Gemini API key from AI Studio"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="invoiceType">Invoice Type:</label>
+            <select id="invoiceType">
+              <option value="standard">Standard Invoice</option>
+              <option value="consulting">Consulting Services</option>
+              <option value="web_development">Web Development</option>
+              <option value="design">Design Services</option>
+              <option value="maintenance">Maintenance & Support</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="clientType">Client Type:</label>
+            <select id="clientType">
+              <option value="business">Business</option>
+              <option value="individual">Individual</option>
+              <option value="nonprofit">Non-profit</option>
+              <option value="student">Student</option>
+              <option value="friend">Friend</option>
+            </select>
+          </div>
+
+          <!-- Pricing Calculator Section -->
+          <div
+            style="
+              background: #f0f8ff;
+              padding: 15px;
+              border-radius: 8px;
+              margin-bottom: 20px;
+              border: 2px solid #2c5aa0;
+            "
+          >
+            <h4 style="color: #2c5aa0; margin-bottom: 15px">💰 Pricing Calculator</h4>
+
+            <div class="form-group" style="margin-bottom: 15px">
+              <label for="valueComplexity">Value/Complexity:</label>
+              <select id="valueComplexity">
+                <option value="0.8">
+                  Low complexity/maintenance (0.8x) - Basic fixes, updates
+                </option>
+                <option value="1.0" selected>
+                  Medium complexity (1.0x) - Standard development
+                </option>
+                <option value="1.5">High value/specialized (1.5x) - Custom solutions</option>
+                <option value="2.0">Business-critical (2.0x) - Mission critical work</option>
+                <option value="2.5">Unique expertise (2.5x) - Specialized knowledge</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px">
+              <label for="clientCapacity">Client Capacity:</label>
+              <select id="clientCapacity">
+                <option value="0.5">Student/nonprofit (50% rate)</option>
+                <option value="0.7">Small business/freelancer (70% rate)</option>
+                <option value="0.8">Friend acquaintance (80% rate)</option>
+                <option value="1.0" selected>Standard business (100% rate)</option>
+                <option value="1.2">Mid-size business (120% rate)</option>
+                <option value="1.5">Large company (150% rate)</option>
+                <option value="2.0">Enterprise/high-income (200% rate)</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px">
+              <label for="friendDiscount">Friend Discount:</label>
+              <select id="friendDiscount">
+                <option value="1.0" selected>No friend discount</option>
+                <option value="0.9">Acquaintance (10% off)</option>
+                <option value="0.7">Friend (30% off)</option>
+                <option value="0.5">Close friend (50% off - cost coverage)</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 10px">
+              <label for="baseRate">Base Rate ($/hour):</label>
+              <input type="number" id="baseRate" value="80" step="1" min="1" />
+            </div>
+
+            <div
+              style="
+                background: white;
+                padding: 12px;
+                border-radius: 6px;
+                border: 1px solid #dee2e6;
+              "
+            >
+              <strong>Calculated Rate: $<span id="calculatedRate">80.00</span>/hour</strong>
+              <div style="font-size: 12px; color: #666; margin-top: 5px">
+                Base ($<span id="calcBaseRate">80</span>) × Complexity (<span id="calcComplexity"
+                  >1.0</span
+                >) × Capacity (<span id="calcCapacity">1.0</span>) × Friend (<span id="calcFriend"
+                  >1.0</span
+                >)
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-secondary"
+              style="margin-top: 10px; width: 100%"
+              onclick="applyCalculatedRate()"
+            >
+              📊 Apply Calculated Rate
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label for="invoiceData">Invoice Details (Natural Language):</label>
+            <textarea
+              id="invoiceData"
+              placeholder="Example:
+
+Client: John Doe
+Email: john.doe@example.com
+Business: Stellar Tech Solutions
+Website: stellartech.example.com
+Location: San Francisco, CA
+Payment: Venmo @stellar_user
+
+Work: WordPress development for johndoe.com
 Hours: 2 hours
 Rate: $40/hour (friend discount from $80/hour)
 Description: Website setup, customization, and optimization
 
-Invoice#: CT-2025-001
+Invoice#: STS-2025-001
 Due: Net 14 days
 
-Additional notes: Student musician friend rate"></textarea>
-                </div>
-                
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="generateInvoice()">🚀 Generate with AI</button>
-                    <button class="btn btn-secondary" onclick="previewInvoice()">👀 Preview</button>
-                    <button class="btn btn-success" onclick="downloadInvoice()">💾 Download PDF</button>
-                    <button class="btn btn-danger" onclick="clearAllFields()">🗑️ Clear All</button>
-                </div>
-                
-                <div id="status"></div>
-            </div>
-            
-            <!-- Form Panel -->
-            <div class="panel">
-                <h2>📋 Structured Fields</h2>
-                
-                <div class="form-group">
-                    <label for="companyName">Company Name:</label>
-                    <input type="text" id="companyName" value="Celerity Tech Consulting">
-                </div>
-                
-                <div class="form-group">
-                    <label for="companyWebsite">Company Website:</label>
-                    <input type="text" id="companyWebsite" value="celeritytechconsulting.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="companyLocation">Company Location:</label>
-                    <input type="text" id="companyLocation" value="Chicago, IL">
-                </div>
-                
-                <div class="form-group">
-                    <label for="clientName">Client Name:</label>
-                    <input type="text" id="clientName">
-                </div>
-                
-                <div class="form-group">
-                    <label for="clientEmail">Client Email:</label>
-                    <input type="email" id="clientEmail">
-                </div>
-                
-                <div class="form-group">
-                    <label for="invoiceNumber">Invoice Number:</label>
-                    <input type="text" id="invoiceNumber" value="CT-2025-001">
-                </div>
-                
-                <div class="form-group">
-                    <label for="invoiceDate">Invoice Date:</label>
-                    <input type="date" id="invoiceDate">
-                </div>
-                
-                <div class="form-group">
-                    <label for="dueDate">Due Date:</label>
-                    <input type="date" id="dueDate">
-                </div>
-                
-                <div class="form-group">
-                    <label for="serviceDescription">Service Description:</label>
-                    <input type="text" id="serviceDescription" placeholder="e.g., WordPress Development & Configuration">
-                </div>
-                
-                <div class="form-group">
-                    <label for="serviceDetails">Service Details:</label>
-                    <input type="text" id="serviceDetails" placeholder="e.g., Website setup, customization, and optimization">
-                </div>
-                
-                <div class="form-group">
-                    <label for="hours">Hours:</label>
-                    <input type="number" id="hours" step="0.1" min="0">
-                </div>
-                
-                <div class="form-group">
-                    <label for="rate">Rate ($/hour):</label>
-                    <input type="number" id="rate" step="0.01" min="0">
-                </div>
-                
-                <div class="form-group">
-                    <label for="paymentMethod">Payment Method:</label>
-                    <input type="text" id="paymentMethod" placeholder="e.g., Venmo @hisingh1, PayPal, Bank Transfer">
-                </div>
-                
-                <div class="form-group">
-                    <label for="paymentTerms">Payment Terms:</label>
-                    <select id="paymentTerms">
-                        <option value="Net 7">Net 7 days</option>
-                        <option value="Net 14" selected>Net 14 days</option>
-                        <option value="Net 30">Net 30 days</option>
-                        <option value="Due on receipt">Due on receipt</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="couponCode">Coupon/Discount Code:</label>
-                    <input type="text" id="couponCode" placeholder="e.g., FRIEND20, STUDENT50, LOYALTY15">
-                </div>
-                
-                <div class="form-group">
-                    <label for="finalPrice">Final Price Override ($):</label>
-                    <input type="number" id="finalPrice" step="0.01" min="0" placeholder="Leave empty to use calculated amount">
-                    <small style="color: #666; display: block; margin-top: 5px;">Override the calculated total if applying discounts or special pricing</small>
-                </div>
-            </div>
+Additional notes: Student musician friend rate"
+            ></textarea>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="generateInvoice()">🚀 Generate with AI</button>
+            <button class="btn btn-secondary" onclick="previewInvoice()">👀 Preview</button>
+            <button class="btn btn-success" onclick="downloadInvoice()">💾 Download PDF</button>
+            <button class="btn btn-danger" onclick="clearAllFields()">🗑️ Clear All</button>
+          </div>
+
+          <div id="status"></div>
         </div>
-        
-        <!-- Invoice Preview -->
-        <div class="invoice-preview" id="invoicePreview">
-            <div class="invoice-header">
-                <div class="company-info">
-                    <h1 id="previewCompanyName">Celerity Tech Consulting</h1>
-                    <p id="previewCompanyWebsite">celeritytechconsulting.com</p>
-                    <p id="previewCompanyLocation">Chicago, IL</p>
-                </div>
-                <div class="invoice-title">
-                    <h2>INVOICE</h2>
-                </div>
-            </div>
-            
-            <div class="invoice-details">
-                <div class="bill-to">
-                    <h3>Bill To:</h3>
-                    <p><strong id="previewClientName">[Client Name]</strong></p>
-                    <p id="previewClientEmail">[Client Email]</p>
-                </div>
-                
-                <div class="invoice-info">
-                    <h3>Invoice Details:</h3>
-                    <p><strong>Invoice #:</strong> <span id="previewInvoiceNumber">CT-2025-001</span></p>
-                    <p><strong>Date:</strong> <span id="previewInvoiceDate">August 28, 2025</span></p>
-                    <p><strong>Due Date:</strong> <span id="previewDueDate">September 11, 2025</span></p>
-                    <p><strong>Payment Terms:</strong> <span id="previewPaymentTerms">Net 14</span></p>
-                </div>
-            </div>
-            
-            <table class="services-table">
-                <thead>
-                    <tr>
-                        <th>Description</th>
-                        <th>Hours</th>
-                        <th>Rate</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <span id="previewServiceDescription">Service Description</span><br>
-                            <small style="color: #666;" id="previewServiceDetails">Service details</small>
-                        </td>
-                        <td id="previewHours">0.0</td>
-                        <td>$<span id="previewRate">0.00</span></td>
-                        <td>$<span id="previewAmount">0.00</span></td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <div class="total-section">
-                <table class="total-table">
-                    <tr>
-                        <td>Subtotal:</td>
-                        <td>$<span id="previewSubtotal">0.00</span></td>
-                    </tr>
-                    <tr id="discountRow" style="display: none;">
-                        <td>Discount (<span id="previewCouponCode"></span>):</td>
-                        <td style="color: #28a745;">-$<span id="previewDiscount">0.00</span></td>
-                    </tr>
-                    <tr>
-                        <td>Tax:</td>
-                        <td>$0.00</td>
-                    </tr>
-                    <tr>
-                        <td>Total Due:</td>
-                        <td>$<span id="previewTotal">0.00</span></td>
-                    </tr>
-                </table>
-            </div>
-            
-            <div class="payment-terms">
-                <h3>Payment Information</h3>
-                <p><strong>Payment Methods:</strong> <span id="previewPaymentMethod">Check, Bank Transfer, PayPal</span></p>
-                <p><strong>Payment Terms:</strong> <span id="previewPaymentTermsText">Net 14 days from invoice date</span></p>
-                <p>Please include invoice number <span id="previewInvoiceNumberRef">CT-2025-001</span> with your payment.</p>
-            </div>
-            
-            <div class="footer">
-                <p>Thank you for choosing <span id="previewCompanyNameFooter">Celerity Tech Consulting</span>!</p>
-                <p>Questions about this invoice? Contact us at <span id="previewCompanyWebsiteFooter">celeritytechconsulting.com</span></p>
-            </div>
+
+        <!-- Form Panel -->
+        <div class="panel">
+          <h2>📋 Structured Fields</h2>
+
+          <div class="form-group">
+            <label for="companyName">Company Name:</label>
+            <input type="text" id="companyName" value="Stellar Tech Solutions" />
+          </div>
+
+          <div class="form-group">
+            <label for="companyWebsite">Company Website:</label>
+            <input type="text" id="companyWebsite" value="stellartech.example.com" />
+          </div>
+
+          <div class="form-group">
+            <label for="companyLocation">Company Location:</label>
+            <input type="text" id="companyLocation" value="San Francisco, CA" />
+          </div>
+
+          <div class="form-group">
+            <label for="clientName">Client Name:</label>
+            <input type="text" id="clientName" />
+          </div>
+
+          <div class="form-group">
+            <label for="clientEmail">Client Email:</label>
+            <input type="email" id="clientEmail" />
+          </div>
+
+          <div class="form-group">
+            <label for="invoiceNumber">Invoice Number:</label>
+            <input type="text" id="invoiceNumber" value="STS-2025-001" />
+          </div>
+
+          <div class="form-group">
+            <label for="invoiceDate">Invoice Date:</label>
+            <input type="date" id="invoiceDate" />
+          </div>
+
+          <div class="form-group">
+            <label for="dueDate">Due Date:</label>
+            <input type="date" id="dueDate" />
+          </div>
+
+          <div class="form-group">
+            <label for="serviceDescription">Service Description:</label>
+            <input
+              type="text"
+              id="serviceDescription"
+              placeholder="e.g., WordPress Development & Configuration"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="serviceDetails">Service Details:</label>
+            <input
+              type="text"
+              id="serviceDetails"
+              placeholder="e.g., Website setup, customization, and optimization"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="hours">Hours:</label>
+            <input type="number" id="hours" step="0.1" min="0" />
+          </div>
+
+          <div class="form-group">
+            <label for="rate">Rate ($/hour):</label>
+            <input type="number" id="rate" step="0.01" min="0" />
+          </div>
+
+          <div class="form-group">
+            <label for="paymentMethod">Payment Method:</label>
+            <input
+              type="text"
+              id="paymentMethod"
+              placeholder="e.g., Venmo @stellar_user, PayPal, Bank Transfer"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="paymentTerms">Payment Terms:</label>
+            <select id="paymentTerms">
+              <option value="Net 7">Net 7 days</option>
+              <option value="Net 14" selected>Net 14 days</option>
+              <option value="Net 30">Net 30 days</option>
+              <option value="Due on receipt">Due on receipt</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="couponCode">Coupon/Discount Code:</label>
+            <input type="text" id="couponCode" placeholder="e.g., FRIEND20, STUDENT50, LOYALTY15" />
+          </div>
+
+          <div class="form-group">
+            <label for="finalPrice">Final Price Override ($):</label>
+            <input
+              type="number"
+              id="finalPrice"
+              step="0.01"
+              min="0"
+              placeholder="Leave empty to use calculated amount"
+            />
+            <small style="color: #666; display: block; margin-top: 5px"
+              >Override the calculated total if applying discounts or special pricing</small
+            >
+          </div>
         </div>
+      </div>
+
+      <!-- Invoice Preview -->
+      <div class="invoice-preview" id="invoicePreview">
+        <div class="invoice-header">
+          <div class="company-info">
+            <h1 id="previewCompanyName">Stellar Tech Solutions</h1>
+            <p id="previewCompanyWebsite">stellartech.example.com</p>
+            <p id="previewCompanyLocation">San Francisco, CA</p>
+          </div>
+          <div class="invoice-title">
+            <h2>INVOICE</h2>
+          </div>
+        </div>
+
+        <div class="invoice-details">
+          <div class="bill-to">
+            <h3>Bill To:</h3>
+            <p><strong id="previewClientName">[Client Name]</strong></p>
+            <p id="previewClientEmail">[Client Email]</p>
+          </div>
+
+          <div class="invoice-info">
+            <h3>Invoice Details:</h3>
+            <p><strong>Invoice #:</strong> <span id="previewInvoiceNumber">STS-2025-001</span></p>
+            <p><strong>Date:</strong> <span id="previewInvoiceDate">August 28, 2025</span></p>
+            <p><strong>Due Date:</strong> <span id="previewDueDate">September 11, 2025</span></p>
+            <p><strong>Payment Terms:</strong> <span id="previewPaymentTerms">Net 14</span></p>
+          </div>
+        </div>
+
+        <table class="services-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Hours</th>
+              <th>Rate</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span id="previewServiceDescription">Service Description</span><br />
+                <small style="color: #666" id="previewServiceDetails">Service details</small>
+              </td>
+              <td id="previewHours">0.0</td>
+              <td>$<span id="previewRate">0.00</span></td>
+              <td>$<span id="previewAmount">0.00</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="total-section">
+          <table class="total-table">
+            <tr>
+              <td>Subtotal:</td>
+              <td>$<span id="previewSubtotal">0.00</span></td>
+            </tr>
+            <tr id="discountRow" style="display: none">
+              <td>Discount (<span id="previewCouponCode"></span>):</td>
+              <td style="color: #28a745">-$<span id="previewDiscount">0.00</span></td>
+            </tr>
+            <tr>
+              <td>Tax:</td>
+              <td>$0.00</td>
+            </tr>
+            <tr>
+              <td>Total Due:</td>
+              <td>$<span id="previewTotal">0.00</span></td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="payment-terms">
+          <h3>Payment Information</h3>
+          <p>
+            <strong>Payment Methods:</strong>
+            <span id="previewPaymentMethod">Check, Bank Transfer, PayPal</span>
+          </p>
+          <p>
+            <strong>Payment Terms:</strong>
+            <span id="previewPaymentTermsText">Net 14 days from invoice date</span>
+          </p>
+          <p>
+            Please include invoice number
+            <span id="previewInvoiceNumberRef">STS-2025-001</span> with your payment.
+          </p>
+        </div>
+
+        <div class="footer">
+          <p>
+            Thank you for choosing
+            <span id="previewCompanyNameFooter">Stellar Tech Solutions</span>!
+          </p>
+          <p>
+            Questions about this invoice? Contact us at
+            <span id="previewCompanyWebsiteFooter">stellartech.example.com</span>
+          </p>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Safe localStorage wrapper with error handling
-        const storage = {
-            getItem: function(key) {
-                try {
-                    if (typeof Storage !== "undefined" && localStorage) {
-                        return localStorage.getItem(key);
-                    }
-                } catch (error) {
-                    console.warn('localStorage not available:', error);
-                }
-                return null;
-            },
-            setItem: function(key, value) {
-                try {
-                    if (typeof Storage !== "undefined" && localStorage) {
-                        localStorage.setItem(key, value);
-                        return true;
-                    }
-                } catch (error) {
-                    console.warn('localStorage not available:', error);
-                }
-                return false;
-            },
-            removeItem: function(key) {
-                try {
-                    if (typeof Storage !== "undefined" && localStorage) {
-                        localStorage.removeItem(key);
-                        return true;
-                    }
-                } catch (error) {
-                    console.warn('localStorage not available:', error);
-                }
-                return false;
-            }
-        };
+              // Safe localStorage wrapper with error handling
+              const storage = {
+                  getItem: function(key) {
+                      try {
+                          if (typeof Storage !== "undefined" && localStorage) {
+                              return localStorage.getItem(key);
+                          }
+                      } catch (error) {
+                          console.warn('localStorage not available:', error);
+                      }
+                      return null;
+                  },
+                  setItem: function(key, value) {
+                      try {
+                          if (typeof Storage !== "undefined" && localStorage) {
+                              localStorage.setItem(key, value);
+                              return true;
+                          }
+                      } catch (error) {
+                          console.warn('localStorage not available:', error);
+                      }
+                      return false;
+                  },
+                  removeItem: function(key) {
+                      try {
+                          if (typeof Storage !== "undefined" && localStorage) {
+                              localStorage.removeItem(key);
+                              return true;
+                          }
+                      } catch (error) {
+                          console.warn('localStorage not available:', error);
+                      }
+                      return false;
+                  }
+              };
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadFromLocalStorage();
-            setDefaultDates();
-            updateCalculatedRate();
-            updatePreview();
-        });
+              // Initialize on page load
+              document.addEventListener('DOMContentLoaded', function() {
+                  loadFromLocalStorage();
+                  setDefaultDates();
+                  updateCalculatedRate();
+                  updatePreview();
+              });
 
-        // Calculate pricing based on multipliers
-        function updateCalculatedRate() {
-            const baseRate = parseFloat(document.getElementById('baseRate')?.value) || 80;
-            const valueComplexity = parseFloat(document.getElementById('valueComplexity')?.value) || 1.0;
-            const clientCapacity = parseFloat(document.getElementById('clientCapacity')?.value) || 1.0;
-            const friendDiscount = parseFloat(document.getElementById('friendDiscount')?.value) || 1.0;
-            
-            const calculatedRate = baseRate * valueComplexity * clientCapacity * friendDiscount;
-            
-            // Update display
-            if (document.getElementById('calculatedRate')) {
-                document.getElementById('calculatedRate').textContent = calculatedRate.toFixed(2);
-            }
-            if (document.getElementById('calcBaseRate')) {
-                document.getElementById('calcBaseRate').textContent = baseRate.toFixed(0);
-            }
-            if (document.getElementById('calcComplexity')) {
-                document.getElementById('calcComplexity').textContent = valueComplexity.toFixed(1);
-            }
-            if (document.getElementById('calcCapacity')) {
-                document.getElementById('calcCapacity').textContent = clientCapacity.toFixed(1);
-            }
-            if (document.getElementById('calcFriend')) {
-                document.getElementById('calcFriend').textContent = friendDiscount.toFixed(1);
-            }
-        }
+              // Calculate pricing based on multipliers
+              function updateCalculatedRate() {
+                  const baseRate = parseFloat(document.getElementById('baseRate')?.value) || 80;
+                  const valueComplexity = parseFloat(document.getElementById('valueComplexity')?.value) || 1.0;
+                  const clientCapacity = parseFloat(document.getElementById('clientCapacity')?.value) || 1.0;
+                  const friendDiscount = parseFloat(document.getElementById('friendDiscount')?.value) || 1.0;
 
-        // Apply calculated rate to the rate field
-        function applyCalculatedRate() {
-            const calculatedRateText = document.getElementById('calculatedRate')?.textContent;
-            if (calculatedRateText) {
-                const rateElement = document.getElementById('rate');
-                if (rateElement) {
-                    rateElement.value = parseFloat(calculatedRateText).toFixed(2);
-                    saveToLocalStorage();
-                    updatePreview();
-                    showStatus('💰 Applied calculated rate!', 'success');
-                }
-            }
-        }
+                  const calculatedRate = baseRate * valueComplexity * clientCapacity * friendDiscount;
 
-        // Set default dates
-        function setDefaultDates() {
-            const today = new Date().toISOString().split('T')[0];
-            const twoWeeksFromNow = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            
-            if (!document.getElementById('invoiceDate').value) {
-                document.getElementById('invoiceDate').value = today;
-            }
-            if (!document.getElementById('dueDate').value) {
-                document.getElementById('dueDate').value = twoWeeksFromNow;
-            }
-        }
+                  // Update display
+                  if (document.getElementById('calculatedRate')) {
+                      document.getElementById('calculatedRate').textContent = calculatedRate.toFixed(2);
+                  }
+                  if (document.getElementById('calcBaseRate')) {
+                      document.getElementById('calcBaseRate').textContent = baseRate.toFixed(0);
+                  }
+                  if (document.getElementById('calcComplexity')) {
+                      document.getElementById('calcComplexity').textContent = valueComplexity.toFixed(1);
+                  }
+                  if (document.getElementById('calcCapacity')) {
+                      document.getElementById('calcCapacity').textContent = clientCapacity.toFixed(1);
+                  }
+                  if (document.getElementById('calcFriend')) {
+                      document.getElementById('calcFriend').textContent = friendDiscount.toFixed(1);
+                  }
+              }
 
-        // Save to localStorage with error handling
-        function saveToLocalStorage() {
-            const fields = [
-                'geminiApiKey', 'invoiceType', 'clientType', 'invoiceData', 
-                'companyName', 'companyWebsite', 'companyLocation', 'clientName', 
-                'clientEmail', 'invoiceNumber', 'invoiceDate', 'dueDate', 
-                'serviceDescription', 'serviceDetails', 'hours', 'rate', 
-                'paymentMethod', 'paymentTerms', 'couponCode', 'finalPrice',
-                'valueComplexity', 'clientCapacity', 'friendDiscount', 'baseRate'
-            ];
-            
-            fields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element) {
-                    storage.setItem(`invoice_${field}`, element.value);
-                }
-            });
-        }
+              // Apply calculated rate to the rate field
+              function applyCalculatedRate() {
+                  const calculatedRateText = document.getElementById('calculatedRate')?.textContent;
+                  if (calculatedRateText) {
+                      const rateElement = document.getElementById('rate');
+                      if (rateElement) {
+                          rateElement.value = parseFloat(calculatedRateText).toFixed(2);
+                          saveToLocalStorage();
+                          updatePreview();
+                          showStatus('💰 Applied calculated rate!', 'success');
+                      }
+                  }
+              }
 
-        // Load from localStorage with error handling
-        function loadFromLocalStorage() {
-            const fields = [
-                'geminiApiKey', 'invoiceType', 'clientType', 'invoiceData', 
-                'companyName', 'companyWebsite', 'companyLocation', 'clientName', 
-                'clientEmail', 'invoiceNumber', 'invoiceDate', 'dueDate', 
-                'serviceDescription', 'serviceDetails', 'hours', 'rate', 
-                'paymentMethod', 'paymentTerms', 'couponCode', 'finalPrice',
-                'valueComplexity', 'clientCapacity', 'friendDiscount', 'baseRate'
-            ];
-            
-            fields.forEach(field => {
-                const element = document.getElementById(field);
-                if (element) {
-                    const value = storage.getItem(`invoice_${field}`);
-                    if (value !== null) {
-                        element.value = value;
-                    }
-                }
-            });
-        }
+              // Set default dates
+              function setDefaultDates() {
+                  const today = new Date().toISOString().split('T')[0];
+                  const twoWeeksFromNow = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-        // Clear all fields
-        function clearAllFields() {
-            if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
-                const fields = [
-                    'invoiceData', 'clientName', 'clientEmail', 'serviceDescription', 
-                    'serviceDetails', 'hours', 'rate', 'paymentMethod', 'couponCode', 'finalPrice'
-                ];
-                
-                fields.forEach(field => {
-                    const element = document.getElementById(field);
-                    if (element) {
-                        element.value = '';
-                        storage.removeItem(`invoice_${field}`);
-                    }
-                });
-                
-                // Reset selects to defaults
-                const resetSelects = [
-                    ['invoiceType', 'standard'],
-                    ['clientType', 'business'],
-                    ['paymentTerms', 'Net 14'],
-                    ['valueComplexity', '1.0'],
-                    ['clientCapacity', '1.0'],
-                    ['friendDiscount', '1.0']
-                ];
-                
-                resetSelects.forEach(([id, value]) => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.value = value;
-                    }
-                });
-                
-                // Reset base rate
-                const baseRateElement = document.getElementById('baseRate');
-                if (baseRateElement) {
-                    baseRateElement.value = '80';
-                }
-                
-                setDefaultDates();
-                updateCalculatedRate();
-                updatePreview();
-                showStatus('All fields cleared!', 'info');
-            }
-        }
+                  if (!document.getElementById('invoiceDate').value) {
+                      document.getElementById('invoiceDate').value = today;
+                  }
+                  if (!document.getElementById('dueDate').value) {
+                      document.getElementById('dueDate').value = twoWeeksFromNow;
+                  }
+              }
 
-        // Show status message
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('status');
-            if (statusDiv) {
-                statusDiv.className = `status ${type}`;
-                statusDiv.textContent = message;
-                statusDiv.style.display = 'block';
-                
-                setTimeout(() => {
-                    statusDiv.style.display = 'none';
-                }, 5000);
-            }
-        }
+              // Save to localStorage with error handling
+              function saveToLocalStorage() {
+                  const fields = [
+                      'geminiApiKey', 'invoiceType', 'clientType', 'invoiceData',
+                      'companyName', 'companyWebsite', 'companyLocation', 'clientName',
+                      'clientEmail', 'invoiceNumber', 'invoiceDate', 'dueDate',
+                      'serviceDescription', 'serviceDetails', 'hours', 'rate',
+                      'paymentMethod', 'paymentTerms', 'couponCode', 'finalPrice',
+                      'valueComplexity', 'clientCapacity', 'friendDiscount', 'baseRate'
+                  ];
 
-        // Generate invoice with AI
-        async function generateInvoice() {
-            const apiKeyElement = document.getElementById('geminiApiKey');
-            const invoiceDataElement = document.getElementById('invoiceData');
-            
-            if (!apiKeyElement || !invoiceDataElement) {
-                showStatus('Required form elements not found!', 'error');
-                return;
-            }
+                  fields.forEach(field => {
+                      const element = document.getElementById(field);
+                      if (element) {
+                          storage.setItem(`invoice_${field}`, element.value);
+                      }
+                  });
+              }
 
-            const apiKey = apiKeyElement.value.trim();
-            if (!apiKey) {
-                showStatus('Please enter your Gemini API key first!', 'error');
-                return;
-            }
+              // Load from localStorage with error handling
+              function loadFromLocalStorage() {
+                  const fields = [
+                      'geminiApiKey', 'invoiceType', 'clientType', 'invoiceData',
+                      'companyName', 'companyWebsite', 'companyLocation', 'clientName',
+                      'clientEmail', 'invoiceNumber', 'invoiceDate', 'dueDate',
+                      'serviceDescription', 'serviceDetails', 'hours', 'rate',
+                      'paymentMethod', 'paymentTerms', 'couponCode', 'finalPrice',
+                      'valueComplexity', 'clientCapacity', 'friendDiscount', 'baseRate'
+                  ];
 
-            const invoiceData = invoiceDataElement.value.trim();
-            if (!invoiceData) {
-                showStatus('Please enter invoice details in the text area!', 'error');
-                return;
-            }
+                  fields.forEach(field => {
+                      const element = document.getElementById(field);
+                      if (element) {
+                          const value = storage.getItem(`invoice_${field}`);
+                          if (value !== null) {
+                              element.value = value;
+                          }
+                      }
+                  });
+              }
 
-            const invoiceType = document.getElementById('invoiceType').value;
-            const clientType = document.getElementById('clientType').value;
+              // Clear all fields
+              function clearAllFields() {
+                  if (confirm('Are you sure you want to clear all fields? This action cannot be undone.')) {
+                      const fields = [
+                          'invoiceData', 'clientName', 'clientEmail', 'serviceDescription',
+                          'serviceDetails', 'hours', 'rate', 'paymentMethod', 'couponCode', 'finalPrice'
+                      ];
 
-            showStatus('🤖 Generating invoice with Gemini AI...', 'info');
+                      fields.forEach(field => {
+                          const element = document.getElementById(field);
+                          if (element) {
+                              element.value = '';
+                              storage.removeItem(`invoice_${field}`);
+                          }
+                      });
 
-            try {
-                const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-goog-api-key': apiKey
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: `You are an expert invoice generator. Extract structured data from the following invoice description and return ONLY a valid JSON object with the exact structure below. Do not include any text outside of the JSON.
+                      // Reset selects to defaults
+                      const resetSelects = [
+                          ['invoiceType', 'standard'],
+                          ['clientType', 'business'],
+                          ['paymentTerms', 'Net 14'],
+                          ['valueComplexity', '1.0'],
+                          ['clientCapacity', '1.0'],
+                          ['friendDiscount', '1.0']
+                      ];
 
-Invoice Type: ${invoiceType}
-Client Type: ${clientType}
+                      resetSelects.forEach(([id, value]) => {
+                          const element = document.getElementById(id);
+                          if (element) {
+                              element.value = value;
+                          }
+                      });
 
-Invoice Details:
-${invoiceData}
+                      // Reset base rate
+                      const baseRateElement = document.getElementById('baseRate');
+                      if (baseRateElement) {
+                          baseRateElement.value = '80';
+                      }
 
-Return JSON in this EXACT format:
-{
-  "companyName": "string",
-  "companyWebsite": "string", 
-  "companyLocation": "string",
-  "clientName": "string",
-  "clientEmail": "string",
-  "invoiceNumber": "string",
-  "serviceDescription": "string",
-  "serviceDetails": "string",
-  "hours": number,
-  "rate": number,
-  "paymentMethod": "string",
-  "paymentTerms": "Net 14",
-  "couponCode": "string or empty if none",
-  "finalPrice": number or null if should use calculated
-}
+                      setDefaultDates();
+                      updateCalculatedRate();
+                      updatePreview();
+                      showStatus('All fields cleared!', 'info');
+                  }
+              }
 
-Rules:
-- Extract all available information from the text
-- If hours and rate are provided, use them exactly
-- If client type is "friend" or "student", apply appropriate discount to rate
-- Use "Net 14" as default payment terms unless specified otherwise
-- For missing information, use reasonable defaults
-- If discount/coupon is mentioned, extract the code name and final price
-- Return ONLY the JSON object, no other text`
-                            }]
-                        }],
-                        generationConfig: {
-                            temperature: 0.1,
-                            topK: 1,
-                            topP: 0.1,
-                            maxOutputTokens: 1024,
-                            responseMimeType: "application/json"
-                        }
-                    })
-                });
+              // Show status message
+              function showStatus(message, type) {
+                  const statusDiv = document.getElementById('status');
+                  if (statusDiv) {
+                      statusDiv.className = `status ${type}`;
+                      statusDiv.textContent = message;
+                      statusDiv.style.display = 'block';
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`API Error: ${errorData.error?.message || 'Unknown error'}`);
-                }
+                      setTimeout(() => {
+                          statusDiv.style.display = 'none';
+                      }, 5000);
+                  }
+              }
 
-                const data = await response.json();
-                const jsonText = data.candidates[0].content.parts[0].text;
-                
-                let parsedData;
-                try {
-                    parsedData = JSON.parse(jsonText);
-                } catch (parseError) {
-                    // Try to extract JSON from the response if it's wrapped in other text
-                    const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
-                    if (jsonMatch) {
-                        parsedData = JSON.parse(jsonMatch[0]);
-                    } else {
-                        throw new Error('Invalid JSON response from AI');
-                    }
-                }
+              // Generate invoice with AI
+              async function generateInvoice() {
+                  const apiKeyElement = document.getElementById('geminiApiKey');
+                  const invoiceDataElement = document.getElementById('invoiceData');
 
-                // Populate form fields with null checking
-                const fieldMappings = [
-                    ['companyName', 'companyName'],
-                    ['companyWebsite', 'companyWebsite'],
-                    ['companyLocation', 'companyLocation'],
-                    ['clientName', 'clientName'],
-                    ['clientEmail', 'clientEmail'],
-                    ['invoiceNumber', 'invoiceNumber'],
-                    ['serviceDescription', 'serviceDescription'],
-                    ['serviceDetails', 'serviceDetails'],
-                    ['hours', 'hours'],
-                    ['rate', 'rate'],
-                    ['paymentMethod', 'paymentMethod'],
-                    ['paymentTerms', 'paymentTerms'],
-                    ['couponCode', 'couponCode'],
-                    ['finalPrice', 'finalPrice']
-                ];
+                  if (!apiKeyElement || !invoiceDataElement) {
+                      showStatus('Required form elements not found!', 'error');
+                      return;
+                  }
 
-                fieldMappings.forEach(([elementId, dataKey]) => {
-                    const element = document.getElementById(elementId);
-                    if (element && parsedData[dataKey] !== undefined && parsedData[dataKey] !== null && parsedData[dataKey] !== '') {
-                        element.value = parsedData[dataKey];
-                    }
-                });
+                  const apiKey = apiKeyElement.value.trim();
+                  if (!apiKey) {
+                      showStatus('Please enter your Gemini API key first!', 'error');
+                      return;
+                  }
 
-                saveToLocalStorage();
-                updatePreview();
-                showStatus('✅ Invoice generated successfully with AI!', 'success');
+                  const invoiceData = invoiceDataElement.value.trim();
+                  if (!invoiceData) {
+                      showStatus('Please enter invoice details in the text area!', 'error');
+                      return;
+                  }
 
-            } catch (error) {
-                console.error('Error generating invoice:', error);
-                showStatus(`❌ Error: ${error.message}`, 'error');
-            }
-        }
+                  const invoiceType = document.getElementById('invoiceType').value;
+                  const clientType = document.getElementById('clientType').value;
 
-        // Update preview
-        function updatePreview() {
-            // Company info
-            const companyName = document.getElementById('companyName')?.value || 'Celerity Tech Consulting';
-            const companyWebsite = document.getElementById('companyWebsite')?.value || 'celeritytechconsulting.com';
-            const companyLocation = document.getElementById('companyLocation')?.value || 'Chicago, IL';
-            
-            document.getElementById('previewCompanyName').textContent = companyName;
-            document.getElementById('previewCompanyWebsite').textContent = companyWebsite;
-            document.getElementById('previewCompanyLocation').textContent = companyLocation;
-            document.getElementById('previewCompanyNameFooter').textContent = companyName;
-            document.getElementById('previewCompanyWebsiteFooter').textContent = companyWebsite;
+                  showStatus('🤖 Generating invoice with Gemini AI...', 'info');
 
-            // Client info
-            const clientName = document.getElementById('clientName')?.value || '[Client Name]';
-            const clientEmail = document.getElementById('clientEmail')?.value || '[Client Email]';
-            document.getElementById('previewClientName').textContent = clientName;
-            document.getElementById('previewClientEmail').textContent = clientEmail;
+                  try {
+                      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json',
+                              'x-goog-api-key': apiKey
+                          },
+                          body: JSON.stringify({
+                              contents: [{
+                                  parts: [{
+                                      text: `You are an expert invoice generator. Extract structured data from the following invoice description and return ONLY a valid JSON object with the exact structure below. Do not include any text outside of the JSON.
 
-            // Invoice details
-            const invoiceNumber = document.getElementById('invoiceNumber')?.value || 'CT-2025-001';
-            document.getElementById('previewInvoiceNumber').textContent = invoiceNumber;
-            document.getElementById('previewInvoiceNumberRef').textContent = invoiceNumber;
-            
-            const invoiceDateElement = document.getElementById('invoiceDate');
-            if (invoiceDateElement?.value) {
-                document.getElementById('previewInvoiceDate').textContent = new Date(invoiceDateElement.value).toLocaleDateString();
-            }
-            
-            const dueDateElement = document.getElementById('dueDate');
-            if (dueDateElement?.value) {
-                document.getElementById('previewDueDate').textContent = new Date(dueDateElement.value).toLocaleDateString();
-            }
+      Invoice Type: ${invoiceType}
+      Client Type: ${clientType}
 
-            const paymentTerms = document.getElementById('paymentTerms')?.value || 'Net 14';
-            document.getElementById('previewPaymentTerms').textContent = paymentTerms;
-            document.getElementById('previewPaymentTermsText').textContent = paymentTerms + ' from invoice date';
+      Invoice Details:
+      ${invoiceData}
 
-            // Service info
-            const serviceDescription = document.getElementById('serviceDescription')?.value || 'Service Description';
-            const serviceDetails = document.getElementById('serviceDetails')?.value || 'Service details';
-            document.getElementById('previewServiceDescription').textContent = serviceDescription;
-            document.getElementById('previewServiceDetails').textContent = serviceDetails;
-            
-            // Calculate amounts
-            const hours = parseFloat(document.getElementById('hours')?.value) || 0;
-            const rate = parseFloat(document.getElementById('rate')?.value) || 0;
-            const calculatedAmount = hours * rate;
-            
-            // Check for price override
-            const finalPriceElement = document.getElementById('finalPrice');
-            const couponCodeElement = document.getElementById('couponCode');
-            const finalPriceOverride = finalPriceElement ? parseFloat(finalPriceElement.value) : null;
-            const couponCode = couponCodeElement ? couponCodeElement.value.trim() : '';
-            
-            let finalAmount = calculatedAmount;
-            let discount = 0;
-            
-            if (finalPriceOverride && finalPriceOverride >= 0) {
-                finalAmount = finalPriceOverride;
-                discount = calculatedAmount - finalAmount;
-            }
+      Return JSON in this EXACT format:
+      {
+        "companyName": "string",
+        "companyWebsite": "string",
+        "companyLocation": "string",
+        "clientName": "string",
+        "clientEmail": "string",
+        "invoiceNumber": "string",
+        "serviceDescription": "string",
+        "serviceDetails": "string",
+        "hours": number,
+        "rate": number,
+        "paymentMethod": "string",
+        "paymentTerms": "Net 14",
+        "couponCode": "string or empty if none",
+        "finalPrice": number or null if should use calculated
+      }
 
-            // Update display
-            document.getElementById('previewHours').textContent = hours.toFixed(1);
-            document.getElementById('previewRate').textContent = rate.toFixed(2);
-            document.getElementById('previewAmount').textContent = calculatedAmount.toFixed(2);
-            document.getElementById('previewSubtotal').textContent = calculatedAmount.toFixed(2);
-            document.getElementById('previewTotal').textContent = finalAmount.toFixed(2);
+      Rules:
+      - Extract all available information from the text
+      - If hours and rate are provided, use them exactly
+      - If client type is "friend" or "student", apply appropriate discount to rate
+      - Use "Net 14" as default payment terms unless specified otherwise
+      - For missing information, use reasonable defaults
+      - If discount/coupon is mentioned, extract the code name and final price
+      - Return ONLY the JSON object, no other text`
+                                  }]
+                              }],
+                              generationConfig: {
+                                  temperature: 0.1,
+                                  topK: 1,
+                                  topP: 0.1,
+                                  maxOutputTokens: 1024,
+                                  responseMimeType: "application/json"
+                              }
+                          })
+                      });
 
-            // Show/hide discount row
-            const discountRow = document.getElementById('discountRow');
-            if (discount > 0 && couponCode) {
-                discountRow.style.display = 'table-row';
-                document.getElementById('previewCouponCode').textContent = couponCode;
-                document.getElementById('previewDiscount').textContent = discount.toFixed(2);
-            } else {
-                discountRow.style.display = 'none';
-            }
+                      if (!response.ok) {
+                          const errorData = await response.json();
+                          throw new Error(`API Error: ${errorData.error?.message || 'Unknown error'}`);
+                      }
 
-            // Payment method
-            const paymentMethod = document.getElementById('paymentMethod')?.value || 'Check, Bank Transfer, PayPal';
-            document.getElementById('previewPaymentMethod').textContent = paymentMethod;
-        }
+                      const data = await response.json();
+                      const jsonText = data.candidates[0].content.parts[0].text;
 
-        // Preview invoice
-        function previewInvoice() {
-            updatePreview();
-            document.getElementById('invoicePreview').scrollIntoView({ behavior: 'smooth' });
-            showStatus('📄 Invoice preview updated!', 'info');
-        }
+                      let parsedData;
+                      try {
+                          parsedData = JSON.parse(jsonText);
+                      } catch (parseError) {
+                          // Try to extract JSON from the response if it's wrapped in other text
+                          const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+                          if (jsonMatch) {
+                              parsedData = JSON.parse(jsonMatch[0]);
+                          } else {
+                              throw new Error('Invalid JSON response from AI');
+                          }
+                      }
 
-        // Download invoice as PDF
-        function downloadInvoice() {
-            updatePreview();
-            window.print();
-        }
+                      // Populate form fields with null checking
+                      const fieldMappings = [
+                          ['companyName', 'companyName'],
+                          ['companyWebsite', 'companyWebsite'],
+                          ['companyLocation', 'companyLocation'],
+                          ['clientName', 'clientName'],
+                          ['clientEmail', 'clientEmail'],
+                          ['invoiceNumber', 'invoiceNumber'],
+                          ['serviceDescription', 'serviceDescription'],
+                          ['serviceDetails', 'serviceDetails'],
+                          ['hours', 'hours'],
+                          ['rate', 'rate'],
+                          ['paymentMethod', 'paymentMethod'],
+                          ['paymentTerms', 'paymentTerms'],
+                          ['couponCode', 'couponCode'],
+                          ['finalPrice', 'finalPrice']
+                      ];
 
-        // Auto-update preview and calculated rate when fields change
-        document.addEventListener('input', function(e) {
-            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) {
-                saveToLocalStorage();
-                
-                // Update calculated rate if pricing fields change
-                const pricingFields = ['baseRate', 'valueComplexity', 'clientCapacity', 'friendDiscount'];
-                if (pricingFields.includes(e.target.id)) {
-                    updateCalculatedRate();
-                }
-                
-                updatePreview();
-            }
-        });
+                      fieldMappings.forEach(([elementId, dataKey]) => {
+                          const element = document.getElementById(elementId);
+                          if (element && parsedData[dataKey] !== undefined && parsedData[dataKey] !== null && parsedData[dataKey] !== '') {
+                              element.value = parsedData[dataKey];
+                          }
+                      });
 
-        // Auto-update calculated rate when selects change
-        document.addEventListener('change', function(e) {
-            if (e.target && e.target.tagName === 'SELECT') {
-                const pricingFields = ['valueComplexity', 'clientCapacity', 'friendDiscount'];
-                if (pricingFields.includes(e.target.id)) {
-                    updateCalculatedRate();
-                }
-                saveToLocalStorage();
-                updatePreview();
-            }
-        });
+                      saveToLocalStorage();
+                      updatePreview();
+                      showStatus('✅ Invoice generated successfully with AI!', 'success');
 
-        // Generate new invoice number
-        function generateInvoiceNumber() {
-            const date = new Date();
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const random = String(Math.floor(Math.random() * 100)).padStart(3, '0');
-            
-            const element = document.getElementById('invoiceNumber');
-            if (element) {
-                element.value = `CT-${year}-${month}${day}-${random}`;
-                saveToLocalStorage();
-                updatePreview();
-            }
-        }
+                  } catch (error) {
+                      console.error('Error generating invoice:', error);
+                      showStatus(`❌ Error: ${error.message}`, 'error');
+                  }
+              }
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey || e.metaKey) {
-                if (e.key === 's') {
-                    e.preventDefault();
-                    downloadInvoice();
-                } else if (e.key === 'Enter') {
-                    e.preventDefault();
-                    generateInvoice();
-                }
-            }
-        });
+              // Update preview
+              function updatePreview() {
+                  // Company info
+                  const companyName = document.getElementById('companyName')?.value || 'Stellar Tech Solutions';
+                  const companyWebsite = document.getElementById('companyWebsite')?.value || 'stellartech.example.com';
+                  const companyLocation = document.getElementById('companyLocation')?.value || 'San Francisco, CA';
+
+                  document.getElementById('previewCompanyName').textContent = companyName;
+                  document.getElementById('previewCompanyWebsite').textContent = companyWebsite;
+                  document.getElementById('previewCompanyLocation').textContent = companyLocation;
+                  document.getElementById('previewCompanyNameFooter').textContent = companyName;
+                  document.getElementById('previewCompanyWebsiteFooter').textContent = companyWebsite;
+
+                  // Client info
+                  const clientName = document.getElementById('clientName')?.value || '[Client Name]';
+                  const clientEmail = document.getElementById('clientEmail')?.value || '[Client Email]';
+                  document.getElementById('previewClientName').textContent = clientName;
+                  document.getElementById('previewClientEmail').textContent = clientEmail;
+
+                  // Invoice details
+                  const invoiceNumber = document.getElementById('invoiceNumber')?.value || 'STS-2025-001';
+                  document.getElementById('previewInvoiceNumber').textContent = invoiceNumber;
+                  document.getElementById('previewInvoiceNumberRef').textContent = invoiceNumber;
+
+                  const invoiceDateElement = document.getElementById('invoiceDate');
+                  if (invoiceDateElement?.value) {
+                      document.getElementById('previewInvoiceDate').textContent = new Date(invoiceDateElement.value).toLocaleDateString();
+                  }
+
+                  const dueDateElement = document.getElementById('dueDate');
+                  if (dueDateElement?.value) {
+                      document.getElementById('previewDueDate').textContent = new Date(dueDateElement.value).toLocaleDateString();
+                  }
+
+                  const paymentTerms = document.getElementById('paymentTerms')?.value || 'Net 14';
+                  document.getElementById('previewPaymentTerms').textContent = paymentTerms;
+                  document.getElementById('previewPaymentTermsText').textContent = paymentTerms + ' from invoice date';
+
+                  // Service info
+                  const serviceDescription = document.getElementById('serviceDescription')?.value || 'Service Description';
+                  const serviceDetails = document.getElementById('serviceDetails')?.value || 'Service details';
+                  document.getElementById('previewServiceDescription').textContent = serviceDescription;
+                  document.getElementById('previewServiceDetails').textContent = serviceDetails;
+
+                  // Calculate amounts
+                  const hours = parseFloat(document.getElementById('hours')?.value) || 0;
+                  const rate = parseFloat(document.getElementById('rate')?.value) || 0;
+                  const calculatedAmount = hours * rate;
+
+                  // Check for price override
+                  const finalPriceElement = document.getElementById('finalPrice');
+                  const couponCodeElement = document.getElementById('couponCode');
+                  const finalPriceOverride = finalPriceElement ? parseFloat(finalPriceElement.value) : null;
+                  const couponCode = couponCodeElement ? couponCodeElement.value.trim() : '';
+
+                  let finalAmount = calculatedAmount;
+                  let discount = 0;
+
+                  if (finalPriceOverride && finalPriceOverride >= 0) {
+                      finalAmount = finalPriceOverride;
+                      discount = calculatedAmount - finalAmount;
+                  }
+
+                  // Update display
+                  document.getElementById('previewHours').textContent = hours.toFixed(1);
+                  document.getElementById('previewRate').textContent = rate.toFixed(2);
+                  document.getElementById('previewAmount').textContent = calculatedAmount.toFixed(2);
+                  document.getElementById('previewSubtotal').textContent = calculatedAmount.toFixed(2);
+                  document.getElementById('previewTotal').textContent = finalAmount.toFixed(2);
+
+                  // Show/hide discount row
+                  const discountRow = document.getElementById('discountRow');
+                  if (discount > 0 && couponCode) {
+                      discountRow.style.display = 'table-row';
+                      document.getElementById('previewCouponCode').textContent = couponCode;
+                      document.getElementById('previewDiscount').textContent = discount.toFixed(2);
+                  } else {
+                      discountRow.style.display = 'none';
+                  }
+
+                  // Payment method
+                  const paymentMethod = document.getElementById('paymentMethod')?.value || 'Check, Bank Transfer, PayPal';
+                  document.getElementById('previewPaymentMethod').textContent = paymentMethod;
+              }
+
+              // Preview invoice
+              function previewInvoice() {
+                  updatePreview();
+                  document.getElementById('invoicePreview').scrollIntoView({ behavior: 'smooth' });
+                  showStatus('📄 Invoice preview updated!', 'info');
+              }
+
+              // Download invoice as PDF
+              function downloadInvoice() {
+                  updatePreview();
+                  window.print();
+              }
+
+              // Auto-update preview and calculated rate when fields change
+              document.addEventListener('input', function(e) {
+                  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) {
+                      saveToLocalStorage();
+
+                      // Update calculated rate if pricing fields change
+                      const pricingFields = ['baseRate', 'valueComplexity', 'clientCapacity', 'friendDiscount'];
+                      if (pricingFields.includes(e.target.id)) {
+                          updateCalculatedRate();
+                      }
+
+                      updatePreview();
+                  }
+              });
+
+              // Auto-update calculated rate when selects change
+              document.addEventListener('change', function(e) {
+                  if (e.target && e.target.tagName === 'SELECT') {
+                      const pricingFields = ['valueComplexity', 'clientCapacity', 'friendDiscount'];
+                      if (pricingFields.includes(e.target.id)) {
+                          updateCalculatedRate();
+                      }
+                      saveToLocalStorage();
+                      updatePreview();
+                  }
+              });
+
+              // Generate new invoice number
+              function generateInvoiceNumber() {
+                  const date = new Date();
+                  const year = date.getFullYear();
+                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                  const day = String(date.getDate()).padStart(2, '0');
+                  const random = String(Math.floor(Math.random() * 100)).padStart(3, '0');
+
+                  const element = document.getElementById('invoiceNumber');
+                  if (element) {
+                      element.value = `STS-${year}-${month}${day}-${random}`;
+                      saveToLocalStorage();
+                      updatePreview();
+                  }
+              }
+
+              // Keyboard shortcuts
+              document.addEventListener('keydown', function(e) {
+                  if (e.ctrlKey || e.metaKey) {
+                      if (e.key === 's') {
+                          e.preventDefault();
+                          downloadInvoice();
+                      } else if (e.key === 'Enter') {
+                          e.preventDefault();
+                          generateInvoice();
+                      }
+                  }
+              });
     </script>
-</body>
+  </body>
 </html>
