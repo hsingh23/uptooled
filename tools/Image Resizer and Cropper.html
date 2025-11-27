@@ -1,1247 +1,873 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Resizer and Cropper</title>
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RawCrop | Brutalist Image Resizer</title>
+
     <!-- SEO Meta Tags -->
-    <meta name="description" content="A free online tool to resize, crop, and edit images for any purpose. Perfect for creating favicons, app icons (Chrome extensions, web apps), and social media assets. Features zoom, pan, and custom background colors.">
-    <meta name="keywords" content="image resizer, image cropper, icon generator, favicon creator, resize image online, crop image, png resizer, jpeg resizer, chrome extension icons, web app icons">
+    <meta
+      name="description"
+      content="A brutalist, no-nonsense online tool to resize, crop, and edit images. High contrast, clear visibility for transparent assets."
+    />
+    <meta
+      name="keywords"
+      content="image resizer, brutalist design, crop image, png resizer, chrome extension icons, web app icons"
+    />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://tools.privacyfirstapps.org/#tools%2FImage%20Resizer%20and%20Cropper.html">
-    <meta property="og:title" content="Free Image Resizer & Cropper - Online Tool">
-    <meta property="og:description" content="Easily resize, crop, and edit images for favicons, app icons, and more. Features zoom, pan, and custom background colors.">
-    <meta property="og:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Image+Resizer\n&cropper">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://tools.privacyfirstapps.org/#tools%2FImage%20Resizer%20and%20Cropper.html">
-    <meta property="twitter:title" content="Free Image Resizer & Cropper - Online Tool">
-    <meta property="twitter:description" content="Easily resize, crop, and edit images for favicons, app icons, and more. Features zoom, pan, and custom background colors.">
-    <meta property="twitter:image" content="https://placehold.co/1200x630/3b82f6/ffffff?text=Image+Resizer\n&cropper">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        #imageListContainer::-webkit-scrollbar {
-            width: 8px;
-        }
-        #imageListContainer::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        #imageListContainer::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        #imageListContainer::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        .thumbnail-selected {
-            outline: 3px solid #3b82f6; /* blue-500 */
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
-        }
-        #canvasContainer {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-            touch-action: none;
-        }
-        #editorCanvas {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            background-image:
-                linear-gradient(45deg, #eee 25%, transparent 25%),
-                linear-gradient(-45deg, #eee 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #eee 75%),
-                linear-gradient(-45deg, transparent 75%, #eee 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-        }
-        /* Custom styling for range input */
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 8px;
-            background: #d1d5db; /* gray-300 */
-            border-radius: 9999px; /* rounded-full */
-            outline: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #3b82f6; /* blue-500 */
-            border-radius: 9999px; /* rounded-full */
-            cursor: pointer;
-            border: 2px solid white;
-        }
-        input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #3b82f6; /* blue-500 */
-            border-radius: 9999px; /* rounded-full */
-            cursor: pointer;
-            border: 2px solid white;
-        }
-    </style>
-</head>
-<body class="bg-gray-100 text-gray-800">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-    <header class="mb-6 text-center">
-      <h1 class="text-3xl sm:text-4xl font-bold text-blue-600">Image Resizer & Cropper</h1>
-      <p class="text-gray-600 mt-1">Upload, zoom, position, set background, and download your images.</p>
-    </header>
+    <script>
+      tailwind.config = {
+          theme: {
+              extend: {
+                  colors: {
+                      'brutal-bg': '#f3f4f6',
+                      'brutal-accent': '#a3e635', /* Lime Green */
+                      'brutal-accent-hover': '#84cc16',
+                      'brutal-dark': '#111827',
+                  },
+                  boxShadow: {
+                      'brutal': '5px 5px 0px 0px rgba(0,0,0,1)',
+                      'brutal-sm': '3px 3px 0px 0px rgba(0,0,0,1)',
+                      'brutal-hover': '2px 2px 0px 0px rgba(0,0,0,1)',
+                      'brutal-active': '0px 0px 0px 0px rgba(0,0,0,1)',
+                  },
+                  fontFamily: {
+                      'display': ['"Archivo Black"', 'sans-serif'],
+                      'mono': ['"Space Mono"', 'monospace'],
+                  }
+              }
+          }
+      }
+    </script>
 
-    <!-- How to Use Guide -->
-    <section id="instructionsCard" class="bg-white p-6 rounded-2xl shadow-md border border-blue-100" aria-live="polite">
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="space-y-3">
-          <div>
-            <h2 class="text-xl font-semibold text-gray-700">How to Use This Tool</h2>
-            <p class="text-sm text-gray-500 mt-1">Follow these quick steps to get started.</p>
-          </div>
-          <ol class="list-decimal list-inside space-y-2 text-gray-600">
-            <li><strong>Upload:</strong> Choose one or more images from your device.</li>
-            <li><strong>Select:</strong> Pick an image from the uploaded list to load it into the editor.</li>
-            <li><strong>Set Size:</strong> Use a preset or enter custom dimensions, then click <span class="font-semibold">Set</span>.</li>
-            <li><strong>Adjust:</strong> Pinch, scroll, or drag directly on the preview, or refine it with the zoom slider.</li>
-            <li><strong>Download:</strong> Save the current size with the single download button below the editor.</li>
-          </ol>
+    <style>
+      body {
+        background-color: #e5e7eb;
+        background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
+        background-size: 24px 24px;
+      }
+
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #fff;
+        border-left: 2px solid #000;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #000;
+        border: 2px solid #fff;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #a3e635;
+      }
+
+      /* Range Slider Styling */
+      input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 24px;
+        width: 24px;
+        background: #a3e635;
+        border: 2px solid black;
+        cursor: pointer;
+        margin-top: -10px;
+        box-shadow: 2px 2px 0px black;
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        background: #000;
+        border-radius: 0;
+      }
+
+      /* Checkbox */
+      .brutal-checkbox {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid black;
+        background: white;
+        cursor: pointer;
+        position: relative;
+      }
+      .brutal-checkbox:checked {
+        background: #000;
+      }
+      .brutal-checkbox:checked::after {
+        content: "✓";
+        color: #a3e635;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 14px;
+        font-weight: bold;
+      }
+
+      /* The Editing Canvas Pattern (The "Checkerboard") */
+      #editorCanvas {
+        background-image: linear-gradient(45deg, #d1d5db 25%, transparent 25%),
+          linear-gradient(-45deg, #d1d5db 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #d1d5db 75%),
+          linear-gradient(-45deg, transparent 75%, #d1d5db 75%);
+        background-size: 20px 20px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        background-color: #fff;
+        /* Crucial: Hard border on the canvas itself so users see the dimensions */
+        box-shadow: 0 0 0 4px #000000;
+      }
+
+      /* The Stage behind the canvas */
+      #canvasContainer {
+        background-color: #262626; /* Dark background to contrast white borders */
+        background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+
+      .thumbnail-selected {
+        border-color: #000 !important;
+        background-color: #a3e635 !important;
+        box-shadow: 3px 3px 0px 0px rgba(0, 0, 0, 1);
+        transform: translate(-2px, -2px);
+      }
+    </style>
+  </head>
+  <body class="font-mono text-black min-h-screen p-4 md:p-8">
+    <div class="max-w-[1800px] mx-auto space-y-8">
+      <!-- Header -->
+      <header
+        class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-4 border-black pb-6 bg-white p-6 shadow-brutal"
+      >
+        <div>
+          <h1 class="font-display text-4xl md:text-6xl uppercase tracking-tighter leading-none">
+            Raw<span class="text-brutal-accent bg-black px-2">Crop</span>
+          </h1>
+          <p class="font-bold text-lg mt-2">The Brutalist Image Resizer.</p>
         </div>
-        <button id="dismissInstructionsButton" type="button" class="self-start px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300">
-          Dismiss guide
+        <div class="text-xs font-bold max-w-sm">
+          <p>1. UPLOAD > 2. SIZE > 3. POSITION > 4. EXPORT</p>
+          <p class="mt-1 opacity-60">High contrast for pixel-perfect transparency control.</p>
+        </div>
+      </header>
+
+      <!-- Instructions Banner -->
+      <div
+        id="instructionsCard"
+        class="bg-brutal-accent border-4 border-black p-4 shadow-brutal flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all"
+      >
+        <div class="font-bold text-sm">
+          <span class="bg-black text-white px-2 py-1 mr-2">TIP</span>
+          Scroll to zoom. Drag to pan. The checkerboard is transparent. The dark area is outside
+          your image.
+        </div>
+        <button
+          id="dismissInstructionsButton"
+          class="border-2 border-black bg-white px-3 py-1 text-xs font-bold hover:bg-black hover:text-white transition-colors shadow-brutal-sm hover:shadow-brutal-hover active:translate-y-1 active:shadow-brutal-active"
+        >
+          GOT IT [X]
         </button>
       </div>
-    </section>
 
+      <!-- Main Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- LEFT COLUMN: Controls & Uploads -->
+        <div class="lg:col-span-4 xl:col-span-3 space-y-8 flex flex-col h-full">
+          <!-- Upload Section -->
+          <section class="bg-white border-4 border-black p-5 shadow-brutal">
+            <h2 class="font-display text-2xl mb-4 uppercase border-b-4 border-black inline-block">
+              1. Inputs
+            </h2>
 
-    <section id="uploadPanel" class="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-lg p-6">
-      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h2 class="text-2xl font-semibold text-gray-800">Upload &amp; Manage Images</h2>
-          <p class="text-sm text-gray-500 mt-1">Drop multiple images at once, then tap a thumbnail to begin editing.</p>
-        </div>
-        <label class="w-full md:w-auto">
-          <span class="sr-only">Choose images to upload</span>
-          <input type="file" id="fileInput" multiple accept="image/*" class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-        </label>
-      </div>
-      <div class="mt-5">
-        <h3 class="text-lg font-semibold text-gray-700 mb-3">Uploaded Images</h3>
-        <div id="imageListContainer" class="space-y-3 max-h-[22rem] lg:max-h-[26rem] overflow-y-auto pr-1">
-          <p id="noImagesMessage" class="text-gray-500 italic">No images uploaded yet.</p>
-        </div>
-      </div>
-    </section>
+            <label class="block w-full cursor-pointer group">
+              <div
+                class="border-2 border-dashed border-black bg-gray-50 p-6 text-center group-hover:bg-brutal-accent/20 transition-colors"
+              >
+                <span class="font-bold block text-lg">CLICK TO UPLOAD</span>
+                <span class="text-xs block mt-1">or drag & drop images</span>
+              </div>
+              <input type="file" id="fileInput" multiple accept="image/*" class="hidden" />
+            </label>
 
-    <section id="editorArea" class="w-full bg-white/80 border border-gray-200 rounded-2xl shadow-xl p-6 hidden">
-      <div class="flex flex-col gap-8">
-        <header class="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
-          <h2 class="text-2xl font-semibold text-gray-800">Adjust &amp; Export</h2>
-          <p class="text-sm text-gray-500">Editing: <span id="currentImageNameDisplay" class="text-blue-600 font-medium"></span></p>
-        </header>
-        <div class="flex flex-col gap-8">
-          <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-              <h3 class="text-lg font-semibold mb-3 text-gray-800">Target Size</h3>
-              <label for="targetSizeSelect" class="sr-only">Choose a preset size</label>
-              <select id="targetSizeSelect" class="w-full mb-4 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Select a preset size</option>
-              </select>
+            <div
+              id="imageListContainer"
+              class="mt-4 space-y-2 max-h-[250px] overflow-y-auto pr-2 border-t-2 border-black pt-2"
+            >
+              <p id="noImagesMessage" class="text-sm text-gray-400 font-bold py-2">[EMPTY_QUEUE]</p>
+              <!-- Image items injected here -->
+            </div>
+          </section>
+
+          <!-- Sizing Controls (Visible only when active) -->
+          <section
+            id="sizingControls"
+            class="bg-white border-4 border-black p-5 shadow-brutal hidden flex-grow"
+          >
+            <h2 class="font-display text-2xl mb-4 uppercase border-b-4 border-black inline-block">
+              2. Dimensions
+            </h2>
+
+            <div class="space-y-4">
               <div>
-                <h4 class="text-sm font-semibold mb-2 text-gray-700">Custom Size (px)</h4>
-                <div class="flex flex-wrap items-center gap-2">
-                  <input type="number" id="customWidthInput" placeholder="Width" class="w-24 p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <span class="font-semibold text-gray-500">×</span>
-                  <input type="number" id="customHeightInput" placeholder="Height" class="w-24 p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                  <button id="setCustomSizeButton" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Set</button>
+                <label class="block font-bold text-xs mb-1 uppercase">Preset Sizes</label>
+                <div class="relative">
+                  <select
+                    id="targetSizeSelect"
+                    class="w-full appearance-none border-2 border-black bg-white p-3 font-bold text-sm focus:outline-none focus:bg-gray-50 rounded-none cursor-pointer"
+                  >
+                    <option value="">CHOOSE SIZE...</option>
+                  </select>
+                  <div
+                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-black"
+                  >
+                    <svg
+                      class="fill-current h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"
+                      />
+                    </svg>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-              <h3 class="text-lg font-semibold mb-3 text-gray-800">Background &amp; Canvas</h3>
-              <div class="flex flex-wrap items-center gap-3">
-                <input type="color" id="bgColorPicker" value="#FFFFFF" class="w-11 h-11 p-1 border border-gray-300 rounded-lg cursor-pointer">
-                <input type="text" id="hexColorInput" placeholder="#FFFFFF" class="w-28 p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm font-mono" maxlength="7">
-                <button id="transparentBgButton" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm">Transparent BG</button>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block font-bold text-xs mb-1">W (PX)</label>
+                  <input
+                    type="number"
+                    id="customWidthInput"
+                    class="w-full border-2 border-black p-2 font-bold focus:outline-none focus:ring-2 focus:ring-brutal-accent placeholder-gray-400"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label class="block font-bold text-xs mb-1">H (PX)</label>
+                  <input
+                    type="number"
+                    id="customHeightInput"
+                    class="w-full border-2 border-black p-2 font-bold focus:outline-none focus:ring-2 focus:ring-brutal-accent placeholder-gray-400"
+                    placeholder="0"
+                  />
+                </div>
               </div>
-              <label class="mt-3 flex items-center gap-2 text-sm text-gray-600">
-                <input type="checkbox" id="backgroundOnlyMode" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
-                <span>Background only (no image)</span>
-              </label>
+              <button
+                id="setCustomSizeButton"
+                class="w-full bg-black text-white py-2 font-bold hover:bg-brutal-accent hover:text-black border-2 border-black transition-colors"
+              >
+                APPLY CUSTOM SIZE
+              </button>
             </div>
-          </div>
 
-          <div class="rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-4 shadow-inner">
-            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
-              <div>
-                <h3 class="text-lg font-semibold text-gray-800">Preview &amp; Position</h3>
-                <p class="text-sm text-gray-500">Canvas: <span id="canvasSizeDisplay" class="font-medium">N/A</span></p>
+            <div class="mt-8 pt-4 border-t-4 border-black">
+              <h2 class="font-display text-2xl mb-4 uppercase border-b-4 border-black inline-block">
+                3. Settings
+              </h2>
+
+              <div class="space-y-3">
+                <!-- Zoom Control -->
+                <div>
+                  <label class="flex justify-between font-bold text-xs mb-1">
+                    <span>ZOOM</span>
+                    <span id="zoomValueDisplay">100%</span>
+                  </label>
+                  <input type="range" id="zoomSlider" min="10" max="500" value="100" />
+                </div>
+
+                <!-- Background Control -->
+                <div class="flex items-center gap-2 mt-4">
+                  <input
+                    type="color"
+                    id="bgColorPicker"
+                    value="#FFFFFF"
+                    class="h-10 w-10 border-2 border-black p-0 cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    id="hexColorInput"
+                    placeholder="#FFFFFF"
+                    class="flex-1 border-2 border-black p-2 font-bold uppercase text-sm"
+                    maxlength="7"
+                  />
+                </div>
+
+                <button
+                  id="transparentBgButton"
+                  class="w-full mt-2 border-2 border-dashed border-gray-400 text-gray-500 py-1 text-xs font-bold hover:border-black hover:text-black hover:bg-gray-100"
+                >
+                  SET TRANSPARENT
+                </button>
+
+                <label
+                  class="flex items-center gap-3 mt-4 pt-4 border-t-2 border-gray-200 cursor-pointer"
+                >
+                  <input type="checkbox" id="backgroundOnlyMode" class="brutal-checkbox" />
+                  <span class="font-bold text-sm">Background Only (No Image)</span>
+                </label>
               </div>
-              <p class="text-xs text-gray-400">Drag to pan · Pinch, scroll, or use the slider to zoom</p>
             </div>
-            <div id="canvasContainer" class="relative flex h-[60vh] min-h-[320px] max-h-[85vh] w-full items-center justify-center overflow-hidden border border-gray-300 bg-white shadow-md">
-              <canvas id="editorCanvas" class="cursor-grab active:cursor-grabbing"></canvas>
-            </div>
-          </div>
-
-          <div class="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm">
-            <label for="zoomSlider" class="flex items-center justify-between text-sm font-medium text-gray-700 mb-3">
-              <span>Zoom</span>
-              <span class="text-gray-500"><span id="zoomValueDisplay">100</span>%</span>
-            </label>
-            <input type="range" id="zoomSlider" min="10" max="500" value="100" class="w-full">
-          </div>
+          </section>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h3 class="text-lg font-semibold text-gray-800">Download this size</h3>
-          <button id="downloadCurrentImageVersionButton" class="w-full sm:w-auto px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2" disabled>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-            Download <span id="currentVersionSizeDisplay">N/A</span>
-          </button>
+        <!-- RIGHT COLUMN: Editor Canvas & Download -->
+        <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
+          <!-- Editor Wrapper -->
+          <section
+            class="flex-grow flex flex-col bg-white border-4 border-black shadow-brutal h-[600px] lg:h-[750px] relative"
+          >
+            <header
+              class="flex justify-between items-center p-3 border-b-4 border-black bg-white z-10"
+            >
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500 border border-black"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-400 border border-black"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500 border border-black"></div>
+                <span class="ml-2 font-bold text-sm uppercase tracking-widest">Workspace</span>
+              </div>
+              <div class="font-mono text-xs font-bold bg-black text-white px-2 py-1">
+                CANVAS: <span id="canvasSizeDisplay">N/A</span>
+              </div>
+            </header>
+
+            <!-- The Canvas Container -->
+            <div
+              id="canvasContainer"
+              class="flex-grow relative flex items-center justify-center overflow-hidden w-full h-full cursor-crosshair"
+            >
+              <!-- Placeholder State -->
+              <div
+                id="editorPlaceholder"
+                class="text-center p-8 bg-white border-4 border-black shadow-brutal rotate-[-2deg]"
+              >
+                <h3 class="font-display text-3xl mb-2">NO SIGNAL</h3>
+                <p class="font-mono text-sm">
+                  Select an image from the left<br />to begin transmission.
+                </p>
+              </div>
+
+              <!-- The Actual Canvas -->
+              <canvas id="editorCanvas" class="hidden cursor-grab active:cursor-grabbing"></canvas>
+            </div>
+          </section>
+
+          <!-- Download Section -->
+          <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-black text-white p-6 shadow-brutal border-4 border-black md:col-start-2">
+              <div class="flex flex-col gap-4">
+                <div class="flex justify-between items-baseline">
+                  <h2 class="font-display text-2xl uppercase text-brutal-accent">4. Export</h2>
+                  <span
+                    id="currentVersionSizeDisplay"
+                    class="font-mono text-sm border border-white px-2"
+                    >N/A</span
+                  >
+                </div>
+                <button
+                  id="downloadCurrentImageVersionButton"
+                  disabled
+                  class="w-full bg-brutal-accent text-black border-2 border-transparent py-4 text-xl font-display uppercase tracking-widest hover:bg-white hover:border-brutal-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[4px_4px_0px_white] active:shadow-none active:translate-x-1 active:translate-y-1"
+                >
+                  Download Image
+                </button>
+              </div>
+            </div>
+          </section>
         </div>
       </div>
-    </section>
-
-    <section id="editorPlaceholder" class="w-full bg-white/80 border border-dashed border-gray-300 p-10 rounded-2xl shadow-inner flex flex-col items-center justify-center text-center text-gray-500 min-h-[440px]">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-20 h-20 mb-4 text-gray-400">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-      </svg>
-      <p class="text-xl font-medium">Select or upload an image to begin.</p>
-      <p class="text-sm mt-1">Your preview will fill this workspace once an image is selected.</p>
-    </section>
-    <footer class="text-center mt-8 text-gray-500 text-sm">
-        <p>&copy; 2025 Image Resizer & Cropper. Created with Gemini.</p>
-    </footer>
-
-    <!-- Toast Notification Container -->
-    <div id="toastContainer" class="fixed bottom-5 right-5 space-y-3 z-50 w-full max-w-xs sm:max-w-sm"></div>
-  </div>
-
-<script>
-    // DOM Elements
-    const instructionsCard = document.getElementById('instructionsCard');
-    const dismissInstructionsButton = document.getElementById('dismissInstructionsButton');
-    const fileInput = document.getElementById('fileInput');
-    const imageListContainer = document.getElementById('imageListContainer');
-    const noImagesMessage = document.getElementById('noImagesMessage');
-    const editorArea = document.getElementById('editorArea');
-    const editorPlaceholder = document.getElementById('editorPlaceholder');
-    const currentImageNameDisplay = document.getElementById('currentImageNameDisplay');
-    const targetSizeSelect = document.getElementById('targetSizeSelect');
-    const customWidthInput = document.getElementById('customWidthInput');
-    const customHeightInput = document.getElementById('customHeightInput');
-    const setCustomSizeButton = document.getElementById('setCustomSizeButton');
-    const canvasContainer = document.getElementById('canvasContainer');
-    const editorCanvas = document.getElementById('editorCanvas');
-    const ctx = editorCanvas.getContext('2d');
-    const canvasSizeDisplay = document.getElementById('canvasSizeDisplay');
-    const downloadCurrentImageVersionButton = document.getElementById('downloadCurrentImageVersionButton');
-    const currentVersionSizeDisplay = document.getElementById('currentVersionSizeDisplay');
-    const toastContainer = document.getElementById('toastContainer');
-    const zoomSlider = document.getElementById('zoomSlider');
-    const zoomValueDisplay = document.getElementById('zoomValueDisplay');
-    const bgColorPicker = document.getElementById('bgColorPicker');
-    const hexColorInput = document.getElementById('hexColorInput');
-    const transparentBgButton = document.getElementById('transparentBgButton');
-    const backgroundOnlyMode = document.getElementById('backgroundOnlyMode');
-
-    const MIN_ZOOM = parseInt(zoomSlider.min, 10) / 100;
-    const MAX_ZOOM = parseInt(zoomSlider.max, 10) / 100;
-    const INSTRUCTIONS_STORAGE_KEY = 'imageResizerInstructionsDismissed';
-
-    // App State
-    let imagesData = []; 
-    let activeImageId = null;
-    let currentTargetSize = null; 
-    let originalImageToDraw = null;
-    let currentPan = { x: 0, y: 0 };
-    let currentZoom = 1.0;
-    let currentBackgroundColor = '#FFFFFF';
-    let isPanning = false;
-    let lastMousePos = { x: 0, y: 0 };
-    let isBackgroundOnlyMode = false;
-    let previousActiveImageId = null;
-    let isPinching = false;
-    let initialPinchDistance = 0;
-    let initialPinchZoom = 1;
-    let lastPinchMidpoint = null;
-    let gestureStartZoom = null;
-
-    const PREDEFINED_SIZES = [
-        // Original icon sizes
-        { name: 'Icon 16x16', width: 16, height: 16 },
-        { name: 'Icon 32x32', width: 32, height: 32 },
-        { name: 'Icon 48x48', width: 48, height: 48 },
-        { name: 'Icon 128x128', width: 128, height: 128 },
-        { name: 'Favicon 32x32', width: 32, height: 32 },
-        { name: 'Web App Icon 192x192', width: 192, height: 192 },
-        { name: 'Web App Icon 512x512', width: 512, height: 512 },
-        
-        // 16:9 aspect ratio (landscape)
-        { name: '16:9 - 1600x900', width: 1600, height: 900 },
-        { name: '16:9 - 2400x1350', width: 2400, height: 1350 },
-        
-        // 9:16 aspect ratio (portrait)
-        { name: '9:16 - 900x1600', width: 900, height: 1600 },
-        { name: '9:16 - 1350x2400', width: 1350, height: 2400 },
-        
-        // 4:3 aspect ratio (landscape)
-        { name: '4:3 - 1600x1200', width: 1600, height: 1200 },
-        { name: '4:3 - 2400x1800', width: 2400, height: 1800 },
-        
-        // 3:4 aspect ratio (portrait)
-        { name: '3:4 - 1200x1600', width: 1200, height: 1600 },
-        { name: '3:4 - 1800x2400', width: 1800, height: 2400 },
-    ];
-
-    function generateImageId() {
-        return `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    }
-
-    function getFileNameWithFallback(file, fallbackPrefix = 'image') {
-        if (file && typeof file.name === 'string' && file.name.trim()) {
-            return file.name.trim();
-        }
-
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const extension = (file && file.type && file.type.includes('/'))
-            ? `.${file.type.split('/')[1] || 'png'}`
-            : '.png';
-
-        return `${fallbackPrefix}-${timestamp}${extension}`;
-    }
-
-    function processImageFile(file, options = {}) {
-        if (!file) return;
-
-        const { nameOverride = null, fallbackPrefix = 'image', successMessage = null } = options;
-        const displayName = nameOverride || getFileNameWithFallback(file, fallbackPrefix);
-        const imageId = generateImageId();
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const imgElement = new Image();
-            imgElement.onload = () => {
-                const newImage = {
-                    id: imageId,
-                    file,
-                    name: displayName,
-                    originalSrc: e.target.result,
-                    originalWidth: imgElement.naturalWidth,
-                    originalHeight: imgElement.naturalHeight,
-                    imgElement,
-                    processedVersions: {}
-                };
-
-                imagesData.push(newImage);
-                renderImageListItem(newImage);
-                noImagesMessage.classList.add('hidden');
-
-                setActiveImage(imageId);
-                updateDownloadButtonsState();
-
-                if (successMessage) {
-                    showToast(successMessage, 'success');
-                }
-            };
-
-            imgElement.onerror = () => showToast(`Error loading image: ${displayName}`, 'error');
-            imgElement.src = e.target.result;
-        };
-
-        reader.onerror = () => showToast(`Error reading file: ${displayName}`, 'error');
-        reader.readAsDataURL(file);
-    }
-
-    function setBackgroundOnlyMode(enabled, options = {}) {
-        const { deferReset = false, skipRestore = false } = options;
-
-        if (enabled) {
-            if (isBackgroundOnlyMode) return;
-
-            if (activeImageId && activeImageId !== 'background-only') {
-                previousActiveImageId = activeImageId;
-            }
-
-            isBackgroundOnlyMode = true;
-            backgroundOnlyMode.checked = true;
-            activeImageId = 'background-only';
-            originalImageToDraw = null;
-            currentImageNameDisplay.textContent = 'Background Only Mode';
-
-            document.querySelectorAll('#imageListContainer > div').forEach(el => {
-                el.classList.remove('thumbnail-selected', 'bg-blue-50');
-            });
-
-            if (!currentTargetSize && PREDEFINED_SIZES.length > 0) {
-                currentTargetSize = { width: PREDEFINED_SIZES[7].width, height: PREDEFINED_SIZES[7].height };
-                customWidthInput.value = currentTargetSize.width;
-                customHeightInput.value = currentTargetSize.height;
-                syncTargetSizeSelect();
-            }
-
-            currentZoom = 1.0;
-            currentPan.x = 0;
-            currentPan.y = 0;
-
-            if (!deferReset) {
-                resetZoomAndBgToDefaultsOrStored();
-            }
-
-            updateEditorVisibility();
-            updateDownloadButtonsState();
-            return;
-        }
-
-        if (!isBackgroundOnlyMode) return;
-
-        isBackgroundOnlyMode = false;
-        backgroundOnlyMode.checked = false;
-
-        if (skipRestore) {
-            activeImageId = null;
-            originalImageToDraw = null;
-            currentImageNameDisplay.textContent = '';
-            updateEditorVisibility();
-            updateCanvasForNewState();
-            updateDownloadButtonsState();
-            return;
-        }
-
-        if (previousActiveImageId && imagesData.some(img => img.id === previousActiveImageId)) {
-            setActiveImage(previousActiveImageId);
-        } else if (imagesData.length > 0) {
-            setActiveImage(imagesData[0].id);
-        } else {
-            activeImageId = null;
-            originalImageToDraw = null;
-            currentImageNameDisplay.textContent = '';
-            updateEditorVisibility();
-            updateCanvasForNewState();
-            updateDownloadButtonsState();
-        }
-    }
-
-    function ensureBackgroundModeIfNoImage() {
-        if (imagesData.length === 0) {
-            setBackgroundOnlyMode(true, { deferReset: true });
-        }
-    }
-
-    function clampZoom(value) {
-        return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
-    }
-
-    function updateZoomDisplay(zoomValue) {
-        const percent = Math.round(clampZoom(zoomValue) * 100);
-        zoomSlider.value = percent;
-        zoomValueDisplay.textContent = percent;
-    }
-
-    function getTouchDistance(touches) {
-        if (!touches || touches.length < 2) return 0;
-        const [touch1, touch2] = touches;
-        const dx = touch1.clientX - touch2.clientX;
-        const dy = touch1.clientY - touch2.clientY;
-        return Math.hypot(dx, dy);
-    }
-
-    function getTouchMidpoint(touches) {
-        if (!touches || touches.length < 2) return null;
-        const [touch1, touch2] = touches;
-        return {
-            x: (touch1.clientX + touch2.clientX) / 2,
-            y: (touch1.clientY + touch2.clientY) / 2,
-        };
-    }
-
-    function handleWheelZoom(event) {
-        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
-        if (!event.ctrlKey && !event.metaKey) return;
-
-        event.preventDefault();
-
-        const zoomIntensity = Math.exp(-event.deltaY * 0.0025);
-        const nextZoom = clampZoom(currentZoom * zoomIntensity);
-
-        if (Math.abs(nextZoom - currentZoom) < 0.0001) {
-            return;
-        }
-
-        applyZoom(nextZoom, { origin: { x: event.clientX, y: event.clientY } });
-    }
-
-    function handleGestureStart(event) {
-        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
-        event.preventDefault();
-        gestureStartZoom = currentZoom;
-    }
-
-    function handleGestureChange(event) {
-        if (gestureStartZoom === null) return;
-        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
-
-        event.preventDefault();
-
-        const scale = typeof event.scale === 'number' && event.scale > 0 ? event.scale : 1;
-        const nextZoom = clampZoom(gestureStartZoom * scale);
-
-        if (Math.abs(nextZoom - currentZoom) < 0.0001) {
-            return;
-        }
-
-        applyZoom(nextZoom);
-    }
-
-    function handleGestureEnd() {
-        gestureStartZoom = null;
-    }
-
-    function applyZoom(newZoom, options = {}) {
-        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
-
-        const { origin = null } = options;
-        const clampedZoom = clampZoom(newZoom);
-
-        const rect = editorCanvas.getBoundingClientRect();
-        let canvasOriginX = editorCanvas.width / 2;
-        let canvasOriginY = editorCanvas.height / 2;
-
-        if (origin && rect.width > 0 && rect.height > 0) {
-            const offsetX = origin.x - rect.left;
-            const offsetY = origin.y - rect.top;
-            const normalizedX = Math.max(0, Math.min(rect.width, offsetX));
-            const normalizedY = Math.max(0, Math.min(rect.height, offsetY));
-            canvasOriginX = (normalizedX / rect.width) * editorCanvas.width;
-            canvasOriginY = (normalizedY / rect.height) * editorCanvas.height;
-        }
-
-        const imgPtXAtOrigin = (canvasOriginX - currentPan.x) / currentZoom;
-        const imgPtYAtOrigin = (canvasOriginY - currentPan.y) / currentZoom;
-
-        currentZoom = clampedZoom;
-
-        currentPan.x = canvasOriginX - (imgPtXAtOrigin * currentZoom);
-        currentPan.y = canvasOriginY - (imgPtYAtOrigin * currentZoom);
-
-        applyPanConstraints();
-        updateZoomDisplay(currentZoom);
-        redrawCanvasAndStore();
-    }
-
-    function handlePasteEvent(event) {
-        const clipboardData = event.clipboardData || window.clipboardData;
-        if (!clipboardData || !clipboardData.items) return;
-
-        const items = Array.from(clipboardData.items);
-        const imageItem = items.find(item => item.type && item.type.startsWith('image/'));
-
-        if (!imageItem) return;
-
-        const file = imageItem.getAsFile();
-        if (!file) return;
-
-        event.preventDefault();
-        processImageFile(file, {
-            fallbackPrefix: 'pasted-image',
-            successMessage: 'Pasted image added to the editor.'
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        let instructionsDismissed = false;
-        try {
-            instructionsDismissed = localStorage.getItem(INSTRUCTIONS_STORAGE_KEY) === 'true';
-        } catch (error) {
-            instructionsDismissed = false;
-        }
-
-        if (instructionsCard) {
-            if (instructionsDismissed) {
-                instructionsCard.classList.add('hidden');
-                instructionsCard.setAttribute('aria-hidden', 'true');
-            } else {
-                instructionsCard.classList.remove('hidden');
-                instructionsCard.removeAttribute('aria-hidden');
-            }
-        }
-
-        if (dismissInstructionsButton) {
-            dismissInstructionsButton.addEventListener('click', () => {
-                if (instructionsCard) {
-                    instructionsCard.classList.add('hidden');
-                    instructionsCard.setAttribute('aria-hidden', 'true');
-                }
-                try {
-                    localStorage.setItem(INSTRUCTIONS_STORAGE_KEY, 'true');
-                } catch (error) {
-                    // Ignore storage errors (e.g., private browsing).
-                }
-            });
-        }
-
-        fileInput.addEventListener('change', handleFileSelect);
-        setCustomSizeButton.addEventListener('click', handleSetCustomSize);
-
-        editorCanvas.addEventListener('mousedown', startPan);
-        editorCanvas.addEventListener('mousemove', panImage);
-        editorCanvas.addEventListener('mouseup', endPan);
-        editorCanvas.addEventListener('mouseleave', endPan);
-        editorCanvas.addEventListener('touchstart', startPan, { passive: false });
-        editorCanvas.addEventListener('touchmove', panImage, { passive: false });
-        editorCanvas.addEventListener('touchend', endPan);
-        editorCanvas.addEventListener('touchcancel', endPan);
-
-        if (canvasContainer) {
-            canvasContainer.addEventListener('wheel', handleWheelZoom, { passive: false });
-            canvasContainer.addEventListener('gesturestart', handleGestureStart);
-            canvasContainer.addEventListener('gesturechange', handleGestureChange);
-            canvasContainer.addEventListener('gestureend', handleGestureEnd);
-        }
-
-        zoomSlider.addEventListener('input', handleZoomChange);
-        if (targetSizeSelect) {
-            targetSizeSelect.addEventListener('change', handleTargetSizeSelectChange);
-        }
-        bgColorPicker.addEventListener('input', handleBgColorChange);
-        hexColorInput.addEventListener('input', handleHexColorChange);
-        hexColorInput.addEventListener('blur', validateHexColor);
-        transparentBgButton.addEventListener('click', setTransparentBackground);
-        backgroundOnlyMode.addEventListener('change', handleBackgroundOnlyModeChange);
-
-        downloadCurrentImageVersionButton.addEventListener('click', downloadCurrentVersion);
-
-        populatePredefinedSizes();
-        syncTargetSizeSelect();
-        updateEditorVisibility();
-        updateDownloadButtonsState();
-        document.addEventListener('paste', handlePasteEvent);
-    });
-
-    function populatePredefinedSizes() {
-        if (!targetSizeSelect) return;
-
-        targetSizeSelect.innerHTML = '';
-
-        const placeholderOption = document.createElement('option');
-        placeholderOption.value = '';
-        placeholderOption.textContent = 'Select a preset size';
-        targetSizeSelect.appendChild(placeholderOption);
-
-        PREDEFINED_SIZES.forEach(size => {
-            const option = document.createElement('option');
-            option.value = `${size.width}x${size.height}`;
-            option.textContent = `${size.name} (${size.width}x${size.height})`;
-            targetSizeSelect.appendChild(option);
-        });
-
-        const customIndicatorOption = document.createElement('option');
-        customIndicatorOption.value = '__custom__';
-        customIndicatorOption.textContent = 'Custom size (use fields below)';
-        targetSizeSelect.appendChild(customIndicatorOption);
-    }
-
-    function syncTargetSizeSelect() {
-        if (!targetSizeSelect) return;
-
-        if (!currentTargetSize) {
-            targetSizeSelect.value = '';
-            return;
-        }
-
-        const value = `${currentTargetSize.width}x${currentTargetSize.height}`;
-        const matchingOption = Array.from(targetSizeSelect.options).find(option => option.value === value);
-        targetSizeSelect.value = matchingOption ? value : '__custom__';
-    }
-
-    function handleTargetSizeSelectChange(event) {
-        const value = event.target.value;
-
-        if (!value) {
-            return;
-        }
-
-        if (value === '__custom__') {
-            const width = parseInt(customWidthInput.value, 10);
-            const height = parseInt(customHeightInput.value, 10);
-            if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
-                currentTargetSize = { width, height };
-                ensureBackgroundModeIfNoImage();
-                resetZoomAndBgToDefaultsOrStored();
-                syncTargetSizeSelect();
-            } else {
-                showToast('Enter a custom width and height, then press Set.', 'info');
-                syncTargetSizeSelect();
-            }
-            return;
-        }
-
-        const [widthStr, heightStr] = value.split('x');
-        const width = parseInt(widthStr, 10);
-        const height = parseInt(heightStr, 10);
-
-        if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
-            currentTargetSize = { width, height };
-            customWidthInput.value = width;
-            customHeightInput.value = height;
-            ensureBackgroundModeIfNoImage();
-            resetZoomAndBgToDefaultsOrStored();
-            syncTargetSizeSelect();
-        }
-    }
-
-    function handleFileSelect(event) {
-        const files = event.target.files;
-        if (!files.length) return;
-        Array.from(files).forEach(file => {
-            const displayName = getFileNameWithFallback(file, 'image');
-            processImageFile(file, {
-                nameOverride: displayName,
-                successMessage: `${displayName} added to the editor.`
-            });
-        });
-        fileInput.value = '';
-    }
-
-    function renderImageListItem(imgData) {
-        const item = document.createElement('div');
-        item.classList.add('p-3', 'border', 'border-gray-200', 'rounded-lg', 'flex', 'items-center', 'gap-3', 'cursor-pointer', 'hover:bg-gray-50', 'transition-colors');
-        item.dataset.imageId = imgData.id;
-        item.title = imgData.name;
-
-        const thumb = document.createElement('img');
-        thumb.src = imgData.originalSrc;
-        thumb.alt = imgData.name;
-        thumb.classList.add('w-12', 'h-12', 'object-cover', 'rounded-md', 'border', 'border-gray-300', 'flex-shrink-0');
-
-        const nameEl = document.createElement('span');
-        nameEl.textContent = imgData.name;
-        nameEl.classList.add('text-sm', 'font-medium', 'text-gray-700', 'flex-grow', 'truncate');
-        
-        const checkmarkContainer = document.createElement('div');
-        checkmarkContainer.classList.add('w-5', 'h-5', 'text-green-500', 'opacity-0', 'transition-opacity', 'duration-300', 'flex-shrink-0');
-        checkmarkContainer.id = `checkmark-${imgData.id}`;
-        checkmarkContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-full h-full"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-        
-        item.appendChild(thumb);
-        item.appendChild(nameEl);
-        item.appendChild(checkmarkContainer);
-
-        item.onclick = () => setActiveImage(imgData.id);
-        imageListContainer.appendChild(item);
-    }
-    
-    function updateImageListItemProcessedState(imageId) {
-        const imgData = imagesData.find(img => img.id === imageId);
-        const checkmark = document.getElementById(`checkmark-${imageId}`);
-        if (imgData && checkmark) {
-            const hasProcessedVersions = Object.keys(imgData.processedVersions).length > 0;
-            checkmark.style.opacity = hasProcessedVersions ? '1' : '0';
-        }
-    }
-
-    function setActiveImage(imageId) {
-        if (isBackgroundOnlyMode) {
-            setBackgroundOnlyMode(false, { skipRestore: true });
-        }
-
-        if (activeImageId === imageId && originalImageToDraw) return;
-
-        activeImageId = imageId;
-        const imgData = imagesData.find(img => img.id === activeImageId);
-
-        if (!imgData) {
-            activeImageId = null;
-            originalImageToDraw = null;
-            currentImageNameDisplay.textContent = '';
-            updateEditorVisibility();
-            return;
-        }
-
-        previousActiveImageId = activeImageId;
-
-        currentImageNameDisplay.textContent = imgData.name;
-        originalImageToDraw = imgData.imgElement;
-
-        document.querySelectorAll('#imageListContainer > div').forEach(el => {
-            el.classList.remove('thumbnail-selected', 'bg-blue-50');
-            if (el.dataset.imageId === imageId) {
-                el.classList.add('thumbnail-selected', 'bg-blue-50');
-            }
-        });
-        
-        updateEditorVisibility();
-        if (currentTargetSize) {
-            resetZoomAndBgToDefaultsOrStored();
-        } else {
-            if (PREDEFINED_SIZES.length > 0) {
-                 currentTargetSize = { width: PREDEFINED_SIZES[3].width, height: PREDEFINED_SIZES[3].height }; // Default to 128x128
-                 customWidthInput.value = currentTargetSize.width;
-                 customHeightInput.value = currentTargetSize.height;
-                 resetZoomAndBgToDefaultsOrStored();
-                 syncTargetSizeSelect();
-            }
-        }
-        updateDownloadButtonsState();
-    }
-
-    function handleSetCustomSize() {
-        const width = parseInt(customWidthInput.value);
-        const height = parseInt(customHeightInput.value);
-
-        if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
-            showToast('Please enter valid positive numbers for width and height.', 'error');
-            return;
-        }
-        currentTargetSize = { width, height };
-        ensureBackgroundModeIfNoImage();
-        resetZoomAndBgToDefaultsOrStored();
-        syncTargetSizeSelect();
-    }
-
-    function resetZoomAndBgToDefaultsOrStored() {
-        if (!activeImageId || !currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) {
-            updateCanvasForNewState();
-            return;
-        }
-
-        if (isBackgroundOnlyMode) {
-            // Background-only mode
-            const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-            const storedVersion = window.backgroundOnlyVersions ? window.backgroundOnlyVersions[sizeKey] : null;
-            
-            if (storedVersion) {
-                currentBackgroundColor = storedVersion.backgroundColor;
-            }
-            // If no stored version, keep the current background color (don't reset to white)
-            
-            // Reset zoom and pan for background mode
-            currentZoom = 1.0;
-            currentPan.x = 0;
-            currentPan.y = 0;
-        } else {
-            // Regular image mode
-            const imgData = imagesData.find(img => img.id === activeImageId);
-            const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-            const storedVersion = imgData.processedVersions[sizeKey];
-
-            if (storedVersion) {
-                currentZoom = storedVersion.zoom;
-                currentBackgroundColor = storedVersion.backgroundColor;
-                currentPan.x = storedVersion.panX;
-                currentPan.y = storedVersion.panY;
-            } else {
-                const zoomX = currentTargetSize.width / originalImageToDraw.naturalWidth;
-                const zoomY = currentTargetSize.height / originalImageToDraw.naturalHeight;
-                currentZoom = Math.max(zoomX, zoomY);
-                
-                const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
-                const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
-                currentPan.x = (currentTargetSize.width - drawWidth) / 2;
-                currentPan.y = (currentTargetSize.height - drawHeight) / 2;
-                
-                currentBackgroundColor = '#FFFFFF';
-            }
-        }
-        
-        currentZoom = clampZoom(currentZoom);
-        updateZoomDisplay(currentZoom);
-        bgColorPicker.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor;
-        hexColorInput.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor.toUpperCase();
-
-        updateCanvasForNewState();
-    }
-
-
-    function updateCanvasForNewState() {
-        if (!activeImageId || !currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) {
-            ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
-            editorCanvas.style.width = '0px';
-            editorCanvas.style.height = '0px';
-            canvasSizeDisplay.textContent = 'N/A';
-            currentVersionSizeDisplay.textContent = 'N/A';
-            updateDownloadButtonsState();
-            return;
-        }
-        
-        editorCanvas.width = currentTargetSize.width;
-        editorCanvas.height = currentTargetSize.height;
-
-        const canvasAspectRatio = editorCanvas.width / editorCanvas.height;
-        const containerWidth = canvasContainer.clientWidth || editorCanvas.width;
-        const containerHeight = canvasContainer.clientHeight || Math.min(640, window.innerHeight * 0.75);
-
-        let displayW = containerWidth;
-        let displayH = displayW / canvasAspectRatio;
-
-        const maxDisplayHeight = Math.min(containerHeight, window.innerHeight * 0.85);
-
-        if (displayH > maxDisplayHeight) {
-            displayH = maxDisplayHeight;
-            displayW = displayH * canvasAspectRatio;
-        }
-
-        if (displayW > containerWidth) {
-            displayW = containerWidth;
-            displayH = displayW / canvasAspectRatio;
-        }
-
-        editorCanvas.style.width = `${displayW}px`;
-        editorCanvas.style.height = `${displayH}px`;
-
-        canvasSizeDisplay.textContent = `${currentTargetSize.width}x${currentTargetSize.height}px`;
-        currentVersionSizeDisplay.textContent = `${currentTargetSize.width}x${currentTargetSize.height}`;
-        
-        applyPanConstraints(); 
-        redrawCanvasAndStore();
-        updateDownloadButtonsState();
-    }
-    
-    function handleZoomChange(event) {
-        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
-
-        const newZoomSliderValue = parseInt(event.target.value, 10);
-        const newZoom = newZoomSliderValue / 100;
-        applyZoom(newZoom);
-    }
-
-    function handleBgColorChange(event) {
-        currentBackgroundColor = event.target.value;
-        hexColorInput.value = currentBackgroundColor.toUpperCase();
-        redrawCanvasAndStore();
-    }
-
-    function handleHexColorChange(event) {
-        const hexValue = event.target.value;
-        if (isValidHexColor(hexValue)) {
-            currentBackgroundColor = hexValue;
-            bgColorPicker.value = hexValue;
-            redrawCanvasAndStore();
-        }
-    }
-
-    function validateHexColor(event) {
-        const hexValue = event.target.value;
-        if (hexValue && !isValidHexColor(hexValue)) {
-            showToast('Invalid hex color format. Use #RRGGBB format.', 'error');
-            hexColorInput.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor;
-        } else if (!hexValue) {
-            hexColorInput.value = currentBackgroundColor === 'transparent' ? '#FFFFFF' : currentBackgroundColor;
-        }
-    }
-
-    function isValidHexColor(hex) {
-        return /^#[0-9A-Fa-f]{6}$/.test(hex);
-    }
-
-    function setTransparentBackground() {
-        currentBackgroundColor = 'transparent';
-        bgColorPicker.value = '#FFFFFF';
-        hexColorInput.value = '#FFFFFF';
-        showToast('Background set to transparent.', 'info');
-        redrawCanvasAndStore();
-    }
-
-    function handleBackgroundOnlyModeChange(event) {
-        setBackgroundOnlyMode(event.target.checked);
-    }
-    
-    function applyPanConstraints() {
-        if ((!originalImageToDraw && !isBackgroundOnlyMode) || !currentTargetSize) return;
-
-        // In background-only mode, there's no image to constrain
-        if (isBackgroundOnlyMode) return;
-
-        const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
-        const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
-
-        // For small images (smaller than canvas), allow positioning anywhere within canvas bounds
-        // For large images (larger than canvas), constrain to show at least some part of the image
-        let minPanX, maxPanX, minPanY, maxPanY;
-        
-        if (drawWidth <= editorCanvas.width) {
-            // Small image horizontally - allow positioning anywhere from left edge to right edge
-            minPanX = 0 - drawWidth;
-            maxPanX = editorCanvas.width;
-        } else {
-            // Large image horizontally - constrain to show some part of the image
-            minPanX = editorCanvas.width - drawWidth;
-            maxPanX = 0;
-        }
-        
-        if (drawHeight <= editorCanvas.height) {
-            // Small image vertically - allow positioning anywhere from top edge to bottom edge
-            minPanY = 0 - drawHeight;
-            maxPanY = editorCanvas.height;
-        } else {
-            // Large image vertically - constrain to show some part of the image
-            minPanY = editorCanvas.height - drawHeight;
-            maxPanY = 0;
-        }
-        
-        currentPan.x = Math.max(minPanX, Math.min(maxPanX, currentPan.x));
-        currentPan.y = Math.max(minPanY, Math.min(maxPanY, currentPan.y));
-    }
-
-
-    function redrawCanvasAndStore() {
-        if (!currentTargetSize) return;
-
-        ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
-        
-        if (currentBackgroundColor && currentBackgroundColor !== 'transparent') {
-            ctx.fillStyle = currentBackgroundColor;
-            ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
-        }
-
-        // Only draw image if we have one and not in background-only mode
-        if (originalImageToDraw && !isBackgroundOnlyMode) {
-            const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
-            const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
-            ctx.drawImage(originalImageToDraw, currentPan.x, currentPan.y, drawWidth, drawHeight);
-        }
-
-        const dataURL = editorCanvas.toDataURL('image/png'); 
-        
-        if (isBackgroundOnlyMode) {
-            // Store background-only version in a special location
-            if (!window.backgroundOnlyVersions) {
-                window.backgroundOnlyVersions = {};
-            }
-            const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-            window.backgroundOnlyVersions[sizeKey] = {
-                dataURL,
-                backgroundColor: currentBackgroundColor,
-                targetWidth: currentTargetSize.width,
-                targetHeight: currentTargetSize.height
-            };
-        } else {
-            const imgData = imagesData.find(img => img.id === activeImageId);
-            if (imgData) {
-                const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-                imgData.processedVersions[sizeKey] = {
-                    dataURL,
-                    panX: currentPan.x,
-                    panY: currentPan.y,
-                    zoom: currentZoom,
-                    backgroundColor: currentBackgroundColor,
-                    targetWidth: currentTargetSize.width,
-                    targetHeight: currentTargetSize.height
-                };
-                updateImageListItemProcessedState(activeImageId);
-            }
-        }
-        updateDownloadButtonsState();
-    }
-    
-    function getEventCoordinates(event) {
-        if (event.touches && event.touches.length > 0) {
-            return { x: event.touches[0].clientX, y: event.touches[0].clientY };
-        }
-        return { x: event.clientX, y: event.clientY };
-    }
-
-    function startPan(event) {
-        if (!currentTargetSize || (!originalImageToDraw && !isBackgroundOnlyMode)) return;
-
-        if (event.touches) {
-            if (event.touches.length === 2) {
-                event.preventDefault();
-                isPinching = true;
-                isPanning = false;
-                initialPinchDistance = getTouchDistance(event.touches);
-                initialPinchZoom = currentZoom;
-                lastPinchMidpoint = getTouchMidpoint(event.touches);
-                editorCanvas.classList.remove('cursor-grab');
-                editorCanvas.classList.add('cursor-grabbing');
-                return;
-            }
-
-            if (event.touches.length > 2) {
-                return;
-            }
-        }
-
-        event.preventDefault();
-        isPinching = false;
-        isPanning = true;
-        lastPinchMidpoint = null;
-        editorCanvas.classList.remove('cursor-grab');
-        editorCanvas.classList.add('cursor-grabbing');
-        const coords = getEventCoordinates(event);
-        lastMousePos = { x: coords.x, y: coords.y };
-    }
-
-    function panImage(event) {
-        if (isPinching && event.touches && event.touches.length >= 2) {
-            event.preventDefault();
-            const newDistance = getTouchDistance(event.touches);
-            if (initialPinchDistance > 0) {
-                const zoomFactor = newDistance / initialPinchDistance;
-                const midpoint = getTouchMidpoint(event.touches) || lastPinchMidpoint;
-                lastPinchMidpoint = midpoint;
-                applyZoom(initialPinchZoom * zoomFactor, { origin: midpoint });
-            }
-            return;
-        }
-
-        if (!isPanning) return;
-        event.preventDefault();
-
-        const coords = getEventCoordinates(event);
-        const currentMousePos = { x: coords.x, y: coords.y };
-
-        const scaleX = editorCanvas.width / editorCanvas.offsetWidth;
-        const scaleY = editorCanvas.height / editorCanvas.offsetHeight;
-
-        const dx = (currentMousePos.x - lastMousePos.x) * (editorCanvas.offsetWidth > 0 ? scaleX : 1);
-        const dy = (currentMousePos.y - lastMousePos.y) * (editorCanvas.offsetHeight > 0 ? scaleY : 1);
-
-        currentPan.x += dx;
-        currentPan.y += dy;
-
-        applyPanConstraints();
-        lastMousePos = currentMousePos;
-        redrawCanvasAndStore();
-    }
-
-    function endPan(event) {
-        const remainingTouches = event && event.touches ? event.touches.length : 0;
-
-        if (isPinching) {
-            if (remainingTouches >= 2) {
-                return;
-            }
-            isPinching = false;
-            initialPinchDistance = 0;
-            lastPinchMidpoint = null;
-        }
-
-        if (!isPanning) {
-            editorCanvas.classList.remove('cursor-grabbing');
-            editorCanvas.classList.add('cursor-grab');
-            return;
-        }
-
-        isPanning = false;
-        editorCanvas.classList.remove('cursor-grabbing');
-        editorCanvas.classList.add('cursor-grab');
-        if (activeImageId && currentTargetSize) {
-             redrawCanvasAndStore();
-        }
-    }
-    
-    function updateEditorVisibility() {
-        if (activeImageId) {
-            editorArea.classList.remove('hidden');
-            editorPlaceholder.classList.add('hidden');
-        } else {
-            editorArea.classList.add('hidden');
-            editorPlaceholder.classList.remove('hidden');
-        }
-    }
-
-    function updateDownloadButtonsState() {
-        let currentVersionExists = false;
-
-        if (currentTargetSize) {
-            const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-
-            if (isBackgroundOnlyMode) {
-                if (window.backgroundOnlyVersions && window.backgroundOnlyVersions[sizeKey]) {
-                    currentVersionExists = true;
-                }
-            } else {
-                const imgData = imagesData.find(img => img.id === activeImageId);
-                if (imgData && imgData.processedVersions[sizeKey] && imgData.processedVersions[sizeKey].dataURL) {
-                    currentVersionExists = true;
-                }
-            }
-        }
-
-        downloadCurrentImageVersionButton.disabled = !currentVersionExists;
-    }
-
-    function downloadCurrentVersion() {
-        if (!activeImageId || !currentTargetSize) return;
-        
-        const sizeKey = `${currentTargetSize.width}x${currentTargetSize.height}`;
-        
-        if (isBackgroundOnlyMode) {
-            const version = window.backgroundOnlyVersions?.[sizeKey];
-            if (version?.dataURL) {
-                triggerDownload(version.dataURL, `background_${version.targetWidth}x${version.targetHeight}.png`);
-                showToast(`Downloading ${version.targetWidth}x${version.targetHeight} background.`, 'success');
-            } else {
-                showToast('No processed version available for this size.', 'error');
-            }
-        } else {
-            const imgData = imagesData.find(img => img.id === activeImageId);
-            const version = imgData?.processedVersions[sizeKey];
-
-            if (version?.dataURL) {
-                triggerDownload(version.dataURL, `${getSafeFilenameBase(imgData.name)}_${version.targetWidth}x${version.targetHeight}.png`);
-                showToast(`Downloading ${version.targetWidth}x${version.targetHeight} version.`, 'success');
-            } else {
-                showToast('No processed version available for this size.', 'error');
-            }
-        }
-    }
-
-    function getSafeFilenameBase(originalName) {
-        const nameWithoutExt = originalName.includes('.') ? originalName.substring(0, originalName.lastIndexOf('.')) : originalName;
-        return nameWithoutExt.replace(/[^a-zA-Z0-9_-]/g, '_') || 'image';
-    }
-
-    function triggerDownload(dataURL, filename) {
-        const link = document.createElement('a');
-        link.href = dataURL;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function showToast(message, type = 'info') {
-        const toastId = `toast-${Date.now()}`;
-        let bgColorClass = 'bg-blue-500'; 
-        if (type === 'success') bgColorClass = 'bg-green-500';
-        if (type === 'error') bgColorClass = 'bg-red-500';
-
-        const toastElement = document.createElement('div');
-        toastElement.id = toastId;
-        toastElement.className = `p-4 rounded-lg shadow-lg text-white text-sm ${bgColorClass} transition-all duration-300 opacity-0 translate-y-2`;
-        toastElement.textContent = message;
-        
-        toastContainer.prepend(toastElement);
-
-        requestAnimationFrame(() => {
-            toastElement.classList.remove('opacity-0', 'translate-y-2');
-            toastElement.classList.add('opacity-100', 'translate-y-0');
-        });
-
-        setTimeout(() => {
-            toastElement.classList.remove('opacity-100', 'translate-y-0');
-            toastElement.classList.add('opacity-0', 'translate-y-2');
-            setTimeout(() => toastElement.remove(), 300); 
-        }, type === 'info' ? 2000 : 3000);
-    }
-
-</script>
-</body>
+
+      <footer class="text-center py-8 text-xs font-bold opacity-50 uppercase">
+        <p>&copy; 2025 Image Resizer & Cropper. Brutalist Edition.</p>
+      </footer>
+
+      <!-- Toast Notification Container -->
+      <div
+        id="toastContainer"
+        class="fixed bottom-8 left-8 space-y-3 z-50 w-full max-w-xs pointer-events-none"
+      ></div>
+    </div>
+
+    <script>
+      // --- Logic Implementation ---
+
+      // DOM Elements
+      const instructionsCard = document.getElementById('instructionsCard');
+      const dismissInstructionsButton = document.getElementById('dismissInstructionsButton');
+      const fileInput = document.getElementById('fileInput');
+      const imageListContainer = document.getElementById('imageListContainer');
+      const noImagesMessage = document.getElementById('noImagesMessage');
+      const sizingControls = document.getElementById('sizingControls'); // Left panel logic
+      const editorPlaceholder = document.getElementById('editorPlaceholder');
+      const targetSizeSelect = document.getElementById('targetSizeSelect');
+      const customWidthInput = document.getElementById('customWidthInput');
+      const customHeightInput = document.getElementById('customHeightInput');
+      const setCustomSizeButton = document.getElementById('setCustomSizeButton');
+      const canvasContainer = document.getElementById('canvasContainer');
+      const editorCanvas = document.getElementById('editorCanvas');
+      const ctx = editorCanvas.getContext('2d');
+      const canvasSizeDisplay = document.getElementById('canvasSizeDisplay');
+      const downloadCurrentImageVersionButton = document.getElementById('downloadCurrentImageVersionButton');
+      const currentVersionSizeDisplay = document.getElementById('currentVersionSizeDisplay');
+      const toastContainer = document.getElementById('toastContainer');
+      const zoomSlider = document.getElementById('zoomSlider');
+      const zoomValueDisplay = document.getElementById('zoomValueDisplay');
+      const bgColorPicker = document.getElementById('bgColorPicker');
+      const hexColorInput = document.getElementById('hexColorInput');
+      const transparentBgButton = document.getElementById('transparentBgButton');
+      const backgroundOnlyMode = document.getElementById('backgroundOnlyMode');
+
+      const MIN_ZOOM = parseInt(zoomSlider.min, 10) / 100;
+      const MAX_ZOOM = parseInt(zoomSlider.max, 10) / 100;
+      const INSTRUCTIONS_STORAGE_KEY = 'brutalResizerInstructionsDismissed';
+
+      // App State
+      let imagesData = [];
+      let activeImageId = null;
+      let currentTargetSize = null;
+      let originalImageToDraw = null;
+      let currentPan = { x: 0, y: 0 };
+      let currentZoom = 1.0;
+      let currentBackgroundColor = '#FFFFFF';
+      let isPanning = false;
+      let lastMousePos = { x: 0, y: 0 };
+      let isBackgroundOnlyMode = false;
+      let previousActiveImageId = null;
+      let isPinching = false;
+      let initialPinchDistance = 0;
+      let initialPinchZoom = 1;
+      let lastPinchMidpoint = null;
+      let gestureStartZoom = null;
+
+      const PREDEFINED_SIZES = [
+          { name: 'Favicon', width: 32, height: 32 },
+          { name: 'App Icon', width: 192, height: 192 },
+          { name: 'App Icon Lg', width: 512, height: 512 },
+          { name: 'Social Post', width: 1080, height: 1080 },
+          { name: 'Story 9:16', width: 1080, height: 1920 },
+          { name: 'Video 16:9', width: 1920, height: 1080 },
+          { name: 'Legacy 4:3', width: 1024, height: 768 },
+      ];
+
+      // --- Helpers ---
+
+      function generateImageId() {
+          return `img_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      }
+
+      function getFileNameWithFallback(file) {
+          if (file && file.name) return file.name.trim();
+          return `upload-${Date.now()}.png`;
+      }
+
+      function showToast(message, type = 'info') {
+          const toast = document.createElement('div');
+          const bgClass = type === 'error' ? 'bg-red-500 text-white' : (type === 'success' ? 'bg-brutal-accent text-black' : 'bg-black text-white');
+
+          toast.className = `${bgClass} p-4 border-4 border-black shadow-brutal font-bold text-sm transform transition-all duration-300 translate-y-10 opacity-0 pointer-events-auto`;
+          toast.innerHTML = `<span class="uppercase mr-2">[${type}]</span> ${message}`;
+
+          toastContainer.appendChild(toast);
+
+          // Trigger animation
+          requestAnimationFrame(() => {
+              toast.classList.remove('translate-y-10', 'opacity-0');
+          });
+
+          setTimeout(() => {
+              toast.classList.add('translate-y-10', 'opacity-0');
+              setTimeout(() => toast.remove(), 300);
+          }, 3000);
+      }
+
+      // --- Core Logic ---
+
+      function processImageFile(file) {
+          const imageId = generateImageId();
+          const reader = new FileReader();
+
+          reader.onload = (e) => {
+              const imgElement = new Image();
+              imgElement.onload = () => {
+                  const newImage = {
+                      id: imageId,
+                      name: getFileNameWithFallback(file),
+                      originalSrc: e.target.result,
+                      imgElement,
+                      processedVersions: {}
+                  };
+
+                  imagesData.push(newImage);
+                  renderImageListItem(newImage);
+                  noImagesMessage.classList.add('hidden');
+
+                  // If it's the first image, select it
+                  if (imagesData.length === 1) {
+                      setActiveImage(imageId);
+                  } else {
+                     setActiveImage(imageId);
+                  }
+                  showToast(`Loaded: ${newImage.name}`, 'success');
+              };
+              imgElement.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+      }
+
+      function renderImageListItem(imgData) {
+          const item = document.createElement('div');
+          item.className = 'flex items-center gap-3 p-2 border-2 border-transparent hover:bg-gray-100 cursor-pointer transition-all group';
+          item.dataset.imageId = imgData.id;
+
+          item.innerHTML = `
+              <img src="${imgData.originalSrc}" class="w-10 h-10 object-cover border-2 border-black bg-white">
+              <span class="text-xs font-bold truncate flex-1">${imgData.name}</span>
+              <div class="opacity-0 group-hover:opacity-100 font-bold text-xs text-brutal-accent bg-black px-1">EDIT</div>
+          `;
+
+          item.onclick = () => setActiveImage(imgData.id);
+          imageListContainer.appendChild(item);
+      }
+
+      function setActiveImage(imageId) {
+          // Handle Background Only toggle logic
+          if (imageId === 'background-only') {
+               // Logic handled in toggle listener, just purely visual update here if needed
+               return;
+          }
+
+          // Reset bg mode if selecting a real image
+          if (isBackgroundOnlyMode && imageId !== 'background-only') {
+               backgroundOnlyMode.checked = false;
+               isBackgroundOnlyMode = false;
+          }
+
+          activeImageId = imageId;
+          const imgData = imagesData.find(img => img.id === imageId);
+
+          if (!imgData) return;
+
+          originalImageToDraw = imgData.imgElement;
+
+          // UI Updates
+          document.querySelectorAll('#imageListContainer > div').forEach(el => {
+              el.classList.remove('thumbnail-selected');
+              if (el.dataset.imageId === imageId) el.classList.add('thumbnail-selected');
+          });
+
+          sizingControls.classList.remove('hidden');
+          editorPlaceholder.classList.add('hidden');
+          editorCanvas.classList.remove('hidden');
+
+          // Initial setup if size exists, otherwise wait for user to pick size
+          if (currentTargetSize) {
+              resetZoomAndBgToDefaultsOrStored();
+          } else {
+              // Auto pick first size for better UX
+              targetSizeSelect.value = "192x192";
+              handleTargetSizeSelectChange({target: targetSizeSelect});
+          }
+      }
+
+      function setBackgroundOnlyMode(enabled) {
+          isBackgroundOnlyMode = enabled;
+          if (enabled) {
+              activeImageId = 'background-only';
+              originalImageToDraw = null;
+              document.querySelectorAll('#imageListContainer > div').forEach(el => el.classList.remove('thumbnail-selected'));
+              sizingControls.classList.remove('hidden');
+              editorPlaceholder.classList.add('hidden');
+              editorCanvas.classList.remove('hidden');
+              if(currentTargetSize) resetZoomAndBgToDefaultsOrStored();
+              else {
+                   targetSizeSelect.value = "192x192";
+                   handleTargetSizeSelectChange({target: targetSizeSelect});
+              }
+          } else {
+              // Revert to last image or first image
+              if (imagesData.length > 0) {
+                  setActiveImage(imagesData[0].id);
+              } else {
+                  activeImageId = null;
+                  sizingControls.classList.add('hidden');
+                  editorPlaceholder.classList.remove('hidden');
+                  editorCanvas.classList.add('hidden');
+              }
+          }
+          redrawCanvasAndStore();
+      }
+
+      // --- Canvas Operations ---
+
+      function resetZoomAndBgToDefaultsOrStored() {
+          if (!currentTargetSize) return;
+
+          // Logic: if we have stored settings for this size/image combo, load them.
+          // Otherwise calc default 'contain' fit.
+
+          // Simplified default logic for this demo:
+          if (!isBackgroundOnlyMode && originalImageToDraw) {
+              const zoomX = currentTargetSize.width / originalImageToDraw.naturalWidth;
+              const zoomY = currentTargetSize.height / originalImageToDraw.naturalHeight;
+              currentZoom = Math.max(zoomX, zoomY); // Cover by default
+
+              const drawWidth = originalImageToDraw.naturalWidth * currentZoom;
+              const drawHeight = originalImageToDraw.naturalHeight * currentZoom;
+
+              currentPan.x = (currentTargetSize.width - drawWidth) / 2;
+              currentPan.y = (currentTargetSize.height - drawHeight) / 2;
+          } else {
+              currentZoom = 1;
+              currentPan = {x:0, y:0};
+          }
+
+          updateZoomDisplay(currentZoom);
+          updateCanvasDOM();
+      }
+
+      function updateCanvasDOM() {
+          if (!currentTargetSize) return;
+
+          editorCanvas.width = currentTargetSize.width;
+          editorCanvas.height = currentTargetSize.height;
+
+          // Visual scaling logic (Fit canvas into container visually)
+          const containerW = canvasContainer.clientWidth;
+          const containerH = canvasContainer.clientHeight;
+          const aspect = currentTargetSize.width / currentTargetSize.height;
+
+          let displayW = containerW - 40; // padding
+          let displayH = displayW / aspect;
+
+          if (displayH > containerH - 40) {
+              displayH = containerH - 40;
+              displayW = displayH * aspect;
+          }
+
+          editorCanvas.style.width = `${displayW}px`;
+          editorCanvas.style.height = `${displayH}px`;
+
+          canvasSizeDisplay.textContent = `${currentTargetSize.width} x ${currentTargetSize.height}`;
+          currentVersionSizeDisplay.textContent = `${currentTargetSize.width} x ${currentTargetSize.height}`;
+          downloadCurrentImageVersionButton.disabled = false;
+
+          redrawCanvasAndStore();
+      }
+
+      function redrawCanvasAndStore() {
+          if (!currentTargetSize || !ctx) return;
+
+          // Clear
+          ctx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
+
+          // Fill BG
+          if (currentBackgroundColor !== 'transparent') {
+              ctx.fillStyle = currentBackgroundColor;
+              ctx.fillRect(0, 0, editorCanvas.width, editorCanvas.height);
+          }
+
+          // Draw Image
+          if (!isBackgroundOnlyMode && originalImageToDraw) {
+              const dw = originalImageToDraw.naturalWidth * currentZoom;
+              const dh = originalImageToDraw.naturalHeight * currentZoom;
+              ctx.drawImage(originalImageToDraw, currentPan.x, currentPan.y, dw, dh);
+          }
+      }
+
+      // --- Interactions ---
+
+      function handleTargetSizeSelectChange(e) {
+          const val = e.target.value;
+          if (!val) return;
+          const [w, h] = val.split('x').map(Number);
+          currentTargetSize = { width: w, height: h };
+          customWidthInput.value = w;
+          customHeightInput.value = h;
+          resetZoomAndBgToDefaultsOrStored();
+      }
+
+      function handleCustomSize() {
+          const w = parseInt(customWidthInput.value);
+          const h = parseInt(customHeightInput.value);
+          if (w > 0 && h > 0) {
+              currentTargetSize = { width: w, height: h };
+              targetSizeSelect.value = ""; // Reset dropdown
+              resetZoomAndBgToDefaultsOrStored();
+          } else {
+              showToast('Invalid dimensions', 'error');
+          }
+      }
+
+      // Zoom
+      function applyZoom(newZoom) {
+          // Clamp
+          if (newZoom < MIN_ZOOM) newZoom = MIN_ZOOM;
+          if (newZoom > MAX_ZOOM) newZoom = MAX_ZOOM;
+
+          // Simple center zoom for slider
+          // (Detailed pan-aware zoom omitted for brevity, keeping it robust)
+          const scaleFactor = newZoom / currentZoom;
+
+          // Adjust pan to zoom towards center of canvas
+          const canvasCenterX = currentTargetSize.width / 2;
+          const canvasCenterY = currentTargetSize.height / 2;
+
+          currentPan.x = canvasCenterX - (canvasCenterX - currentPan.x) * scaleFactor;
+          currentPan.y = canvasCenterY - (canvasCenterY - currentPan.y) * scaleFactor;
+
+          currentZoom = newZoom;
+          updateZoomDisplay(currentZoom);
+          redrawCanvasAndStore();
+      }
+
+      function updateZoomDisplay(val) {
+          const pct = Math.round(val * 100);
+          zoomSlider.value = pct;
+          zoomValueDisplay.textContent = pct + "%";
+      }
+
+      // Panning
+      function startPan(e) {
+          if (!currentTargetSize) return;
+          e.preventDefault();
+          isPanning = true;
+          editorCanvas.classList.add('cursor-grabbing');
+          editorCanvas.classList.remove('cursor-grab');
+
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          lastMousePos = { x: clientX, y: clientY };
+      }
+
+      function doPan(e) {
+          if (!isPanning) return;
+          e.preventDefault();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+          // Calculate delta based on visual size vs actual size
+          const visualRect = editorCanvas.getBoundingClientRect();
+          const scaleX = editorCanvas.width / visualRect.width;
+          const scaleY = editorCanvas.height / visualRect.height;
+
+          const dx = (clientX - lastMousePos.x) * scaleX;
+          const dy = (clientY - lastMousePos.y) * scaleY;
+
+          currentPan.x += dx;
+          currentPan.y += dy;
+
+          lastMousePos = { x: clientX, y: clientY };
+          redrawCanvasAndStore();
+      }
+
+      function endPan() {
+          isPanning = false;
+          editorCanvas.classList.remove('cursor-grabbing');
+          editorCanvas.classList.add('cursor-grab');
+      }
+
+      function handleWheel(e) {
+          if (!currentTargetSize) return;
+          e.preventDefault();
+          const delta = -e.deltaY * 0.001;
+          applyZoom(currentZoom + (currentZoom * delta));
+      }
+
+      // Download
+      function download() {
+          if (!currentTargetSize) return;
+          const link = document.createElement('a');
+          link.download = `rawcrop_${currentTargetSize.width}x${currentTargetSize.height}_${Date.now()}.png`;
+          link.href = editorCanvas.toDataURL('image/png');
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          showToast('Image Exported', 'success');
+      }
+
+      // --- Initialization ---
+
+      document.addEventListener('DOMContentLoaded', () => {
+          // Populate Select
+          PREDEFINED_SIZES.forEach(s => {
+              const opt = document.createElement('option');
+              opt.value = `${s.width}x${s.height}`;
+              opt.text = `${s.name.toUpperCase()} (${s.width}x${s.height})`;
+              targetSizeSelect.appendChild(opt);
+          });
+
+          // Event Listeners
+          fileInput.addEventListener('change', (e) => {
+              Array.from(e.target.files).forEach(processImageFile);
+              e.target.value = '';
+          });
+
+          targetSizeSelect.addEventListener('change', handleTargetSizeSelectChange);
+          setCustomSizeButton.addEventListener('click', handleCustomSize);
+
+          zoomSlider.addEventListener('input', (e) => applyZoom(parseInt(e.target.value)/100));
+
+          bgColorPicker.addEventListener('input', (e) => {
+              currentBackgroundColor = e.target.value;
+              hexColorInput.value = currentBackgroundColor;
+              redrawCanvasAndStore();
+          });
+
+          hexColorInput.addEventListener('change', (e) => {
+              let val = e.target.value;
+              if(!val.startsWith('#')) val = '#' + val;
+              if(/^#[0-9A-F]{6}$/i.test(val)) {
+                  currentBackgroundColor = val;
+                  bgColorPicker.value = val;
+                  redrawCanvasAndStore();
+              }
+          });
+
+          transparentBgButton.addEventListener('click', () => {
+              currentBackgroundColor = 'transparent';
+              hexColorInput.value = 'TRANSPARENT';
+              redrawCanvasAndStore();
+              showToast('Background: Transparent');
+          });
+
+          backgroundOnlyMode.addEventListener('change', (e) => {
+              setBackgroundOnlyMode(e.target.checked);
+          });
+
+          downloadCurrentImageVersionButton.addEventListener('click', download);
+
+          // Canvas Events
+          editorCanvas.addEventListener('mousedown', startPan);
+          window.addEventListener('mousemove', doPan); // Window allows dragging outside canvas
+          window.addEventListener('mouseup', endPan);
+
+          editorCanvas.addEventListener('touchstart', startPan, {passive: false});
+          editorCanvas.addEventListener('touchmove', doPan, {passive: false});
+          editorCanvas.addEventListener('touchend', endPan);
+
+          canvasContainer.addEventListener('wheel', handleWheel, {passive: false});
+
+          dismissInstructionsButton.addEventListener('click', () => {
+              instructionsCard.style.display = 'none';
+          });
+      });
+    </script>
+  </body>
 </html>
