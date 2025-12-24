@@ -1,2194 +1,2219 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StitchMastery Symbol Viewer & Exporter</title>
     <!-- Libraries for Zipping and Saving -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
-        :root {
-            --primary: #333;
-            --accent: #0056b3;
-            --bg: #f4f4f4;
-            --card-bg: #fff;
-            --border: #ddd;
-        }
+      :root {
+        --primary: #333;
+        --accent: #0056b3;
+        --bg: #f4f4f4;
+        --card-bg: #fff;
+        --border: #ddd;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 20px;
-            color: var(--primary);
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg);
+        margin: 0;
+        padding: 20px;
+        color: var(--primary);
+      }
 
-        /* Font Face Definitions */
-        @font-face {
-            font-family: 'StitchMasteryDash';
-            src: url('https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDash.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'StitchMasteryDot';
-            src: url('https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDot.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'StitchMasteryDashCable';
-            src: url('https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDashCable.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'StitchMasteryDotCable';
-            src: url('https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDotCable.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'StitchMasteryDashCableEH';
-            src: url('https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDashCableEH.ttf') format('truetype');
-        }
-        @font-face {
-            font-family: 'StitchMasteryDotCableEH';
-            src: url('https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDotCableEH.ttf') format('truetype');
-        }
+      /* Font Face Definitions */
+      @font-face {
+        font-family: "StitchMasteryDash";
+        src: url("https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDash.ttf")
+          format("truetype");
+      }
+      @font-face {
+        font-family: "StitchMasteryDot";
+        src: url("https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDot.ttf")
+          format("truetype");
+      }
+      @font-face {
+        font-family: "StitchMasteryDashCable";
+        src: url("https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDashCable.ttf")
+          format("truetype");
+      }
+      @font-face {
+        font-family: "StitchMasteryDotCable";
+        src: url("https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDotCable.ttf")
+          format("truetype");
+      }
+      @font-face {
+        font-family: "StitchMasteryDashCableEH";
+        src: url("https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDashCableEH.ttf")
+          format("truetype");
+      }
+      @font-face {
+        font-family: "StitchMasteryDotCableEH";
+        src: url("https://cdn.jsdelivr.net/gh/hsingh23/my-files@main/fonts/StitchMasteryDotCableEH.ttf")
+          format("truetype");
+      }
 
-        /* Layout */
-        header {
-            background: var(--card-bg);
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+      /* Layout */
+      header {
+        background: var(--card-bg);
+        padding: 20px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
 
-        .controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
+      .controls {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
 
-        h1 { margin: 0; font-size: 1.5rem; }
+      h1 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
 
-        .btn {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        }
-        .btn:hover { background-color: #004494; }
-        .btn.secondary { background-color: #666; }
-        .btn.secondary:hover { background-color: #444; }
-        .btn.danger { background-color: #d9534f; }
-        .btn.danger:hover { background-color: #c9302c; }
+      .btn {
+        background-color: var(--accent);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+      }
+      .btn:hover {
+        background-color: #004494;
+      }
+      .btn.secondary {
+        background-color: #666;
+      }
+      .btn.secondary:hover {
+        background-color: #444;
+      }
+      .btn.danger {
+        background-color: #d9534f;
+      }
+      .btn.danger:hover {
+        background-color: #c9302c;
+      }
 
-        select, input[type="text"] {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+      select,
+      input[type="text"] {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
 
-        .checkbox-group {
-            display: flex;
-            gap: 10px;
-            background: #eee;
-            padding: 8px;
-            border-radius: 4px;
-        }
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-        }
+      .checkbox-group {
+        display: flex;
+        gap: 10px;
+        background: #eee;
+        padding: 8px;
+        border-radius: 4px;
+      }
+      .checkbox-group label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+      }
 
-        /* Grid */
-        .category-section {
-            margin-bottom: 40px;
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+      /* Grid */
+      .category-section {
+        margin-bottom: 40px;
+        background: var(--card-bg);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
 
-        .category-title {
-            font-size: 1.2rem;
-            border-bottom: 2px solid var(--accent);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            color: var(--accent);
-        }
+      .category-title {
+        font-size: 1.2rem;
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        color: var(--accent);
+      }
 
-        .stitch-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-        }
+      .stitch-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+      }
 
-        /* Stitch Card */
-        .stitch-card {
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 15px;
-            background: #fff;
-            transition: box-shadow 0.2s;
-        }
-        .stitch-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .stitch-card.incorrect {
-            border: 2px solid #d9534f;
-            background-color: #fdf0ed;
-        }
+      /* Stitch Card */
+      .stitch-card {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 15px;
+        background: #fff;
+        transition: box-shadow 0.2s;
+      }
+      .stitch-card:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .stitch-card.incorrect {
+        border: 2px solid #d9534f;
+        background-color: #fdf0ed;
+      }
 
-        .stitch-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            font-weight: bold;
-        }
-        .stitch-name { font-size: 1.1rem; }
-        .stitch-actions { display: flex; gap: 5px; }
+      .stitch-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
+      .stitch-name {
+        font-size: 1.1rem;
+      }
+      .stitch-actions {
+        display: flex;
+        gap: 5px;
+      }
 
-        .renders-area {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+      .renders-area {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
 
-        .render-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 5px;
-            background: #f9f9f9;
-            border-radius: 4px;
-            border: 1px solid transparent;
-        }
-        .render-row:focus-within {
-            border-color: var(--accent);
-            background: #fff;
-        }
+      .render-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 5px;
+        background: #f9f9f9;
+        border-radius: 4px;
+        border: 1px solid transparent;
+      }
+      .render-row:focus-within {
+        border-color: var(--accent);
+        background: #fff;
+      }
 
-        .font-label {
-            font-size: 0.8rem;
-            color: #666;
-            width: 120px;
-            text-align: right;
-        }
+      .font-label {
+        font-size: 0.8rem;
+        color: #666;
+        width: 120px;
+        text-align: right;
+      }
 
-        .svg-preview {
-            height: 40px;
-            width: auto;
-            display: block;
-        }
+      .svg-preview {
+        height: 40px;
+        width: auto;
+        display: block;
+      }
 
-        .char-code {
-            font-family: monospace;
-            font-size: 0.85rem;
-            color: #888;
-            padding: 2px 5px;
-            background: #eee;
-            border-radius: 3px;
-            border: none;
-            width: 80px;
-        }
+      .char-code {
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: #888;
+        padding: 2px 5px;
+        background: #eee;
+        border-radius: 3px;
+        border: none;
+        width: 80px;
+      }
 
-        /* Status */
-        .status-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #333;
-            color: #fff;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-        }
+      /* Status */
+      .status-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #333;
+        color: #fff;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+      }
 
-        /* Modal for Corrections */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        .modal-content {
-            background-color: #fff;
-            margin: 10% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 60%;
-            max-height: 80vh;
-            overflow-y: auto;
-            border-radius: 8px;
-        }
-        .close-modal {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .correction-list {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .correction-list th, .correction-list td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        .correction-list th { background-color: #f2f2f2; }
-
+      /* Modal for Corrections */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      .modal-content {
+        background-color: #fff;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 60%;
+        max-height: 80vh;
+        overflow-y: auto;
+        border-radius: 8px;
+      }
+      .close-modal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .correction-list {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .correction-list th,
+      .correction-list td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      .correction-list th {
+        background-color: #f2f2f2;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <header>
+      <h1>StitchMastery Tool</h1>
 
-<header>
-    <h1>StitchMastery Tool</h1>
-    
-    <div class="controls">
+      <div class="controls">
         <!-- Font Selection -->
         <div class="checkbox-group" id="font-toggles">
-            <label><input type="checkbox" checked value="StitchMasteryDash"> Dash</label>
-            <label><input type="checkbox" checked value="StitchMasteryDot"> Dot</label>
-            <label><input type="checkbox" value="StitchMasteryDashCable"> DashCable</label>
-            <label><input type="checkbox" value="StitchMasteryDotCable"> DotCable</label>
-            <label><input type="checkbox" value="StitchMasteryDashCableEH"> DashCableEH</label>
-            <label><input type="checkbox" value="StitchMasteryDotCableEH"> DotCableEH</label>
+          <label><input type="checkbox" checked value="StitchMasteryDash" /> Dash</label>
+          <label><input type="checkbox" checked value="StitchMasteryDot" /> Dot</label>
+          <label><input type="checkbox" value="StitchMasteryDashCable" /> DashCable</label>
+          <label><input type="checkbox" value="StitchMasteryDotCable" /> DotCable</label>
+          <label><input type="checkbox" value="StitchMasteryDashCableEH" /> DashCableEH</label>
+          <label><input type="checkbox" value="StitchMasteryDotCableEH" /> DotCableEH</label>
         </div>
 
         <!-- Filter -->
         <select id="category-filter">
-            <option value="All">All Categories</option>
-            <!-- Populated by JS -->
+          <option value="All">All Categories</option>
+          <!-- Populated by JS -->
         </select>
 
         <!-- Actions -->
         <button class="btn" onclick="downloadSVGs()">Download SVGs</button>
         <button class="btn secondary" onclick="openCorrectionsModal()">Corrections</button>
-    </div>
-</header>
+      </div>
+    </header>
 
-<main id="app">
-    <div style="text-align:center; padding: 50px;">Loading Fonts and Data...</div>
-</main>
+    <main id="app">
+      <div style="text-align: center; padding: 50px">Loading Fonts and Data...</div>
+    </main>
 
-<!-- Corrections Modal -->
-<div id="correctionsModal" class="modal">
-    <div class="modal-content">
+    <!-- Corrections Modal -->
+    <div id="correctionsModal" class="modal">
+      <div class="modal-content">
         <span class="close-modal" onclick="closeCorrectionsModal()">&times;</span>
         <h2>Corrections</h2>
         <p>Manage saved corrections and overrides.</p>
-        <div style="margin-bottom: 15px;">
-            <button class="btn" onclick="copyCorrectionsToClipboard()">Copy All (JSON)</button>
-            <button class="btn danger" onclick="clearAllCorrections()">Clear All</button>
+        <div style="margin-bottom: 15px">
+          <button class="btn" onclick="copyCorrectionsToClipboard()">Copy All (JSON)</button>
+          <button class="btn danger" onclick="clearAllCorrections()">Clear All</button>
         </div>
         <table class="correction-list">
-            <thead>
-                <tr>
-                    <th>Stitch Name</th>
-                    <th>Override Char</th>
-                    <th>Marked Incorrect</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="correction-table-body">
-                <!-- Populated by JS -->
-            </tbody>
+          <thead>
+            <tr>
+              <th>Stitch Name</th>
+              <th>Override Char</th>
+              <th>Marked Incorrect</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="correction-table-body">
+            <!-- Populated by JS -->
+          </tbody>
         </table>
+      </div>
     </div>
-</div>
-
-<div class="status-bar">
-    <span id="status-text">Ready</span>
-    <span>Fonts are © Stitchmastery</span>
-</div>
-
-<script>
-    // --- Data & Config ---
-
-    const FONTS = [
-        "StitchMasteryDash", "StitchMasteryDot", 
-        "StitchMasteryDashCable", "StitchMasteryDotCable",
-        "StitchMasteryDashCableEH", "StitchMasteryDotCableEH"
-    ];
-
-    // CSV Data from previous prompt, parsed for lookup
-    const CSV_DATA = `Type,Unicode,Suggested use,example,width,Unicode to string
-Dot,21,knit into stitch below,,1,!
-Dot,22,bobble/special stitch,,1,"
-Dot,23,make one purlwise,,1,#
-Dot,24,bobble/special stitch,,1,$ Dot,25,purl into stitch below,,1,%
-Dot,26,slip purlwise,,1,&
-Dot,27,slip purlwise,,1,'
-Dot,28,centred decrease - purl,,1,(
-Dot,29,centred increase - purl,,1,)
-Dot,2A,slip or increase,,1,*
-Dot,2B,edge stitch,,1,+
-Dot,2C,knit into stitch below,,1,,
-Dot,2D,,,1,-
-Dot,2E,purl (large version),,1,.
-Dot,2F,knit 2 together,,1,/
-Dot,30,decrease,,1,0
-Dot,31,decorates decrease 01À1,,1,1
-Dot,32,decorates decrease 02À2,,1,2
-Dot,33,decorates decrease 03À3,,1,3
-Dot,34,decorates decrease 04À4,,1,4
-Dot,35,decorates decrease 05À5,,1,5
-Dot,36,decorates decrease 06À6,,1,6
-Dot,37,decorates decrease 07À7,,1,7
-Dot,38,decorates decrease 08À8,,1,8
-Dot,39,decorates decrease 09À9,,1,9
-Dot,3A,increase - left leaning,,1,:
-Dot,3B,increase - right leaning,,1,;
-Dot,3C,centred decrease,,1,<
-Dot,3D,centred increase,,1,=
-Dot,3E,make one,,1,>
-Dot,3F,twisted stitch - purl tbl,,1,?
-Dot,40,make one - purl,,1,@
-Dot,41,double yarn over,,1,A
-Dot,42,decorates yarn over oB,,1,B
-Dot,43,decorates yarn over oC,,1,C
-Dot,44,decorates yarn over oD,,1,D
-Dot,45,decorates yarn over oE,,1,E
-Dot,46,decorates yarn over oF,,1,F
-Dot,47,decorates yarn over oG,,1,G
-Dot,48,decorates yarn over oH,,1,H
-Dot,49,decorates yarn over oI,,1,I
-Dot,4A,purl 2 together,,1,J
-Dot,4B,ssp,,1,K
-Dot,4C,k1, yarn over, k1,,1,L
-Dot,4D,make one,,1,M
-Dot,4E,yarn over decrease,,1,N
-Dot,4F,short row,,1,O
-Dot,50,short row,,1,P
-Dot,51,slip or increase purlwise,,1,Q
-Dot,52,,,1,R
-Dot,53,bind off,,1,S
-Dot,54,bind off,,1,T
-Dot,55,knit 2 together,,1,U
-Dot,56,ssk,,1,V
-Dot,57,purl 2 together,,1,W
-Dot,58,ssp,,1,X
-Dot,59,purl 2 together,,1,Y
-Dot,5A,ssp,,1,Z
-Dot,5B,purl decrease,,1,[
-Dot,5C,ssk,,1,\\
-Dot,5D,k1 elongated (wrap yarn twice),,1,]
-Dot,5E,,,1,^
-Dot,5F,,,1,_
-Dot,60,decorates increase *`Ã`,,1,`
-Dot,61,decorates increase *aÃa,,1,a
-Dot,62,decorates increase *bÃb,,1,b
-Dot,63,decorates increase *cÃc,,1,c
-Dot,64,decorates increase *dÃd,,1,d
-Dot,65,decorates increase *eÃe,,1,e
-Dot,66,decorates increase *fÃf,,1,f
-Dot,67,decorates increase *gÃg,,1,g
-Dot,68,decorates increase *hÃh,,1,h
-Dot,69,centred increase,,1,i
-Dot,6A,centred decrease,,1,j
-Dot,6B,knit,,1,k
-Dot,6C,purl 2 together,,1,l
-Dot,6D,ssp,,1,m
-Dot,6E,twisted stitch - knit tbl,,1,n
-Dot,6F,yarn over,,1,o
-Dot,70,purl,,1,p
-Dot,71,ssk,,1,q
-Dot,72,knit 2 together,,1,r
-Dot,73,knit 3 together,,1,s
-Dot,74,sssk,,1,t
-Dot,75,purl 3 together,,1,u
-Dot,76,sssp,,1,v
-Dot,77,no stitch,,1,w
-Dot,78,purl increase - left leaning,,1,x
-Dot,79,purl increase - right leaning,,1,y
-Dot,7A,nupp,,1,z
-Dot,7B,nupp,,1,{
-Dot,7C,,,1,|
-Dot,7D,purl 1, yarn over, purl 1,,1,}
-Dot,7E,nupp,,1,~
-Dot,A1,decrease 4 to 1 - right leaning,,1,¡
-Dot,A2,decrease 4 to 1 - left leaning,,1,¢
-Dot,A3,decrease 3 to 1 - right leaning,,1,£
-Dot,A4,decrease 3 to 1 - left leaning,,1,¤
-Dot,A5,twined - front loop curved,,1,¥
-Dot,A6,twined - front loop straight,,1,¦
-Dot,A7,decorates other twined stitches,,1,§
-Dot,A8,twined - use with 00A6,,1,¨
-Dot,A9,twined - use with 00A6,,1,©
-Dot,AA,twined - use with 00A5,,1,ª
-Dot,AB,twined - use with 00A5,,1,«
-Dot,AC,twined - use with 00A5,,1,¬
-Dot,AD,decorates other twined stitches,,1,­
-Dot,AE,twined - braid curved,,1,®
-Dot,AF,twined - braid curved,,1,¯
-Dot,B0,knit - decorates brioche sl1yof äåæ,,1,°
-Dot,B1,twined - braid straight,,1,±
-Dot,B2,twined - braid straight,,1,²
-Dot,B3,decorates left leaning decrease – nupp V³q³\\³t³,,1,³
-Dot,B4,decorates right leaning decrease – nupp U´r´s´/´,,1,´
-Dot,B5,decorates right leaning decrease – twisted Uµrµsµ/µ,,1,µ
-Dot,B6,decorates left leaning decrease – twisted V¶q¶t¶\\¶,,1,¶
-Dot,B7,decorates right leaning decrease – twisted U·r·s·/·,,1,·
-Dot,B8,decorates left leaning decrease – twisted V¸q¸t¸\\¸,,1,¸
-Dot,B9,knit into stitch below,,1,¹
-Dot,BA,bobble/special stitch,,1,º
-Dot,BB,purl - decorates brioche sl1yof ä»å»æ»ï»,,1,»
-Dot,BC,cast on,,1,¼
-Dot,BD,move marker left,,1,½
-Dot,BE,move marker right,,1,¾
-Dot,BF,bobble/special stitch,,1,¿
-Dot,C0,decrease through back loop,,1,À
-Dot,C1,Estonian – gathered stitch,,1,Á
-Dot,C2,Estonian – gathered stitch,,1,Â
-Dot,C3,increase through back loop,,1,Ã
-Dot,C4,Estonian – decorates gathered stitches ,,1,Ä
-Dot,C5,Estonian – decorates gathered stitches ,,1,Å
-Dot,C6,Estonian – decorates gathered stitches ,,1,Æ
-Dot,C7,Estonian – decorates gathered stitches ,,1,Ç
-Dot,C8,Estonian – decorates gathered stitches ,,1,È
-Dot,C9,Estonian – decorates gathered stitches ,,1,É
-Dot,CA,Estonian – decorates gathered stitches ,,1,Ê
-Dot,CB,Estonian – decorates gathered stitches ,,1,Ë
-Dot,CC,Estonian – decorates gathered stitches ,,1,Ì
-Dot,CD,Estonian – decorates gathered stitches ,,1,Í
-Dot,CE,Estonian – decorates gathered stitches ,,1,Î
-Dot,CF,Estonian – decorates gathered stitches ,,1,Ï
-Dot,D2,Estonian – decorates gathered stitches ,,1,Ò
-Dot,D3,Estonian – decorates gathered stitches ,,1,Ó
-Dot,D4,Estonian – decorates gathered stitches ,,1,Ô
-Dot,D5,Estonian – decorates gathered stitches ,,1,Õ
-Dot,D6,Estonian – decorates gathered stitches ,,1,Ö
-Dot,D7,Estonian – decorates gathered stitches ,,1,×
-Dot,D8,Estonian – decorates gathered stitches ,,1,Ø
-Dot,D9,Estonian – decorates gathered stitches ,,1,Ù
-Dot,DA,,,1,Ú
-Dot,DB,,,1,Û
-Dot,DC,k1 elongated twice (wrap yarn 3 times),,1,Ü
-Dot,DD,move marker left ÝÝÅ,,1,Ý
-Dot,DE,move marker right ÞÞ,,1,Þ
-Dot,E0,decorates right leaning decrease – nupp Urs/,,1,ß
-Dot,E1,decorates left leaning decrease – nupp Vq\\t,,1,à
-Dot,E2,brioche - brp,,1,á
-Dot,E3,brioche - brk,,1,â
-Dot,E4,brioche - yf sl1yo fits with brp/brk,,1,ã
-Dot,E5,brioche - sl1yof fits with brp/brk,,1,ä
-Dot,E6,brioche - sl1yof fits with brp/brk,,1,å
-Dot,E7,brioche - brkssk,,1,æ
-Dot,E8,brioche - brksssk,,1,ç
-Dot,E9,brioche - brk2tog,,1,è
-Dot,EA,brioche - brk3tog,,1,é
-Dot,EB,brioche - brkssp,,1,ê
-Dot,EC,brioche - brksssp,,1,ë
-Dot,ED,brioche - brp2tog,,1,ì
-Dot,EE,brioche - brp3tog,,1,í
-Dot,EF,brioche - yf sl1yo,,1,î
-Dot,F1,brioche - brkyobrk,,1,ñ
-Dot,F2,brioche - brkbrpbrk into one st,,1,ò
-Dot,F3,brioche - brk tbl,,1,ó
-Dot,F4,brioche - brp tbl,,1,ô
-Dot,F5,decorates decreases 0À,,1,õ
-Dot,F6,decorates increases *Ã,,1,ö
-Dot,F7,decorates left leaning decreases V÷q÷\\÷t÷,,1,÷
-Dot,F8,beading - knit,,1,ø
-Dot,F9,beading - purl,,1,ù
-Dot,FA,decorates yarn over oB,,1,ú
-Dot,FB,Estonian – decorates gathered stitches ,,1,û
-Dot,FC,Estonian – decorates gathered stitches ,,1,ü
-Dot,FD,decorates decrease 0ýÀý,,1,ý
-Dot,FE,decorates increase *þÃþ,,1,þ
-Dot,100,decorates decrease 0ĀÀĀ,,1,Ā
-Dot,101,decorates increase *āÃā,,1,ā
-Dot,102,decorates decrease 0ĂÀĂ,,1,Ă
-Dot,103,decorates increase *ăÃă,,1,ă
-Dot,104,brioche - centred double decrease,,1,Ą
-Dot,105,brioche - centred double purl dec,,1,ą
-Dot,106,Estonian – decorates gathered stitches and decreases 0ĆÀĆ,,1,Ć
-Dot,107,Estonian – decorates gathered stitches and increases *ćÃć,,1,ć
-Dot,108,Estonian – decorates gathered stitches and decreases 0ĈÀĈ,,1,Ĉ
-Dot,109,Estonian – decorates gathered stitches and increases *ĉÃĉ,,1,ĉ
-Dot,10A,Estonian – decorates gathered stitches and decreases 0ĊÀĊ,,1,Ċ
-Dot,10B,Estonian – decorates gathered stitches and increases *ċÃċ,,1,ċ
-Dot,10C,Estonian – decorates gathered stitches and decreases 0ČÀČ,,1,Č
-Dot,10D,Estonian – decorates gathered stitches and increases *čÃč,,1,č
-Dot,10E,decorates decrease – bead 0ĎÀĎ,,1,Ď
-Dot,10F,decorates increase – bead *ďÃď,,1,ď
-Dot,110,decorates right leaning decreases – bead UĐrĐsĐ/Đ,,1,Đ
-Dot,111,decorates left leaning decreases – bead Vđqđ\\đtđ,,1,đ
-Dot,113,purlwise left-leaning increase,,1,ē
-Dot,114,purlwise right-leaning increase,,1,Ĕ
-Dot,115,purlwise left-leaning increase,,1,ĕ
-Dot,116,purlwise right-leaning increase,,1,Ė
-Dot,117,knitwise left-leaning increase,,1,ė
-Dot,118,knitwise right-leaning increase,,1,Ę
-Dot,119,,,1,ę
-Dot,11A,,,1,Ě
-Dot,11B,,,1,ě
-Dot,11C,,,1,Ĝ
-Dot,151,brioche - centred double decrease,,1,ű
-Dot,152,brioche – purl centred double decrease,,1,ų
-Dot,153,hook bead,,1,ŵ
-Dot,156,catch strands,,1,ŷ
-Dot,157,decorates right leaning decreases,,1,Ÿ
-Dot,11D,increase to 2 stitches,,2,ĝ
-Dot,125,Estonian – gathered stitch,,2,ĥ
-Dot,134,Estonian – gathered stitch,,2,Ĵ
-Dot,143,increase to 2 stitches,,2,ģ
-Dot,154,bunny ears outward – k2tog + ssk,,2,ź
-Dot,155,bunny ears inward – ssk + k2tog,,2,Ż
-Dot,158,increase - left leaning,,2,Ž
-Dot,159,increase - right leaning,,2,ž
-Dot,15a,purl increase - left leaning,,2,ś
-Dot,15b,purl increase - right leaning,,2,Ś
-Dot,11E,increase to 3 stitches,,3,Ğ
-Dot,126,Estonian – gathered stitch,,3,Ħ
-Dot,135,Estonian – gathered stitch,,3,ĵ
-Dot,144,increase to 3 stitches,,3,Ġ
-Dot,14B,knit 1, yarn over, knit 1,,3,ı
-Dot,14C,purl 1, yarn over, purl 1,,3,ŀ
-Dot,14F,brioche - brk, yo, brk,,3,ő
-Dot,150,brioche - brk, brp, brk,,3,Ő
-Dot,11F,increase to 4 stitches,,4,ğ
-Dot,127,Estonian – gathered stitch,,4,ħ
-Dot,136,Estonian – gathered stitch,,4,Ķ
-Dot,145,increase to 4 stitches,,4,ġ
-Dot,120,increase to 5 stitches,,5,Ā
-Dot,128,Estonian – gathered stitch,,5,Ĩ
-Dot,137,Estonian – gathered stitch,,5,ķ
-Dot,146,increase to 5 stitches,,5,Ģ
-Dot,14D,brioche - brk, yo, brk, yo, brk,,5,ō
-Dot,14E,brioche - brk, brp, brk, brp, brk,,5,Ō
-Dot,121,increase to 6 stitches,,6,ā
-Dot,129,Estonian – gathered stitch,,6,ĩ
-Dot,138,Estonian – gathered stitch,,6,ĸ
-Dot,147,increase to 6 stitches,,6,ģ
-Dot,122,increase to 7 stitches,,7,â
-Dot,12A,Estonian – gathered stitch,,7,Ī
-Dot,139,Estonian – gathered stitch,,7,Ĺ
-Dot,148,increase to 7 stitches,,7,Ĥ
-Dot,123,increase to 8 stitches,,8,ă
-Dot,12B,Estonian – gathered stitch,,8,ī
-Dot,13A,Estonian – gathered stitch,,8,ĺ
-Dot,149,increase to 8 stitches,,8,ĥ
-Dot,124,increase to 9 stitches,,9,Ą
-Dot,12C,Estonian – gathered stitch,,9,Ĭ
-Dot,13B,Estonian – gathered stitch,,9,Ļ
-Dot,14A,increase to 9 stitches,,9,Ħ
-Dot,12D,Estonian – gathered stitch,,10,ĭ
-Dot,13C,Estonian – gathered stitch,,10,ļ
-Dot,12E,Estonian – gathered stitch,,11,Į
-Dot,13D,Estonian – gathered stitch,,11,Ľ
-Dot,12F,Estonian – gathered stitch,,12,į
-Dot,13E,Estonian – gathered stitch,,12,ľ
-Dot,130,Estonian – gathered stitch,,13,İ
-Dot,13F,Estonian – gathered stitch,,13,ŀ
-Dot,131,Estonian – gathered stitch,,14,Ĳ
-Dot,140,Estonian – gathered stitch,,14,Ł
-Dot,132,Estonian – gathered stitch,,15,ĳ
-Dot,141,Estonian – gathered stitch,,15,Ń
-Dot,133,Estonian – gathered stitch,,16,Ĵ
-Dot,142,Estonian – gathered stitch,,16,ń
-Dash,21,knit into stitch below,,1,!
-Dash,22,bobble/special stitch,,1,"
-Dash,23,make one purlwise,,1,#
-Dash,24,bobble/special stitch,,1,$ Dash,25,purl into stitch below,,1,%
-Dash,26,slip purlwise,,1,&
-Dash,27,slip purlwise,,1,'
-Dash,28,centred decrease - purl,,1,(
-Dash,29,centred increase - purl,,1,)
-Dash,2A,slip or increase,,1,*
-Dash,2B,edge stitch,,1,+
-Dash,2C,knit into stitch below,,1,,
-Dash,2D,,,1,-
-Dash,2E,purl (large version),,1,.
-Dash,2F,knit 2 together,,1,/
-Dash,30,decrease,,1,0
-Dash,31,decorates decrease ￿1À1,,1,1
-Dash,32,decorates decrease ￿2À2,,1,2
-Dash,33,decorates decrease ￿3À3,,1,3
-Dash,34,decorates decrease ￿4À4,,1,4
-Dash,35,decorates decrease ￿5À5,,1,5
-Dash,36,decorates decrease ￿6À6,,1,6
-Dash,37,decorates decrease ￿7À7,,1,7
-Dash,38,decorates decrease ￿8À8,,1,8
-Dash,39,decorates decrease ￿9À9,,1,9
-Dash,3A,increase - left leaning,,1,:
-Dash,3B,increase - right leaning,,1,;
-Dash,3C,centred decrease,,1,<
-Dash,3D,centred increase,,1,=
-Dash,3E,make one,,1,>
-Dash,3F,twisted stitch - purl tbl,,1,?
-Dash,40,make one - purl,,1,@
-Dash,41,double yarn over,,1,A
-Dash,42,decorates yarn over oB,,1,B
-Dash,43,decorates yarn over oC,,1,C
-Dash,44,decorates yarn over oD,,1,D
-Dash,45,decorates yarn over oE,,1,E
-Dash,46,decorates yarn over oF,,1,F
-Dash,47,decorates yarn over oG,,1,G
-Dash,48,decorates yarn over oH,,1,H
-Dash,49,decorates yarn over oI,,1,I
-Dash,4A,purl 2 together,,1,J
-Dash,4B,ssp,,1,K
-Dash,4C,k1, yarn over, k1,,1,L
-Dash,4D,make one,,1,M
-Dash,4E,yarn over decrease,,1,N
-Dash,4F,short row,,1,O
-Dash,50,short row,,1,P
-Dash,51,slip or increase purlwise,,1,Q
-Dash,52,,,1,R
-Dash,53,bind off,,1,S
-Dash,54,bind off,,1,T
-Dash,55,knit 2 together,,1,U
-Dash,56,ssk,,1,V
-Dash,57,purl 2 together,,1,W
-Dash,58,ssp,,1,X
-Dash,59,purl 2 together,,1,Y
-Dash,5A,ssp,,1,Z
-Dash,5B,purl decrease,,1,[
-Dash,5C,ssk,,1,\\
-Dash,5D,k1 elongated (wrap yarn twice),,1,]
-Dash,5E,,,1,^
-Dash,5F,,,1,_
-Dash,60,decorates increase *`Ã`,,1,`
-Dash,61,decorates increase *aÃa,,1,a
-Dash,62,decorates increase *bÃb,,1,b
-Dash,63,decorates increase *cÃc,,1,c
-Dash,64,decorates increase *dÃd,,1,d
-Dash,65,decorates increase *eÃe,,1,e
-Dash,66,decorates increase *fÃf,,1,f
-Dash,67,decorates increase *gÃg,,1,g
-Dash,68,decorates increase *hÃh,,1,h
-Dash,69,centred increase,,1,i
-Dash,6A,centred decrease,,1,j
-Dash,6B,knit,,1,k
-Dash,6C,purl 2 together,,1,l
-Dash,6D,ssp,,1,m
-Dash,6E,twisted stitch - knit tbl,,1,n
-Dash,6F,yarn over,,1,o
-Dash,70,purl,,1,p
-Dash,71,ssk,,1,q
-Dash,72,knit 2 together,,1,r
-Dash,73,knit 3 together,,1,s
-Dash,74,sssk,,1,t
-Dash,75,purl 3 together,,1,u
-Dash,76,sssp,,1,v
-Dash,77,no stitch,,1,w
-Dash,78,purl increase - left leaning,,1,x
-Dash,79,purl increase - right leaning,,1,y
-Dash,7A,nupp,,1,z
-Dash,7B,nupp,,1,{
-Dash,7C,,,1,|
-Dash,7D,purl 1, yarn over, purl 1,,1,}
-Dash,7E,nupp,,1,~
-Dash,A1,decrease 4 to 1 - right leaning,,1,¡
-Dash,A2,decrease 4 to 1 - left leaning,,1,¢
-Dash,A3,decrease 3 to 1 - right leaning,,1,£
-Dash,A4,decrease 3 to 1 - left leaning,,1,¤
-Dash,A5,twined - front loop curved,,1,¥
-Dash,A6,twined - front loop straight,,1,¦
-Dash,A7,decorates other twined stitches,,1,§
-Dash,A8,twined - use with 00A6,,1,¨
-Dash,A9,twined - use with 00A6,,1,©
-Dash,AA,twined - use with 00A5,,1,ª
-Dash,AB,twined - use with 00A5,,1,«
-Dash,AC,twined - use with 00A5,,1,¬
-Dash,AD,decorates other twined stitches,,1,­
-Dash,AE,twined - braid curved,,1,®
-Dash,AF,twined - braid curved,,1,¯
-Dash,B0,knit - decorates brioche sl1yof äåæ,,1,°
-Dash,B1,twined - braid straight,,1,±
-Dash,B2,twined - braid straight,,1,²
-Dash,B3,decorates left leaning decrease – nupp V³q³\\³t³,,1,³
-Dash,B4,decorates right leaning decrease – nupp U´r´s´/´,,1,´
-Dash,B5,decorates right leaning decrease – twisted Uµrµsµ/µ,,1,µ
-Dash,B6,decorates left leaning decrease – twisted V¶q¶t¶\\¶,,1,¶
-Dash,B7,decorates right leaning decrease – twisted U·r·s·/·,,1,·
-Dash,B8,decorates left leaning decrease – twisted V¸q¸t¸\\¸,,1,¸
-Dash,B9,knit into stitch below,,1,¹
-Dash,BA,bobble/special stitch,,1,º
-Dash,BB,purl - decorates brioche sl1yof ä»å»æ»ï»,,1,»
-Dash,BC,cast on,,1,¼
-Dash,BD,move marker left,,1,½
-Dash,BE,move marker right,,1,¾
-Dash,BF,bobble/special stitch,,1,¿
-Dash,C0,decrease through back loop,,1,À
-Dash,C1,Estonian – gathered stitch,,1,Á
-Dash,C2,Estonian – gathered stitch,,1,Â
-Dash,C3,increase through back loop,,1,Ã
-Dash,C4,Estonian – decorates gathered stitches ,,1,Ä
-Dash,C5,Estonian – decorates gathered stitches ,,1,Å
-Dash,C6,Estonian – decorates gathered stitches ,,1,Æ
-Dash,C7,Estonian – decorates gathered stitches ,,1,Ç
-Dash,C8,Estonian – decorates gathered stitches ,,1,È
-Dash,C9,Estonian – decorates gathered stitches ,,1,É
-Dash,CA,Estonian – decorates gathered stitches ,,1,Ê
-Dash,CB,Estonian – decorates gathered stitches ,,1,Ë
-Dash,CC,Estonian – decorates gathered stitches ,,1,Ì
-Dash,CD,Estonian – decorates gathered stitches ,,1,Í
-Dash,CE,Estonian – decorates gathered stitches ,,1,Î
-Dash,CF,Estonian – decorates gathered stitches ,,1,Ï
-Dash,D2,Estonian – decorates gathered stitches ,,1,Ò
-Dash,D3,Estonian – decorates gathered stitches ,,1,Ó
-Dash,D4,Estonian – decorates gathered stitches ,,1,Ô
-Dash,D5,Estonian – decorates gathered stitches ,,1,Õ
-Dash,D6,Estonian – decorates gathered stitches ,,1,Ö
-Dash,D7,Estonian – decorates gathered stitches ,,1,×
-Dash,D8,Estonian – decorates gathered stitches ,,1,Ø
-Dash,D9,Estonian – decorates gathered stitches ,,1,Ù
-Dash,DA,,,1,Ú
-Dash,DB,,,1,Û
-Dash,DC,k1 elongated twice (wrap yarn 3 times),,1,Ü
-Dash,DD,move marker left ÝÝÅ,,1,Ý
-Dash,DE,move marker right ÞÞ,,1,Þ
-Dash,E0,decorates right leaning decrease – nupp Urs/,,1,ß
-Dash,E1,decorates left leaning decrease – nupp Vq\\t,,1,à
-Dash,E2,brioche - brp,,1,á
-Dash,E3,brioche - brk,,1,â
-Dash,E4,brioche - yf sl1yo fits with brp/brk,,1,ã
-Dash,E5,brioche - sl1yof fits with brp/brk,,1,ä
-Dash,E6,brioche - sl1yof fits with brp/brk,,1,å
-Dash,E7,brioche - brkssk,,1,æ
-Dash,E8,brioche - brksssk,,1,ç
-Dash,E9,brioche - brk2tog,,1,è
-Dash,EA,brioche - brk3tog,,1,é
-Dash,EB,brioche - brkssp,,1,ê
-Dash,EC,brioche - brksssp,,1,ë
-Dash,ED,brioche - brp2tog,,1,ì
-Dash,EE,brioche - brp3tog,,1,í
-Dash,EF,brioche - yf sl1yo,,1,î
-Dash,F1,brioche - brkyobrk,,1,ñ
-Dash,F2,brioche - brkbrpbrk into one st,,1,ò
-Dash,F3,brioche - brk tbl,,1,ó
-Dash,F4,brioche - brp tbl,,1,ô
-Dash,F5,decorates decreases ￿À,,1,õ
-Dash,F6,decorates increases *Ã,,1,ö
-Dash,F7,decorates left leaning decreases V÷q÷\\÷t÷,,1,÷
-Dash,F8,beading - knit,,1,ø
-Dash,F9,beading - purl,,1,ù
-Dash,FA,decorates yarn over oB,,1,ú
-Dash,FB,Estonian – decorates gathered stitches ,,1,û
-Dash,FC,Estonian – decorates gathered stitches ,,1,ü
-Dash,FD,decorates decrease ￿ýÀý,,1,ý
-Dash,FE,decorates increase *þÃþ,,1,þ
-Dash,100,decorates decrease ￿ĀÀĀ,,1,Ā
-Dash,101,decorates increase *āÃā,,1,ā
-Dash,102,decorates decrease ￿ĂÀĂ,,1,Ă
-Dash,103,decorates increase *ăÃă,,1,ă
-Dash,104,brioche - centred double decrease,,1,Ą
-Dash,105,brioche - centred double purl dec,,1,ą
-Dash,106,Estonian – decorates gathered stitches and decreases ￿ĆÀĆ,,1,Ć
-Dash,107,Estonian – decorates gathered stitches and increases *ćÃć,,1,ć
-Dash,108,Estonian – decorates gathered stitches and decreases ￿ĈÀĈ,,1,Ĉ
-Dash,109,Estonian – decorates gathered stitches and increases *ĉÃĉ,,1,ĉ
-Dash,10A,Estonian – decorates gathered stitches and decreases ￿ĊÀĊ,,1,Ċ
-Dash,10B,Estonian – decorates gathered stitches and increases *ċÃċ,,1,ċ
-Dash,10C,Estonian – decorates gathered stitches and decreases ￿ČÀČ,,1,Č
-Dash,10D,Estonian – decorates gathered stitches and increases *čÃč,,1,č
-Dash,10E,decorates decrease – bead ￿ĎÀĎ,,1,Ď
-Dash,10F,decorates increase – bead *ďÃď,,1,ď
-Dash,110,decorates right leaning decreases – bead UĐrĐsĐ/Đ,,1,Đ
-Dash,111,decorates left leaning decreases – bead Vđqđ\\đtđ,,1,đ
-Dash,113,purlwise left-leaning increase,,1,ē
-Dash,114,purlwise right-leaning increase,,1,Ĕ
-Dash,115,purlwise left-leaning increase,,1,ĕ
-Dash,116,purlwise right-leaning increase,,1,Ė
-Dash,117,knitwise left-leaning increase,,1,ė
-Dash,118,knitwise right-leaning increase,,1,Ę
-Dash,119,,,1,ę
-Dash,11A,,,1,Ě
-Dash,11B,,,1,ě
-Dash,11C,,,1,Ĝ
-Dash,151,brioche - centred double decrease,,1,ű
-Dash,152,brioche – purl centred double decrease,,1,ų
-Dash,153,hook bead,,1,ŵ
-Dash,156,catch strands,,1,ŷ
-Dash,157,decorates right leaning decreases,,1,Ÿ
-Dash,11D,increase to 2 stitches,,2,ĝ
-Dash,125,Estonian – gathered stitch,,2,ĥ
-Dash,134,Estonian – gathered stitch,,2,Ĵ
-Dash,143,increase to 2 stitches,,2,ģ
-Dash,154,bunny ears outward – k2tog + ssk,,2,ź
-Dash,155,bunny ears inward – ssk + k2tog,,2,Ż
-Dash,158,increase - left leaning,,2,Ž
-Dash,159,increase - right leaning,,2,ž
-Dash,15a,purl increase - left leaning,,2,ś
-Dash,15b,purl increase - right leaning,,2,Ś
-Dash,11E,increase to 3 stitches,,3,Ğ
-Dash,126,Estonian – gathered stitch,,3,Ħ
-Dash,135,Estonian – gathered stitch,,3,ĵ
-Dash,144,increase to 3 stitches,,3,Ġ
-Dash,14B,knit 1, yarn over, knit 1,,3,ı
-Dash,14C,purl 1, yarn over, purl 1,,3,ŀ
-Dash,14F,brioche - brk, yo, brk,,3,ő
-Dash,150,brioche - brk, brp, brk,,3,Ő
-Dash,11F,increase to 4 stitches,,4,ğ
-Dash,127,Estonian – gathered stitch,,4,ħ
-Dash,136,Estonian – gathered stitch,,4,Ķ
-Dash,145,increase to 4 stitches,,4,ġ
-Dash,120,increase to 5 stitches,,5,Ā
-Dash,128,Estonian – gathered stitch,,5,Ĩ
-Dash,137,Estonian – gathered stitch,,5,ķ
-Dash,146,increase to 5 stitches,,5,Ģ
-Dash,14D,brioche - brk, yo, brk, yo, brk,,5,ō
-Dash,14E,brioche - brk, brp, brk, brp, brk,,5,Ō
-Dash,121,increase to 6 stitches,,6,ā
-Dash,129,Estonian – gathered stitch,,6,ĩ
-Dash,138,Estonian – gathered stitch,,6,ĸ
-Dash,147,increase to 6 stitches,,6,ģ
-Dash,122,increase to 7 stitches,,7,â
-Dash,12A,Estonian – gathered stitch,,7,Ī
-Dash,139,Estonian – gathered stitch,,7,Ĺ
-Dash,148,increase to 7 stitches,,7,Ĥ
-Dash,123,increase to 8 stitches,,8,ă
-Dash,12B,Estonian – gathered stitch,,8,ī
-Dash,13A,Estonian – gathered stitch,,8,ĺ
-Dash,149,increase to 8 stitches,,8,ĥ
-Dash,124,increase to 9 stitches,,9,Ą
-Dash,12C,Estonian – gathered stitch,,9,Ĭ
-Dash,13B,Estonian – gathered stitch,,9,Ļ
-Dash,14A,increase to 9 stitches,,9,Ħ
-Dash,12D,Estonian – gathered stitch,,10,ĭ
-Dash,13C,Estonian – gathered stitch,,10,ļ
-Dash,12E,Estonian – gathered stitch,,11,Į
-Dash,13D,Estonian – gathered stitch,,11,Ľ
-Dash,12F,Estonian – gathered stitch,,12,į
-Dash,13E,Estonian – gathered stitch,,12,ľ
-Dash,130,Estonian – gathered stitch,,13,İ
-Dash,13F,Estonian – gathered stitch,,13,ŀ
-Dash,131,Estonian – gathered stitch,,14,Ĳ
-Dash,140,Estonian – gathered stitch,,14,Ł
-Dash,132,Estonian – gathered stitch,,15,ĳ
-Dash,141,Estonian – gathered stitch,,15,Ń
-Dash,133,Estonian – gathered stitch,,16,Ĵ
-Dash,142,Estonian – gathered stitch,,16,ń
-DashCable,21,1/1 RC,,2,!
-DashCable,22,1/1 LC,,2,"
-DashCable,23,1/1 RPC,,2,#
-DashCable,24,1/1 LPC,,2,$ DashCable,25,1/1 RT,,2,%
-DashCable,26,1/1 LT,,2,&
-DashCable,27,1/1 RT,,2,'
-DashCable,28,1/1 LT,,2,(
-DashCable,29,1/1 RPT,,2,)
-DashCable,2A,1/1 LPT,,2,*
-DashCable,F1,Custom cable,,2,ñ
-DashCable,2B,2/1 RC,,3,+
-DashCable,2C,2/1 LC,,3,,
-DashCable,2D,2/1 RPC,,3,-
-DashCable,2E,2/1 LPC,,3,.
-DashCable,2F,1/2 RC,,3,/
-DashCable,30,1/2 LC,,3,0
-DashCable,31,1/2 RPC,,3,1
-DashCable,32,1/2 LPC,,3,2
-DashCable,33,2/1 RT,,3,3
-DashCable,34,2/1 LT,,3,4
-DashCable,35,2/1 RT,,3,5
-DashCable,36,2/1 LT,,3,6
-DashCable,37,2/1 RPT,,3,7
-DashCable,38,2/1 LPT,,3,8
-DashCable,39,1/1/1 RC,,3,9
-DashCable,3A,1/1/1 LC,,3,:
-DashCable,3B,1/1/1 RPC,,3,;
-DashCable,3C,1/1/1 LPC,,3,<
-DashCable,3D,1/1/1 Reverse,,3,=
-DashCable,DE,1/1/1 RPT,,3,Þ
-DashCable,DF,1/1/1 LPT,,3,ß
-DashCable,F2,Custom cable,,3,ò
-DashCable,100,1/2 LT,,3,Ā
-DashCable,101,1/2 RT,,3,ā
-DashCable,102,1/2 LT,,3,Ă
-DashCable,103,1/2 RT,,3,ă
-DashCable,104,1/1/1 RPT,,3,Ą
-DashCable,105,1/1/1 LPT,,3,ą
-DashCable,3E,2/2 RC,,4,>
-DashCable,3F,2/2 LC,,4,?
-DashCable,40,2/2 RPC,,4,@
-DashCable,41,2/2 LPC,,4,A
-DashCable,42,2/2 RT,,4,B
-DashCable,43,2/2 LT,,4,C
-DashCable,44,2/2 RT,,4,D
-DashCable,45,2/2 LT,,4,E
-DashCable,46,1/3 RC,,4,F
-DashCable,47,1/3 LC,,4,G
-DashCable,48,1/3 RPC,,4,H
-DashCable,49,1/3 LPC,,4,I
-DashCable,4A,3/1 RC,,4,J
-DashCable,4B,3/1 LC,,4,K
-DashCable,4C,3/1 RPC,,4,L
-DashCable,4D,3/1 LPC,,4,M
-DashCable,4E,1/2/1 RC,,4,N
-DashCable,4F,1/2/1 LC,,4,O
-DashCable,50,1/2/1 RPC,,4,P
-DashCable,51,1/2/1 LPC,,4,Q
-DashCable,DC,2/2 RPT,,4,Ü
-DashCable,DD,2/2 LPT,,4,Ý
-DashCable,F3,Custom cable,,4,ó
-DashCable,106,1/3 LT,,4,Ċ
-DashCable,107,1/3 RT,,4,ċ
-DashCable,108,1/3 LT,,4,Č
-DashCable,109,1/3 RT,,4,č
-DashCable,10A,1/3 LPT,,4,Ď
-DashCable,10B,1/3 RPT,,4,ď
-DashCable,52,1/4 RC,,5,R
-DashCable,53,1/4 LC,,5,S
-DashCable,54,1/4 RPC,,5,T
-DashCable,55,1/4 LPC,,5,U
-DashCable,56,2/3 RC,,5,V
-DashCable,57,2/3 LC,,5,W
-DashCable,58,2/3 RPC,,5,X
-DashCable,59,2/3 LPC,,5,Y
-DashCable,5A,3/2 RC,,5,Z
-DashCable,5B,3/2 LC,,5,[
-DashCable,5C,3/2 RPC,,5,\\
-DashCable,5D,3/2 LPC,,5,]
-DashCable,5E,4/1 RC,,5,^
-DashCable,5F,4/1 LC,,5,_
-DashCable,60,4/1 RPC,,5,`
-DashCable,61,4/1 LPC,,5,a
-DashCable,62,2/1/2 RC,,5,b
-DashCable,63,2/1/2 LC,,5,c
-DashCable,64,2/1/2 RPC,,5,d
-DashCable,65,2/1/2 LPC,,5,e
-DashCable,66,1/3/1 RC,,5,f
-DashCable,67,1/3/1 LC,,5,g
-DashCable,68,1/3/1 RPC,,5,h
-DashCable,69,1/3/1 LPC,,5,i
-DashCable,F4,Custom cable,,5,ô
-DashCable,6A,3/3 RC,,6,j
-DashCable,6B,3/3 LC,,6,k
-DashCable,6C,3/3 RPC,,6,l
-DashCable,6D,3/3 LPC,,6,m
-DashCable,6E,2/4 RC,,6,n
-DashCable,6F,2/4 LC,,6,o
-DashCable,70,2/4 RPC,,6,p
-DashCable,71,2/4 LPC,,6,q
-DashCable,72,4/2 RC,,6,r
-DashCable,73,4/2 LC,,6,s
-DashCable,74,4/2 RPC,,6,t
-DashCable,75,4/2 LPC,,6,u
-DashCable,76,2/2/2 RC,,6,v
-DashCable,77,2/2/2 LC,,6,w
-DashCable,78,2/2/2 RPC,,6,x
-DashCable,79,2/2/2 LPC,,6,y
-DashCable,7A,2/2/2 Reverse,,6,z
-DashCable,F5,Custom cable,,6,õ
-DashCable,7B,3/1/3 RC,,7,{
-DashCable,7C,3/1/3 LC,,7,|
-DashCable,7D,3/1/3 RPC,,7,}
-DashCable,7E,3/1/3 LPC,,7,~
-DashCable,C0,3/4 RC,,7,À
-DashCable,C1,3/4 LC,,7,Á
-DashCable,C2,3/4 RPC,,7,Â
-DashCable,C3,3/4 LPC,,7,Ã
-DashCable,C4,4/3 RC,,7,Ä
-DashCable,C5,4/3 LC,,7,Å
-DashCable,C6,4/3 RPC,,7,Æ
-DashCable,C7,4/3 LPC,,7,Ç
-DashCable,F6,Custom cable,,7,ö
-DashCable,C8,4/4 RC,,8,È
-DashCable,C9,4/4 LC,,8,É
-DashCable,CA,4/4 RPC,,8,Ê
-DashCable,CB,4/4 LPC,,8,Ë
-DashCable,CC,3/2/3 RC,,8,Ì
-DashCable,CD,3/2/3 LC,,8,Í
-DashCable,CE,3/2/3 RPC,,8,Î
-DashCable,CF,3/2/3 LPC,,8,Ï
-DashCable,D1,3/2/3 Reverse,,8,Ñ
-DashCable,F8,Custom cable,,8,ø
-DashCable,116,2/6 RC,,8,Ŗ
-DashCable,117,2/6 LC,,8,ŗ
-DashCable,118,2/6 RPC,,8,Ř
-DashCable,119,2/6 LPC,,8,ř
-DashCable,D2,4/1/4 RC,,9,Ò
-DashCable,D3,4/1/4 LC,,9,Ó
-DashCable,D4,4/1/4 RPC,,9,Ô
-DashCable,D5,4/1/4 LPC,,9,Õ
-DashCable,D6,3/3/3 Reverse,,9,Ö
-DashCable,D8,3/3/3 RC,,9,Ø
-DashCable,D9,3/3/3 LC,,9,Ù
-DashCable,DA,3/3/3 RPC,,9,Ú
-DashCable,DB,3/3/3/ LPC,,9,Û
-DashCable,F9,Custom cable,,9,ù
-DashCable,11a,4/5 RC,,9,Š
-DashCable,11b,4/5 LC,,9,š
-DashCable,11c,4/5 RPC,,9,Ŝ
-DashCable,11d,4/5 LPC,,9,ŝ
-DashCable,11e,5/4 RC,,9,Ž
-DashCable,11f,5/4 LC,,9,ž
-DashCable,120,5/4 RPC,,9,Ā
-DashCable,121,5/4 LPC,,9,ā
-DashCable,E0,5/5 RC,,10,à
-DashCable,E1,5/5 LC,,10,á
-DashCable,E2,5/5 RPC,,10,â
-DashCable,E3,5/5 LPC,,10,ã
-DashCable,FA,Custom cable,,10,ú
-DashCable,FB,Custom cable,,11,û
-DashCable,E4,6/6 RC,,12,ä
-DashCable,E5,6/6 LC,,12,å
-DashCable,E6,6/6 RPC,,12,æ
-DashCable,E7,6/6 LPC,,12,ç
-DashCable,E8,4/4/4 RC,,12,è
-DashCable,E9,4/4/4 LC,,12,é
-DashCable,EA,4/4/4 RPC,,12,ê
-DashCable,EB,4/4/4 LPC,,12,ë
-DashCable,EC,4/4/4 Reverse,,12,ì
-DashCable,FC,Custom cable,,12,ü
-DashCable,FD,8/8 RC,,16,ý
-DashCable,FE,8/8 LC,,16,þ
-DashCable,10E,8/8 RPC,,16,Ď
-DashCable,10F,8/8 LPC,,16,ď
-DashCable,10C,9/9 RC,,18,Č
-DashCable,10D,9/9 LC,,18,í
-DashCable,110,9/9 RPC,,18,đ
-DashCable,111,9/9 LPC,,18,Đ
-DashCable,112,12/12 RC,,24,Œ
-DashCable,113,12/12 LC,,24,œ
-DashCable,114,12/12 RPC,,24,Ŕ
-DashCable,115,12/12 LPC,,24,ŕ
-DotCable,21,1/1 RC,,2,!
-DotCable,22,1/1 LC,,2,"
-DotCable,23,1/1 RPC,,2,#
-DotCable,24,1/1 LPC,,2,$ DotCable,25,1/1 RT,,2,%
-DotCable,26,1/1 LT,,2,&
-DotCable,27,1/1 RT,,2,'
-DotCable,28,1/1 LT,,2,(
-DotCable,29,1/1 RPT,,2,)
-DotCable,2A,1/1 LPT,,2,*
-DotCable,F1,Custom cable,,2,ñ
-DotCable,2B,2/1 RC,,3,+
-DotCable,2C,2/1 LC,,3,,
-DotCable,2D,2/1 RPC,,3,-
-DotCable,2E,2/1 LPC,,3,.
-DotCable,2F,1/2 RC,,3,/
-DotCable,30,1/2 LC,,3,0
-DotCable,31,1/2 RPC,,3,1
-DotCable,32,1/2 LPC,,3,2
-DotCable,33,2/1 RT,,3,3
-DotCable,34,2/1 LT,,3,4
-DotCable,35,2/1 RT,,3,5
-DotCable,36,2/1 LT,,3,6
-DotCable,37,2/1 RPT,,3,7
-DotCable,38,2/1 LPT,,3,8
-DotCable,39,1/1/1 RC,,3,9
-DotCable,3A,1/1/1 LC,,3,:
-DotCable,3B,1/1/1 RPC,,3,;
-DotCable,3C,1/1/1 LPC,,3,<
-DotCable,3D,1/1/1 Reverse,,3,=
-DotCable,DE,1/1/1 RPT,,3,Þ
-DotCable,DF,1/1/1 LPT,,3,ß
-DotCable,F2,Custom cable,,3,ò
-DotCable,100,1/2 LT,,3,Ā
-DotCable,101,1/2 RT,,3,ā
-DotCable,102,1/2 LT,,3,Ă
-DotCable,103,1/2 RT,,3,ă
-DotCable,104,1/1/1 RPT,,3,Ą
-DotCable,105,1/1/1 LPT,,3,ą
-DotCable,3E,2/2 RC,,4,>
-DotCable,3F,2/2 LC,,4,?
-DotCable,40,2/2 RPC,,4,@
-DotCable,41,2/2 LPC,,4,A
-DotCable,42,2/2 RT,,4,B
-DotCable,43,2/2 LT,,4,C
-DotCable,44,2/2 RT,,4,D
-DotCable,45,2/2 LT,,4,E
-DotCable,46,1/3 RC,,4,F
-DotCable,47,1/3 LC,,4,G
-DotCable,48,1/3 RPC,,4,H
-DotCable,49,1/3 LPC,,4,I
-DotCable,4A,3/1 RC,,4,J
-DotCable,4B,3/1 LC,,4,K
-DotCable,4C,3/1 RPC,,4,L
-DotCable,4D,3/1 LPC,,4,M
-DotCable,4E,1/2/1 RC,,4,N
-DotCable,4F,1/2/1 LC,,4,O
-DotCable,50,1/2/1 RPC,,4,P
-DotCable,51,1/2/1 LPC,,4,Q
-DotCable,DC,2/2 RPT,,4,Ü
-DotCable,DD,2/2 LPT,,4,Ý
-DotCable,F3,Custom cable,,4,ó
-DotCable,106,1/3 LT,,4,Ċ
-DotCable,107,1/3 RT,,4,ċ
-DotCable,108,1/3 LT,,4,Č
-DotCable,109,1/3 RT,,4,č
-DotCable,10A,1/3 LPT,,4,Ď
-DotCable,10B,1/3 RPT,,4,ď
-DotCable,52,1/4 RC,,5,R
-DotCable,53,1/4 LC,,5,S
-DotCable,54,1/4 RPC,,5,T
-DotCable,55,1/4 LPC,,5,U
-DotCable,56,2/3 RC,,5,V
-DotCable,57,2/3 LC,,5,W
-DotCable,58,2/3 RPC,,5,X
-DotCable,59,2/3 LPC,,5,Y
-DotCable,5A,3/2 RC,,5,Z
-DotCable,5B,3/2 LC,,5,[
-DotCable,5C,3/2 RPC,,5,\\
-DotCable,5D,3/2 LPC,,5,]
-DotCable,5E,4/1 RC,,5,^
-DotCable,5F,4/1 LC,,5,_
-DotCable,60,4/1 RPC,,5,`
-DotCable,61,4/1 LPC,,5,a
-DotCable,62,2/1/2 RC,,5,b
-DotCable,63,2/1/2 LC,,5,c
-DotCable,64,2/1/2 RPC,,5,d
-DotCable,65,2/1/2 LPC,,5,e
-DotCable,66,1/3/1 RC,,5,f
-DotCable,67,1/3/1 LC,,5,g
-DotCable,68,1/3/1 RPC,,5,h
-DotCable,69,1/3/1 LPC,,5,i
-DotCable,F4,Custom cable,,5,ô
-DotCable,6A,3/3 RC,,6,j
-DotCable,6B,3/3 LC,,6,k
-DotCable,6C,3/3 RPC,,6,l
-DotCable,6D,3/3 LPC,,6,m
-DotCable,6E,2/4 RC,,6,n
-DotCable,6F,2/4 LC,,6,o
-DotCable,70,2/4 RPC,,6,p
-DotCable,71,2/4 LPC,,6,q
-DotCable,72,4/2 RC,,6,r
-DotCable,73,4/2 LC,,6,s
-DotCable,74,4/2 RPC,,6,t
-DotCable,75,4/2 LPC,,6,u
-DotCable,76,2/2/2 RC,,6,v
-DotCable,77,2/2/2 LC,,6,w
-DotCable,78,2/2/2 RPC,,6,x
-DotCable,79,2/2/2 LPC,,6,y
-DotCable,7A,2/2/2 Reverse,,6,z
-DotCable,F5,Custom cable,,6,õ
-DotCable,7B,3/1/3 RC,,7,{
-DotCable,7C,3/1/3 LC,,7,|
-DotCable,7D,3/1/3 RPC,,7,}
-DotCable,7E,3/1/3 LPC,,7,~
-DotCable,C0,3/4 RC,,7,À
-DotCable,C1,3/4 LC,,7,Á
-DotCable,C2,3/4 RPC,,7,Â
-DotCable,C3,3/4 LPC,,7,Ã
-DotCable,C4,4/3 RC,,7,Ä
-DotCable,C5,4/3 LC,,7,Å
-DotCable,C6,4/3 RPC,,7,Æ
-DotCable,C7,4/3 LPC,,7,Ç
-DotCable,F6,Custom cable,,7,ö
-DotCable,C8,4/4 RC,,8,È
-DotCable,C9,4/4 LC,,8,É
-DotCable,CA,4/4 RPC,,8,Ê
-DotCable,CB,4/4 LPC,,8,Ë
-DotCable,CC,3/2/3 RC,,8,Ì
-DotCable,CD,3/2/3 LC,,8,Í
-DotCable,CE,3/2/3 RPC,,8,Î
-DotCable,CF,3/2/3 LPC,,8,Ï
-DotCable,D1,3/2/3 Reverse,,8,Ñ
-DotCable,F8,Custom cable,,8,ø
-DotCable,116,2/6 RC,,8,Ŗ
-DotCable,117,2/6 LC,,8,ŗ
-DotCable,118,2/6 RPC,,8,Ř
-DotCable,119,2/6 LPC,,8,ř
-DotCable,D2,4/1/4 RC,,9,Ò
-DotCable,D3,4/1/4 LC,,9,Ó
-DotCable,D4,4/1/4 RPC,,9,Ô
-DotCable,D5,4/1/4 LPC,,9,Õ
-DotCable,D6,3/3/3 Reverse,,9,Ö
-DotCable,D8,3/3/3 RC,,9,Ø
-DotCable,D9,3/3/3 LC,,9,Ù
-DotCable,DA,3/3/3 RPC,,9,Ú
-DotCable,DB,3/3/3/ LPC,,9,Û
-DotCable,F9,Custom cable,,9,ù
-DotCable,11a,4/5 RC,,9,Š
-DotCable,11b,4/5 LC,,9,š
-DotCable,11c,4/5 RPC,,9,Ŝ
-DotCable,11d,4/5 LPC,,9,ŝ
-DotCable,11e,5/4 RC,,9,Ž
-DotCable,11f,5/4 LC,,9,ž
-DotCable,120,5/4 RPC,,9,Ā
-DotCable,121,5/4 LPC,,9,ā
-DotCable,E0,5/5 RC,,10,à
-DotCable,E1,5/5 LC,,10,á
-DotCable,E2,5/5 RPC,,10,â
-DotCable,E3,5/5 LPC,,10,ã
-DotCable,FA,Custom cable,,10,ú
-DotCable,FB,Custom cable,,11,û
-DotCable,E4,6/6 RC,,12,ä
-DotCable,E5,6/6 LC,,12,å
-DotCable,E6,6/6 RPC,,12,æ
-DotCable,E7,6/6 LPC,,12,ç
-DotCable,E8,4/4/4 RC,,12,è
-DotCable,E9,4/4/4 LC,,12,é
-DotCable,EA,4/4/4 RPC,,12,ê
-DotCable,EB,4/4/4 LPC,,12,ë
-DotCable,EC,4/4/4 Reverse,,12,ì
-DotCable,FC,Custom cable,,12,ü
-DotCable,FD,8/8 RC,,16,ý
-DotCable,FE,8/8 LC,,16,þ
-DotCable,10E,8/8 RPC,,16,Ď
-DotCable,10F,8/8 LPC,,16,ď
-DotCable,10C,9/9 RC,,18,Č
-DotCable,10D,9/9 LC,,18,í
-DotCable,110,9/9 RPC,,18,đ
-DotCable,111,9/9 LPC,,18,Đ
-DotCable,112,12/12 RC,,24,Œ
-DotCable,113,12/12 LC,,24,œ
-DotCable,114,12/12 RPC,,24,Ŕ
-DotCable,115,12/12 LPC,,24,ŕ
-DashCableEH,21,1/1 RC,,2,!
-DashCableEH,22,1/1 LC,,2,"
-DashCableEH,23,1/1 RPC,,2,#
-DashCableEH,24,1/1 LPC,,2,$ DashCableEH,25,1/1 RT,,2,%
-DashCableEH,26,1/1 LT,,2,&
-DashCableEH,27,1/1 RT,,2,'
-DashCableEH,28,1/1 LT,,2,(
-DashCableEH,29,1/1 RPT,,2,)
-DashCableEH,2A,1/1 LPT,,2,*
-DashCableEH,F1,Custom cable,,2,ñ
-DashCableEH,2B,2/1 RC,,3,+
-DashCableEH,2C,2/1 LC,,3,,
-DashCableEH,2D,2/1 RPC,,3,-
-DashCableEH,2E,2/1 LPC,,3,.
-DashCableEH,2F,1/2 RC,,3,/
-DashCableEH,30,1/2 LC,,3,0
-DashCableEH,31,1/2 RPC,,3,1
-DashCableEH,32,1/2 LPC,,3,2
-DashCableEH,33,2/1 RT,,3,3
-DashCableEH,34,2/1 LT,,3,4
-DashCableEH,35,2/1 RT,,3,5
-DashCableEH,36,2/1 LT,,3,6
-DashCableEH,37,2/1 RPT,,3,7
-DashCableEH,38,2/1 LPT,,3,8
-DashCableEH,39,1/1/1 RC,,3,9
-DashCableEH,3A,1/1/1 LC,,3,:
-DashCableEH,3B,1/1/1 RPC,,3,;
-DashCableEH,3C,1/1/1 LPC,,3,<
-DashCableEH,3D,1/1/1 Reverse,,3,=
-DashCableEH,DE,1/1/1 RPT,,3,Þ
-DashCableEH,DF,1/1/1 LPT,,3,ß
-DashCableEH,F2,Custom cable,,3,ò
-DashCableEH,100,1/2 LT,,3,Ā
-DashCableEH,101,1/2 RT,,3,ā
-DashCableEH,102,1/2 LT,,3,Ă
-DashCableEH,103,1/2 RT,,3,ă
-DashCableEH,104,1/1/1 RPT,,3,Ą
-DashCableEH,105,1/1/1 LPT,,3,ą
-DashCableEH,3E,2/2 RC,,4,>
-DashCableEH,3F,2/2 LC,,4,?
-DashCableEH,40,2/2 RPC,,4,@
-DashCableEH,41,2/2 LPC,,4,A
-DashCableEH,42,2/2 RT,,4,B
-DashCableEH,43,2/2 LT,,4,C
-DashCableEH,44,2/2 RT,,4,D
-DashCableEH,45,2/2 LT,,4,E
-DashCableEH,46,1/3 RC,,4,F
-DashCableEH,47,1/3 LC,,4,G
-DashCableEH,48,1/3 RPC,,4,H
-DashCableEH,49,1/3 LPC,,4,I
-DashCableEH,4A,3/1 RC,,4,J
-DashCableEH,4B,3/1 LC,,4,K
-DashCableEH,4C,3/1 RPC,,4,L
-DashCableEH,4D,3/1 LPC,,4,M
-DashCableEH,4E,1/2/1 RC,,4,N
-DashCableEH,4F,1/2/1 LC,,4,O
-DashCableEH,50,1/2/1 RPC,,4,P
-DashCableEH,51,1/2/1 LPC,,4,Q
-DashCableEH,DC,2/2 RPT,,4,Ü
-DashCableEH,DD,2/2 LPT,,4,Ý
-DashCableEH,F3,Custom cable,,4,ó
-DashCableEH,106,1/3 LT,,4,Ċ
-DashCableEH,107,1/3 RT,,4,ċ
-DashCableEH,108,1/3 LT,,4,Č
-DashCableEH,109,1/3 RT,,4,č
-DashCableEH,10A,1/3 LPT,,4,Ď
-DashCableEH,10B,1/3 RPT,,4,ď
-DashCableEH,52,1/4 RC,,5,R
-DashCableEH,53,1/4 LC,,5,S
-DashCableEH,54,1/4 RPC,,5,T
-DashCableEH,55,1/4 LPC,,5,U
-DashCableEH,56,2/3 RC,,5,V
-DashCableEH,57,2/3 LC,,5,W
-DashCableEH,58,2/3 RPC,,5,X
-DashCableEH,59,2/3 LPC,,5,Y
-DashCableEH,5A,3/2 RC,,5,Z
-DashCableEH,5B,3/2 LC,,5,[
-DashCableEH,5C,3/2 RPC,,5,\\
-DashCableEH,5D,3/2 LPC,,5,]
-DashCableEH,5E,4/1 RC,,5,^
-DashCableEH,5F,4/1 LC,,5,_
-DashCableEH,60,4/1 RPC,,5,`
-DashCableEH,61,4/1 LPC,,5,a
-DashCableEH,62,2/1/2 RC,,5,b
-DashCableEH,63,2/1/2 LC,,5,c
-DashCableEH,64,2/1/2 RPC,,5,d
-DashCableEH,65,2/1/2 LPC,,5,e
-DashCableEH,66,1/3/1 RC,,5,f
-DashCableEH,67,1/3/1 LC,,5,g
-DashCableEH,68,1/3/1 RPC,,5,h
-DashCableEH,69,1/3/1 LPC,,5,i
-DashCableEH,F4,Custom cable,,5,ô
-DashCableEH,6A,3/3 RC,,6,j
-DashCableEH,6B,3/3 LC,,6,k
-DashCableEH,6C,3/3 RPC,,6,l
-DashCableEH,6D,3/3 LPC,,6,m
-DashCableEH,6E,2/4 RC,,6,n
-DashCableEH,6F,2/4 LC,,6,o
-DashCableEH,70,2/4 RPC,,6,p
-DashCableEH,71,2/4 LPC,,6,q
-DashCableEH,72,4/2 RC,,6,r
-DashCableEH,73,4/2 LC,,6,s
-DashCableEH,74,4/2 RPC,,6,t
-DashCableEH,75,4/2 LPC,,6,u
-DashCableEH,76,2/2/2 RC,,6,v
-DashCableEH,77,2/2/2 LC,,6,w
-DashCableEH,78,2/2/2 RPC,,6,x
-DashCableEH,79,2/2/2 LPC,,6,y
-DashCableEH,7A,2/2/2 Reverse,,6,z
-DashCableEH,F5,Custom cable,,6,õ
-DashCableEH,7B,3/1/3 RC,,7,{
-DashCableEH,7C,3/1/3 LC,,7,|
-DashCableEH,7D,3/1/3 RPC,,7,}
-DashCableEH,7E,3/1/3 LPC,,7,~
-DashCableEH,C0,3/4 RC,,7,À
-DashCableEH,C1,3/4 LC,,7,Á
-DashCableEH,C2,3/4 RPC,,7,Â
-DashCableEH,C3,3/4 LPC,,7,Ã
-DashCableEH,C4,4/3 RC,,7,Ä
-DashCableEH,C5,4/3 LC,,7,Å
-DashCableEH,C6,4/3 RPC,,7,Æ
-DashCableEH,C7,4/3 LPC,,7,Ç
-DashCableEH,F6,Custom cable,,7,ö
-DashCableEH,C8,4/4 RC,,8,È
-DashCableEH,C9,4/4 LC,,8,É
-DashCableEH,CA,4/4 RPC,,8,Ê
-DashCableEH,CB,4/4 LPC,,8,Ë
-DashCableEH,CC,3/2/3 RC,,8,Ì
-DashCableEH,CD,3/2/3 LC,,8,Í
-DashCableEH,CE,3/2/3 RPC,,8,Î
-DashCableEH,CF,3/2/3 LPC,,8,Ï
-DashCableEH,D1,3/2/3 Reverse,,8,Ñ
-DashCableEH,F8,Custom cable,,8,ø
-DashCableEH,116,2/6 RC,,8,Ŗ
-DashCableEH,117,2/6 LC,,8,ŗ
-DashCableEH,118,2/6 RPC,,8,Ř
-DashCableEH,119,2/6 LPC,,8,ř
-DashCableEH,D2,4/1/4 RC,,9,Ò
-DashCableEH,D3,4/1/4 LC,,9,Ó
-DashCableEH,D4,4/1/4 RPC,,9,Ô
-DashCableEH,D5,4/1/4 LPC,,9,Õ
-DashCableEH,D6,3/3/3 Reverse,,9,Ö
-DashCableEH,D8,3/3/3 RC,,9,Ø
-DashCableEH,D9,3/3/3 LC,,9,Ù
-DashCableEH,DA,3/3/3 RPC,,9,Ú
-DashCableEH,DB,3/3/3/ LPC,,9,Û
-DashCableEH,F9,Custom cable,,9,ù
-DashCableEH,11a,4/5 RC,,9,Š
-DashCableEH,11b,4/5 LC,,9,š
-DashCableEH,11c,4/5 RPC,,9,Ŝ
-DashCableEH,11d,4/5 LPC,,9,ŝ
-DashCableEH,11e,5/4 RC,,9,Ž
-DashCableEH,11f,5/4 LC,,9,ž
-DashCableEH,120,5/4 RPC,,9,Ā
-DashCableEH,121,5/4 LPC,,9,ā
-DashCableEH,E0,5/5 RC,,10,à
-DashCableEH,E1,5/5 LC,,10,á
-DashCableEH,E2,5/5 RPC,,10,â
-DashCableEH,E3,5/5 LPC,,10,ã
-DashCableEH,FA,Custom cable,,10,ú
-DashCableEH,FB,Custom cable,,11,û
-DashCableEH,E4,6/6 RC,,12,ä
-DashCableEH,E5,6/6 LC,,12,å
-DashCableEH,E6,6/6 RPC,,12,æ
-DashCableEH,E7,6/6 LPC,,12,ç
-DashCableEH,E8,4/4/4 RC,,12,è
-DashCableEH,E9,4/4/4 LC,,12,é
-DashCableEH,EA,4/4/4 RPC,,12,ê
-DashCableEH,EB,4/4/4 LPC,,12,ë
-DashCableEH,EC,4/4/4 Reverse,,12,ì
-DashCableEH,FC,Custom cable,,12,ü
-DashCableEH,FD,8/8 RC,,16,ý
-DashCableEH,FE,8/8 LC,,16,þ
-DashCableEH,10E,8/8 RPC,,16,Ď
-DashCableEH,10F,8/8 LPC,,16,ď
-DashCableEH,10C,9/9 RC,,18,Č
-DashCableEH,10D,9/9 LC,,18,í
-DashCableEH,110,9/9 RPC,,18,đ
-DashCableEH,111,9/9 LPC,,18,Đ
-DashCableEH,112,12/12 RC,,24,Œ
-DashCableEH,113,12/12 LC,,24,œ
-DashCableEH,114,12/12 RPC,,24,Ŕ
-DashCableEH,115,12/12 LPC,,24,ŕ
-DotCableEH,21,1/1 RC,,2,!
-DotCableEH,22,1/1 LC,,2,"
-DotCableEH,23,1/1 RPC,,2,#
-DotCableEH,24,1/1 LPC,,2,$ DotCableEH,25,1/1 RT,,2,%
-DotCableEH,26,1/1 LT,,2,&
-DotCableEH,27,1/1 RT,,2,'
-DotCableEH,28,1/1 LT,,2,(
-DotCableEH,29,1/1 RPT,,2,)
-DotCableEH,2A,1/1 LPT,,2,*
-DotCableEH,F1,Custom cable,,2,ñ
-DotCableEH,2B,2/1 RC,,3,+
-DotCableEH,2C,2/1 LC,,3,,
-DotCableEH,2D,2/1 RPC,,3,-
-DotCableEH,2E,2/1 LPC,,3,.
-DotCableEH,2F,1/2 RC,,3,/
-DotCableEH,30,1/2 LC,,3,0
-DotCableEH,31,1/2 RPC,,3,1
-DotCableEH,32,1/2 LPC,,3,2
-DotCableEH,33,2/1 RT,,3,3
-DotCableEH,34,2/1 LT,,3,4
-DotCableEH,35,2/1 RT,,3,5
-DotCableEH,36,2/1 LT,,3,6
-DotCableEH,37,2/1 RPT,,3,7
-DotCableEH,38,2/1 LPT,,3,8
-DotCableEH,39,1/1/1 RC,,3,9
-DotCableEH,3A,1/1/1 LC,,3,:
-DotCableEH,3B,1/1/1 RPC,,3,;
-DotCableEH,3C,1/1/1 LPC,,3,<
-DotCableEH,3D,1/1/1 Reverse,,3,=
-DotCableEH,DE,1/1/1 RPT,,3,Þ
-DotCableEH,DF,1/1/1 LPT,,3,ß
-DotCableEH,F2,Custom cable,,3,ò
-DotCableEH,100,1/2 LT,,3,Ā
-DotCableEH,101,1/2 RT,,3,ā
-DotCableEH,102,1/2 LT,,3,Ă
-DotCableEH,103,1/2 RT,,3,ă
-DotCableEH,104,1/1/1 RPT,,3,Ą
-DotCableEH,105,1/1/1 LPT,,3,ą
-DotCableEH,3E,2/2 RC,,4,>
-DotCableEH,3F,2/2 LC,,4,?
-DotCableEH,40,2/2 RPC,,4,@
-DotCableEH,41,2/2 LPC,,4,A
-DotCableEH,42,2/2 RT,,4,B
-DotCableEH,43,2/2 LT,,4,C
-DotCableEH,44,2/2 RT,,4,D
-DotCableEH,45,2/2 LT,,4,E
-DotCableEH,46,1/3 RC,,4,F
-DotCableEH,47,1/3 LC,,4,G
-DotCableEH,48,1/3 RPC,,4,H
-DotCableEH,49,1/3 LPC,,4,I
-DotCableEH,4A,3/1 RC,,4,J
-DotCableEH,4B,3/1 LC,,4,K
-DotCableEH,4C,3/1 RPC,,4,L
-DotCableEH,4D,3/1 LPC,,4,M
-DotCableEH,4E,1/2/1 RC,,4,N
-DotCableEH,4F,1/2/1 LC,,4,O
-DotCableEH,50,1/2/1 RPC,,4,P
-DotCableEH,51,1/2/1 LPC,,4,Q
-DotCableEH,DC,2/2 RPT,,4,Ü
-DotCableEH,DD,2/2 LPT,,4,Ý
-DotCableEH,F3,Custom cable,,4,ó
-DotCableEH,106,1/3 LT,,4,Ċ
-DotCableEH,107,1/3 RT,,4,ċ
-DotCableEH,108,1/3 LT,,4,Č
-DotCableEH,109,1/3 RT,,4,č
-DotCableEH,10A,1/3 LPT,,4,Ď
-DotCableEH,10B,1/3 RPT,,4,ď
-DotCableEH,52,1/4 RC,,5,R
-DotCableEH,53,1/4 LC,,5,S
-DotCableEH,54,1/4 RPC,,5,T
-DotCableEH,55,1/4 LPC,,5,U
-DotCableEH,56,2/3 RC,,5,V
-DotCableEH,57,2/3 LC,,5,W
-DotCableEH,58,2/3 RPC,,5,X
-DotCableEH,59,2/3 LPC,,5,Y
-DotCableEH,5A,3/2 RC,,5,Z
-DotCableEH,5B,3/2 LC,,5,[
-DotCableEH,5C,3/2 RPC,,5,\\
-DotCableEH,5D,3/2 LPC,,5,]
-DotCableEH,5E,4/1 RC,,5,^
-DotCableEH,5F,4/1 LC,,5,_
-DotCableEH,60,4/1 RPC,,5,`
-DotCableEH,61,4/1 LPC,,5,a
-DotCableEH,62,2/1/2 RC,,5,b
-DotCableEH,63,2/1/2 LC,,5,c
-DotCableEH,64,2/1/2 RPC,,5,d
-DotCableEH,65,2/1/2 LPC,,5,e
-DotCableEH,66,1/3/1 RC,,5,f
-DotCableEH,67,1/3/1 LC,,5,g
-DotCableEH,68,1/3/1 RPC,,5,h
-DotCableEH,69,1/3/1 LPC,,5,i
-DotCableEH,F4,Custom cable,,5,ô
-DotCableEH,6A,3/3 RC,,6,j
-DotCableEH,6B,3/3 LC,,6,k
-DotCableEH,6C,3/3 RPC,,6,l
-DotCableEH,6D,3/3 LPC,,6,m
-DotCableEH,6E,2/4 RC,,6,n
-DotCableEH,6F,2/4 LC,,6,o
-DotCableEH,70,2/4 RPC,,6,p
-DotCableEH,71,2/4 LPC,,6,q
-DotCableEH,72,4/2 RC,,6,r
-DotCableEH,73,4/2 LC,,6,s
-DotCableEH,74,4/2 RPC,,6,t
-DotCableEH,75,4/2 LPC,,6,u
-DotCableEH,76,2/2/2 RC,,6,v
-DotCableEH,77,2/2/2 LC,,6,w
-DotCableEH,78,2/2/2 RPC,,6,x
-DotCableEH,79,2/2/2 LPC,,6,y
-DotCableEH,7A,2/2/2 Reverse,,6,z
-DotCableEH,F5,Custom cable,,6,õ
-DotCableEH,7B,3/1/3 RC,,7,{
-DotCableEH,7C,3/1/3 LC,,7,|
-DotCableEH,7D,3/1/3 RPC,,7,}
-DotCableEH,7E,3/1/3 LPC,,7,~
-DotCableEH,C0,3/4 RC,,7,À
-DotCableEH,C1,3/4 LC,,7,Á
-DotCableEH,C2,3/4 RPC,,7,Â
-DotCableEH,C3,3/4 LPC,,7,Ã
-DotCableEH,C4,4/3 RC,,7,Ä
-DotCableEH,C5,4/3 LC,,7,Å
-DotCableEH,C6,4/3 RPC,,7,Æ
-DotCableEH,C7,4/3 LPC,,7,Ç
-DotCableEH,F6,Custom cable,,7,ö
-DotCableEH,C8,4/4 RC,,8,È
-DotCableEH,C9,4/4 LC,,8,É
-DotCableEH,CA,4/4 RPC,,8,Ê
-DotCableEH,CB,4/4 LPC,,8,Ë
-DotCableEH,CC,3/2/3 RC,,8,Ì
-DotCableEH,CD,3/2/3 LC,,8,Í
-DotCableEH,CE,3/2/3 RPC,,8,Î
-DotCableEH,CF,3/2/3 LPC,,8,Ï
-DotCableEH,D1,3/2/3 Reverse,,8,Ñ
-DotCableEH,F8,Custom cable,,8,ø
-DotCableEH,116,2/6 RC,,8,Ŗ
-DotCableEH,117,2/6 LC,,8,ŗ
-DotCableEH,118,2/6 RPC,,8,Ř
-DotCableEH,119,2/6 LPC,,8,ř
-DotCableEH,D2,4/1/4 RC,,9,Ò
-DotCableEH,D3,4/1/4 LC,,9,Ó
-DotCableEH,D4,4/1/4 RPC,,9,Ô
-DotCableEH,D5,4/1/4 LPC,,9,Õ
-DotCableEH,D6,3/3/3 Reverse,,9,Ö
-DotCableEH,D8,3/3/3 RC,,9,Ø
-DotCableEH,D9,3/3/3 LC,,9,Ù
-DotCableEH,DA,3/3/3 RPC,,9,Ú
-DotCableEH,DB,3/3/3/ LPC,,9,Û
-DotCableEH,F9,Custom cable,,9,ù
-DotCableEH,11a,4/5 RC,,9,Š
-DotCableEH,11b,4/5 LC,,9,š
-DotCableEH,11c,4/5 RPC,,9,Ŝ
-DotCableEH,11d,4/5 LPC,,9,ŝ
-DotCableEH,11e,5/4 RC,,9,Ž
-DotCableEH,11f,5/4 LC,,9,ž
-DotCableEH,120,5/4 RPC,,9,Ā
-DotCableEH,121,5/4 LPC,,9,ā
-DotCableEH,E0,5/5 RC,,10,à
-DotCableEH,E1,5/5 LC,,10,á
-DotCableEH,E2,5/5 RPC,,10,â
-DotCableEH,E3,5/5 LPC,,10,ã
-DotCableEH,FA,Custom cable,,10,ú
-DotCableEH,FB,Custom cable,,11,û
-DotCableEH,E4,6/6 RC,,12,ä
-DotCableEH,E5,6/6 LC,,12,å
-DotCableEH,E6,6/6 RPC,,12,æ
-DotCableEH,E7,6/6 LPC,,12,ç
-DotCableEH,E8,4/4/4 RC,,12,è
-DotCableEH,E9,4/4/4 LC,,12,é
-DotCableEH,EA,4/4/4 RPC,,12,ê
-DotCableEH,EB,4/4/4 LPC,,12,ë
-DotCableEH,EC,4/4/4 Reverse,,12,ì
-DotCableEH,FC,Custom cable,,12,ü
-DotCableEH,FD,8/8 RC,,16,ý
-DotCableEH,FE,8/8 LC,,16,þ
-DotCableEH,10E,8/8 RPC,,16,Ď
-DotCableEH,10F,8/8 LPC,,16,ď
-DotCableEH,10C,9/9 RC,,18,Č
-DotCableEH,10D,9/9 LC,,18,í
-DotCableEH,110,9/9 RPC,,18,đ
-DotCableEH,111,9/9 LPC,,18,Đ
-DotCableEH,112,12/12 RC,,24,Œ
-DotCableEH,113,12/12 LC,,24,œ
-DotCableEH,114,12/12 RPC,,24,Ŕ
-DotCableEH,115,12/12 LPC,,24,ŕ`;
-
-    const TAXONOMY = {
-    "Basic Stitches": [
-    "knit","purl","slip","slip purlwise with yarn in front","no stitch","grey no stitch","k tbl","p tbl","k1 below","p1 below"
-    ],
-    "Knit Increases":[
-    "m1","m1 right leaning","m1 left leaning","knit into fb","knit into fbf","(k1, p1) in 1 stitch","(k1, p1, k1) in 1 stitch",
-    "increase 1 to 3","increase 1 to 4","increase 1 to 5","increase 1 to 6","increase 1 to 7","increase 1 to 8","increase 1 to 9",
-    "right-leaning lifted increase","left-leaning lifted increase"
-    ],
-    "Purl Increases":[
-    "m1 purlwise","m1 purlwise right leaning","m1 purlwise left leaning","purl into fb","purl into fbf","(p1, k1) in 1 stitch",
-    "(p1, k1, p1) in 1 stitch","right-leaning lifted increase purl","left-leaning lifted increase purl"
-    ],
-    "Yarn Over Increases":[
-    "yo","yo twice","yo 3 times","yo 4 times","yo 5 times","yo 6 times","yo 7 times","yo 8 times","yo 9 times",
-    "(k1, yo, k1) in 1 stitch","(p1, yo, p1) in 1 stitch"
-    ],
-    "Knit Decreases":[
-    "k2tog","ssk","sl1, k1, psso","k3tog","sssk","sl1, k2tog, psso","sl2, k1, p2sso","central double decrease",
-    "sl2, k2tog, p2sso","k4tog","k5tog","k6tog","k7tog","k8tog","k9tog",
-    "decrease 4 to 1","decrease 5 to 1","decrease 6 to 1","decrease 7 to 1","decrease 8 to 1","decrease 9 to 1",
-    "twisted k2tog","twisted ssk","twisted cdd","bunny ears outward","bunny ears inward"
-    ],
-    "Purl Decreases":[
-    "p2tog","p2tog tbl","ssp","p3tog","p3tog tbl","sssp","p2tog, sl1 wyif, psso","sl2, p1, p2sso",
-    "central double decrease purl","sl1 wyif, p2tog tbl, psso","twisted p2tog","twisted ssp"
-    ],
-    "Miscellaneous":[
-    "k1 elongated","p1 elongated","k1 elongated twice","p1 elongated twice","k1 elongated thrice","p1 elongated thrice",
-    "bobble","cast on","bind off","cluster 2 sts","cluster 3 sts","cluster 4 sts","cluster 5 sts",
-    "place marker","slip marker","move marker 1 stitch left","move marker 1 stitch right",
-    "move marker 2 stitches left","move marker 2 stitches right",
-    "left twist purl braid","right twist purl braid","short row left","short row right","catch strands"
-    ],
-    "2 Stitch Cables":[
-    "1/1 RC","1/1 LC","1/1 RPC","1/1 LPC","1/1 RT","1/1 LT","1/1 RPT","1/1 LPT","2 stitch custom cable"
-    ],
-    "3 Stitch Cables":[
-    "2/1 RC","2/1 LC","1/2 RC","1/2 LC","2/1 RPC","2/1 LPC","1/2 RPC","1/2 LPC",
-    "1/1/1 RC","1/1/1 LC","1/1/1 RPC","1/1/1 LPC","1/1/1 RRC","1/1/1 LRC",
-    "2/1 RT","2/1 LT","2/1 RPT","2/1 LPT","1/2 RT","1/2 LT","1/2 RPT","1/2 LPT","1/1/1 RPT","1/1/1 LPT",
-    "3 stitch custom cable"
-    ],
-    "4 Stitch Cables":[
-    "2/2 RC","2/2 LC","2/2 RPC","2/2 LPC","1/3 RC","1/3 LC","1/3 RPC","1/3 LPC","3/1 RC","3/1 LC","3/1 RPC","3/1 LPC",
-    "1/2/1 RC","1/2/1 LC","1/2/1 RPC","1/2/1 LPC",
-    "2/2 RT","2/2 LT","2/2 RPT","2/2 LPT","1/3 RT","1/3 LT","1/3 RPT","1/3 LPT",
-    "4 stitch custom cable"
-    ],
-    "5 Stitch Cables":[
-    "2/3 RC","2/3 LC","2/3 RPC","2/3 LPC","3/2 RC","3/2 LC","3/2 RPC","3/2 LPC",
-    "4/1 RC","4/1 LC","4/1 RPC","4/1 LPC","1/4 RC","1/4 LC","1/4 RPC","1/4 LPC",
-    "2/1/2 RC","2/1/2 LC","2/1/2 RPC","2/1/2 LPC","1/3/1 RC","1/3/1 LC","1/3/1 RPC","1/3/1 LPC",
-    "5 stitch custom cable"
-    ],
-    "6 Stitch Cables":[
-    "3/3 RC","3/3 LC","3/3 RPC","3/3 LPC","2/4 RC","2/4 LC","2/4 RPC","2/4 LPC","4/2 RC","4/2 LC","4/2 RPC","4/2 LPC",
-    "2/2/2 RC","2/2/2 LC","2/2/2 RPC","2/2/2 LPC","2/2/2 RRC","2/2/2 LRC","6 stitch custom cable"
-    ],
-    "7 Stitch Cables":[
-    "3/4 RC","3/4 LC","3/4 RPC","3/4 LPC","4/3 RC","4/3 LC","4/3 RPC","4/3 LPC",
-    "3/1/3 RC","3/1/3 LC","3/1/3 RPC","3/1/3 LPC","7 stitch custom cable"
-    ],
-    "8 Stitch Cables":[
-    "4/4 RC","4/4 LC","4/4 RPC","4/4 LPC","3/2/3 RC","3/2/3 LC","3/2/3 RPC","3/2/3 LPC","3/2/3 RRC","3/2/3 LRC",
-    "8 stitch custom cable"
-    ],
-    "9 Stitch Cables":[
-    "3/3/3 RC","3/3/3 LC","3/3/3 RPC","3/3/3 LPC","3/3/3 RRC","3/3/3 LRC",
-    "4/1/4 RC","4/1/4 LC","4/1/4 RPC","4/1/4 LPC","9 stitch custom cable"
-    ],
-    "10 Stitch Cables":[
-    "5/5 RC","5/5 LC","10 stitch custom cable"
-    ],
-    "11 Stitch Cables":[
-    "11 stitch custom cable"
-    ],
-    "12 Stitch Cables":[
-    "6/6 RC","6/6 LC","4/4/4 RC","4/4/4 LC","4/4/4 RPC","4/4/4 LPC","4/4/4 RRC","4/4/4 LRC","12 stitch custom cable"
-    ],
-    "Estonian Gathered Stitches":[
-    "2 into 2 gathered","3 into 3 gathered","6 into 2 gathered","5 into 5 gathered","3 into 7 gathered","7 into 5 gathered",
-    "2 into 2 gathered tbl","2 into 3 gathered tbl","3 into 3 gathered tbl","4 into 3 gathered tbl","5 into 3 gathered tbl",
-    "2 into 5 gathered tbl","3 into 5 gathered tbl","5 into 5 gathered tbl","7 into 5 gathered tbl","9 into 5 gathered tbl",
-    "2 into 9 gathered tbl","3 into 9 gathered tbl","5 into 9 gathered tbl","7 into 9 gathered tbl","9 into 9 gathered tbl",
-    "5 into 11 gathered tbl","3 into 7 gathered tbl"
-    ],
-    "Estonian Increases":[
-    "inc 1 to 3 tbl","inc 1 to 4 tbl","inc 1 to 5 tbl","inc 1 to 6 tbl","inc 1 to 7 tbl","inc 1 to 8 tbl","inc 1 to 9 tbl"
-    ],
-    "Estonian Decreases":[
-    "k2tog tbl","k3tog tbl","k4tog tbl","k5tog tbl","k6tog tbl","k7tog tbl","k8tog tbl","k9tog tbl","k2tog-nupp","ssk-nupp"
-    ],
-    "More Estonian Stitches":[
-    "nupp","N stitch","Reverse N stitch","k2tog-nupp","ssk-nupp"
-    ],
-    "Brioche Stitches":[
-    "brk","brp","yf sl1yo","yf sl1yo plus","brk2tog","brssk","brk3tog","brsssk","brkyobrk","brk tbl","yf sl2yo",
-    "brcdd","brcdd purl","br4st inc","brssp","brp2tog","brsssp","brp3tog"
-    ],
-    "Beaded Stitches":[
-    "knit and bead","purl and bead","beaded yarn over","beaded 2 yarn over","beaded 3 yarn over","beaded 4 yarn over",
-    "bead last stitch","hook bead","beaded central double decrease"
-    ],
-    "Twined Stitches":[
-    "twined knit","twined purl","twined purl reverse twist","hook stitch end","hook stitch strand","hook stitch start","hook stitch middle",
-    "hook 3 stitches","hook 5 stitches","hook 7 stitches"
-    ],
-    "V2 Old Stitches":[
-    "knit into fb old","knit into fbf old","(k1, p1) in 1 stitch","(k1, p1, k1) in 1 stitch",
-    "increase 1 to 3 old","increase 1 to 4 old","increase 1 to 5 old","increase 1 to 6 old","increase 1 to 7 old","increase 1 to 8 old"
-    ]
-    };
-
-    // Global State
-    const FONT_DATA = {}; // { fontFamily: { stitchName: { char, width } } }
-    const CORRECTIONS = {}; // { stitchName: { overrideChar, isIncorrect } }
-    let db;
-
-    // --- Initialization ---
-
-    async function init() {
-        await Promise.all([initDB(), parseCSV(), loadCorrections()]);
-        setupEventListeners();
-        renderUI();
-        setStatus("Ready");
-    }
-
-    function setStatus(msg) {
-        document.getElementById('status-text').textContent = msg;
-    }
-
-    // --- Data Parsing ---
-
-    function parseCSV() {
-        return new Promise((resolve) => {
-            const lines = CSV_DATA.trim().split('\n');
-            // Skip header
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i];
-                // Handle commas inside quotes? The CSV provided seems mostly simple or escaped.
-                // Simple split by comma for this specific dataset as it doesn't look like it contains commas in the "Suggested use" in a way that breaks rows easily (mostly simple phrases).
-                // However, to be safe:
-                const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                
-                if (parts.length < 6) continue;
-
-                const typeRaw = parts[0].trim();
-                const suggestedUse = parts[2].trim();
-                const widthRaw = parts[4].trim();
-                const char = parts[5].trim();
-
-                // Map CSV Type to Font Family Name
-                let fontFamily = "";
-                if (typeRaw === "Dot") fontFamily = "StitchMasteryDot";
-                else if (typeRaw === "Dash") fontFamily = "StitchMasteryDash";
-                else if (typeRaw === "DotCable") fontFamily = "StitchMasteryDotCable";
-                else if (typeRaw === "DashCable") fontFamily = "StitchMasteryDashCable";
-                else if (typeRaw === "DotCableEH") fontFamily = "StitchMasteryDotCableEH";
-                else if (typeRaw === "DashCableEH") fontFamily = "StitchMasteryDashCableEH";
-                else continue; // Skip unknown types like Estonian if they don't map to provided fonts
-
-                if (!FONT_DATA[fontFamily]) FONT_DATA[fontFamily] = {};
-                
-                // Normalize width
-                let width = 1;
-                if (widthRaw.includes("One")) width = 1;
-                else if (widthRaw.includes("Two")) width = 2;
-                else if (widthRaw.includes("Three")) width = 3;
-                else if (widthRaw.includes("Four")) width = 4;
-                else if (widthRaw.includes("Five")) width = 5;
-                else if (widthRaw.includes("Six")) width = 6;
-                else if (widthRaw.includes("Seven")) width = 7;
-                else if (widthRaw.includes("Eight")) width = 8;
-                else if (widthRaw.includes("Nine")) width = 9;
-                else if (widthRaw.includes("Ten")) width = 10;
-                else if (widthRaw.includes("Eleven")) width = 11;
-                else if (widthRaw.includes("Twelve")) width = 12;
-                else if (widthRaw.includes("Thirteen")) width = 13;
-                else if (widthRaw.includes("Fourteen")) width = 14;
-                else if (widthRaw.includes("Fifteen")) width = 15;
-                else if (widthRaw.includes("Sixteen")) width = 16;
-                else if (widthRaw.includes("Eighteen")) width = 18;
-                else if (widthRaw.includes("Twentyfour")) width = 24;
-                else if (!isNaN(parseInt(widthRaw))) width = parseInt(widthRaw);
-
-                FONT_DATA[fontFamily][suggestedUse] = { char, width };
-            }
-            resolve();
-        });
-    }
-
-    function findStitchData(stitchName, fontFamily) {
-        // 1. Check Exact Match
-        if (FONT_DATA[fontFamily] && FONT_DATA[fontFamily][stitchName]) {
-            return FONT_DATA[fontFamily][stitchName];
-        }
-
-        // 2. Check Fuzzy Match / Substring
-        if (FONT_DATA[fontFamily]) {
-            // Search keys that are substrings or superset
-            const keys = Object.keys(FONT_DATA[fontFamily]);
-            for (let k of keys) {
-                // Simple heuristics
-                if (stitchName.toLowerCase() === k.toLowerCase()) return FONT_DATA[fontFamily][k];
-                if (k.toLowerCase().includes(stitchName.toLowerCase()) && k.length < stitchName.length + 5) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("k2tog") && k.toLowerCase().includes("knit 2 together")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("ssk") && k.toLowerCase().includes("ssk")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("m1") && k.toLowerCase().includes("make one")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("p2tog") && k.toLowerCase().includes("purl 2 together")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("k3tog") && k.toLowerCase().includes("knit 3 together")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("yo") && k.toLowerCase().includes("yarn over")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("k tbl") && k.toLowerCase().includes("knit tbl")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("p tbl") && k.toLowerCase().includes("purl tbl")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("k1 below") && k.toLowerCase().includes("knit into stitch below")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("p1 below") && k.toLowerCase().includes("purl into stitch below")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("bobble") && k.toLowerCase().includes("bobble")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("nupp") && k.toLowerCase().includes("nupp")) return FONT_DATA[fontFamily][k];
-                if (stitchName.toLowerCase().includes("no stitch") && k.toLowerCase().includes("no stitch")) return FONT_DATA[fontFamily][k];
-            }
-        }
-        
-        return null;
-    }
-
-    // --- IndexedDB ---
-
-    function initDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open("StitchCorrectionsDB", 1);
-            
-            request.onupgradeneeded = (event) => {
-                const db = event.target.result;
-                if (!db.objectStoreNames.contains("corrections")) {
-                    db.createObjectStore("corrections", { keyPath: "stitchName" });
-                }
-            };
-
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                resolve(db);
-            };
-
-            request.onerror = (event) => {
-                console.error("DB Error", event);
-                reject(event);
-            };
-        });
-    }
-
-    function loadCorrections() {
-        return new Promise((resolve) => {
-            const transaction = db.transaction("corrections", "readonly");
-            const store = transaction.objectStore("corrections");
-            const request = store.getAll();
-
-            request.onsuccess = () => {
-                request.result.forEach(c => {
-                    CORRECTIONS[c.stitchName] = c;
-                });
-                resolve();
-            };
-        });
-    }
-
-    function saveCorrection(stitchName, data) {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction("corrections", "readwrite");
-            const store = transaction.objectStore("corrections");
-            const entry = { stitchName, ...data };
-            const request = store.put(entry);
-
-            request.onsuccess = () => {
-                CORRECTIONS[stitchName] = entry;
-                resolve();
-            };
-            request.onerror = reject;
-        });
-    }
-
-    function deleteCorrection(stitchName) {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction("corrections", "readwrite");
-            const store = transaction.objectStore("corrections");
-            const request = store.delete(stitchName);
-
-            request.onsuccess = () => {
-                delete CORRECTIONS[stitchName];
-                resolve();
-            };
-            request.onerror = reject;
-        });
-    }
-
-    // --- UI Logic ---
-
-    function setupEventListeners() {
-        // Filter
-        const filterSelect = document.getElementById('category-filter');
-        Object.keys(TAXONOMY).forEach(cat => {
-            const opt = document.createElement('option');
-            opt.value = cat;
-            opt.textContent = cat;
-            filterSelect.appendChild(opt);
-        });
-
-        filterSelect.addEventListener('change', renderUI);
-
-        // Font Toggles
-        document.getElementById('font-toggles').addEventListener('change', renderUI);
-    }
-
-    function renderUI() {
-        const app = document.getElementById('app');
-        app.innerHTML = '';
-        const filter = document.getElementById('category-filter').value;
-        const activeFonts = Array.from(document.querySelectorAll('#font-toggles input:checked')).map(cb => cb.value);
-
-        const categoriesToShow = filter === "All" ? Object.keys(TAXONOMY) : [filter];
-
-        categoriesToShow.forEach(cat => {
-            if (!TAXONOMY[cat]) return;
-            
-            const section = document.createElement('section');
-            section.className = 'category-section';
-            
-            const title = document.createElement('h2');
-            title.className = 'category-title';
-            title.textContent = cat;
-            section.appendChild(title);
-
-            const grid = document.createElement('div');
-            grid.className = 'stitch-grid';
-
-            TAXONOMY[cat].forEach(stitchName => {
-                grid.appendChild(createStitchCard(stitchName, activeFonts));
-            });
-
-            section.appendChild(grid);
-            app.appendChild(section);
-        });
-    }
-
-    function createStitchCard(stitchName, activeFonts) {
-        const card = document.createElement('div');
-        card.className = 'stitch-card';
-        
-        // Check correction status
-        const correction = CORRECTIONS[stitchName];
-        if (correction && correction.isIncorrect) {
-            card.classList.add('incorrect');
-        }
-
-        const header = document.createElement('div');
-        header.className = 'stitch-header';
-        header.innerHTML = `
-            <span class="stitch-name">${stitchName}</span>
-            <div class="stitch-actions">
-                <button class="btn secondary" style="font-size:0.7rem; padding:2px 5px;" onclick="markIncorrect('${stitchName}')">Mark Incorrect</button>
-            </div>
-        `;
-        card.appendChild(header);
-
-        const renders = document.createElement('div');
-        renders.className = 'renders-area';
-
-        activeFonts.forEach(fontFamily => {
-            const data = findStitchData(stitchName, fontFamily);
-            
-            // Determine char and width to use
-            let char = "";
-            let width = 1;
-
-            if (correction && correction.overrideChar) {
-                char = correction.overrideChar;
-                width = 1; // Default to 1 if manually corrected, user didn't specify width usually
-            } else if (data) {
-                char = data.char;
-                width = data.width;
-            }
-
-            const row = document.createElement('div');
-            row.className = 'render-row';
-
-            const svgString = generateSVG(char, fontFamily, width);
-            const blob = new Blob([svgString], {type: 'image/svg+xml'});
-            const url = URL.createObjectURL(blob);
-
-            const fontLabel = document.createElement('div');
-            fontLabel.className = 'font-label';
-            fontLabel.textContent = fontFamily.replace('StitchMastery', '');
-
-            const img = document.createElement('img');
-            img.className = 'svg-preview';
-            img.src = url;
-            img.onload = () => URL.revokeObjectURL(url); // Cleanup
-
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.className = 'char-code';
-            input.value = char;
-            input.placeholder = "Char";
-            input.onchange = (e) => {
-                updateOverride(stitchName, e.target.value, fontFamily);
-            };
-
-            // Click to copy char code
-            input.title = "Click to copy";
-            input.onclick = function() { this.select(); document.execCommand('copy'); setStatus("Copied char code"); };
-
-            row.appendChild(fontLabel);
-            row.appendChild(img);
-            row.appendChild(input);
-
-            renders.appendChild(row);
-        });
-
-        // If no active fonts selected, or no data found
-        if (activeFonts.length === 0) {
-            renders.innerHTML = '<div style="color:#666; padding:10px;">Select fonts above to see symbols.</div>';
-        }
-
-        card.appendChild(renders);
-        return card;
-    }
-
-    function generateSVG(char, fontFamily, width) {
-        // 50px height, width variable based on stitch width
-        const w = width * 50;
-        const h = 50;
-        return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-          <text x="0" y="35" font-family="${fontFamily}" font-size="30" fill="black">${char}</text>
-        </svg>`;
-    }
-
-    function markIncorrect(stitchName) {
-        const correction = CORRECTIONS[stitchName] || { stitchName, isIncorrect: false, overrideChar: "" };
-        correction.isIncorrect = !correction.isIncorrect;
-        saveCorrection(stitchName, correction).then(() => renderUI());
-    }
-
-    function updateOverride(stitchName, char, fontFamily) {
-        const correction = CORRECTIONS[stitchName] || { stitchName, isIncorrect: false, overrideChar: "" };
-        correction.overrideChar = char;
-        saveCorrection(stitchName, correction).then(() => {
-            setStatus("Saved override for " + stitchName);
-            renderUI();
-        });
-    }
-
-    // --- Download & Export ---
-
-    async function downloadSVGs() {
-        const zip = new JSZip();
-        const filter = document.getElementById('category-filter').value;
-        const activeFonts = Array.from(document.querySelectorAll('#font-toggles input:checked')).map(cb => cb.value);
-        const categoriesToShow = filter === "All" ? Object.keys(TAXONOMY) : [filter];
-        let count = 0;
-
-        categoriesToShow.forEach(cat => {
-            TAXONOMY[cat].forEach(stitchName => {
-                activeFonts.forEach(fontFamily => {
-                    let char = "";
-                    let width = 1;
-                    const correction = CORRECTIONS[stitchName];
-                    const data = findStitchData(stitchName, fontFamily);
-
-                    if (correction && correction.overrideChar) {
-                        char = correction.overrideChar;
-                    } else if (data) {
-                        char = data.char;
-                        width = data.width;
-                    } else {
-                        return; // No data
-                    }
-
-                    // Generate filename
-                    const safeName = stitchName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                    const safeFont = fontFamily.replace('StitchMastery', '');
-                    const filename = `${safeFont}_${safeName}.svg`;
-                    
-                    const svgContent = generateSVG(char, fontFamily, width);
-                    zip.file(filename, svgContent);
-                    count++;
-                });
-            });
-        });
-
-        if (count === 0) {
-            alert("No symbols found to download based on current selection.");
-            return;
-        }
-
-        setStatus("Generating zip...");
-        const blob = await zip.generateAsync({type:"blob"});
-        saveAs(blob, "stitch_symbols.zip");
-        setStatus("Download complete.");
-    }
-
-    // --- Correction Modal Management ---
-
-    function openCorrectionsModal() {
-        document.getElementById('correctionsModal').style.display = 'block';
-        renderCorrectionsTable();
-    }
-
-    function closeCorrectionsModal() {
-        document.getElementById('correctionsModal').style.display = 'none';
-        renderUI(); // Refresh UI in case changes were made
-    }
-
-    function renderCorrectionsTable() {
-        const tbody = document.getElementById('correction-table-body');
-        tbody.innerHTML = '';
-        
-        const list = Object.values(CORRECTIONS);
-        if (list.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No corrections saved.</td></tr>';
-            return;
-        }
-
-        list.forEach(c => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${c.stitchName}</td>
-                <td><input type="text" value="${c.overrideChar || ''}" onchange="updateCorrectionFromModal('${c.stitchName}', this.value, 'overrideChar')" style="width:60px;"></td>
-                <td>
-                    <input type="checkbox" ${c.isIncorrect ? 'checked' : ''} onchange="updateCorrectionFromModal('${c.stitchName}', this.checked, 'isIncorrect')">
-                </td>
-                <td><button class="btn danger" style="padding:2px 5px; font-size:0.7rem;" onclick="deleteCorrectionFromModal('${c.stitchName}')">Delete</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function updateCorrectionFromModal(stitchName, value, field) {
-        const correction = CORRECTIONS[stitchName] || { stitchName, isIncorrect: false, overrideChar: "" };
-        correction[field] = value;
-        saveCorrection(stitchName, correction).then(() => {
-            renderCorrectionsTable();
-            renderUI();
-        });
-    }
-
-    function deleteCorrectionFromModal(stitchName) {
-        if(confirm("Delete this correction?")) {
-            deleteCorrection(stitchName).then(() => {
-                renderCorrectionsTable();
-                renderUI();
-            });
-        }
-    }
-
-    function clearAllCorrections() {
-        if(confirm("Clear all corrections?")) {
-            Object.keys(CORRECTIONS).forEach(key => deleteCorrection(key));
-            setTimeout(() => {
-                renderCorrectionsTable();
-                renderUI();
-            }, 500);
-        }
-    }
-
-    function copyCorrectionsToClipboard() {
-        const data = JSON.stringify(CORRECTIONS, null, 2);
-        navigator.clipboard.writeText(data).then(() => {
-            alert("Corrections copied to clipboard as JSON.");
-        });
-    }
-
-    // --- Start ---
-    // Ensure fonts are loaded before rendering
-    document.fonts.ready.then(() => {
-        init();
-    });
-
-</script>
-</body>
+
+    <div class="status-bar">
+      <span id="status-text">Ready</span>
+      <span>Fonts are © Stitchmastery</span>
+    </div>
+
+    <script>
+          // --- Data & Config ---
+
+          const FONTS = [
+              "StitchMasteryDash", "StitchMasteryDot",
+              "StitchMasteryDashCable", "StitchMasteryDotCable",
+              "StitchMasteryDashCableEH", "StitchMasteryDotCableEH"
+          ];
+
+          // CSV Data from previous prompt, parsed for lookup
+          const CSV_DATA = `Type,Unicode,Suggested use,example,width,Unicode to string
+      Dot,21,knit into stitch below,,1,!
+      Dot,22,bobble/special stitch,,1,"
+      Dot,23,make one purlwise,,1,#
+      Dot,24,bobble/special stitch,,1,$ Dot,25,purl into stitch below,,1,%
+      Dot,26,slip purlwise,,1,&
+      Dot,27,slip purlwise,,1,'
+      Dot,28,centred decrease - purl,,1,(
+      Dot,29,centred increase - purl,,1,)
+      Dot,2A,slip or increase,,1,*
+      Dot,2B,edge stitch,,1,+
+      Dot,2C,knit into stitch below,,1,,
+      Dot,2D,,,1,-
+      Dot,2E,purl (large version),,1,.
+      Dot,2F,knit 2 together,,1,/
+      Dot,30,decrease,,1,0
+      Dot,31,decorates decrease 01À1,,1,1
+      Dot,32,decorates decrease 02À2,,1,2
+      Dot,33,decorates decrease 03À3,,1,3
+      Dot,34,decorates decrease 04À4,,1,4
+      Dot,35,decorates decrease 05À5,,1,5
+      Dot,36,decorates decrease 06À6,,1,6
+      Dot,37,decorates decrease 07À7,,1,7
+      Dot,38,decorates decrease 08À8,,1,8
+      Dot,39,decorates decrease 09À9,,1,9
+      Dot,3A,increase - left leaning,,1,:
+      Dot,3B,increase - right leaning,,1,;
+      Dot,3C,centred decrease,,1,<
+      Dot,3D,centred increase,,1,=
+      Dot,3E,make one,,1,>
+      Dot,3F,twisted stitch - purl tbl,,1,?
+      Dot,40,make one - purl,,1,@
+      Dot,41,double yarn over,,1,A
+      Dot,42,decorates yarn over oB,,1,B
+      Dot,43,decorates yarn over oC,,1,C
+      Dot,44,decorates yarn over oD,,1,D
+      Dot,45,decorates yarn over oE,,1,E
+      Dot,46,decorates yarn over oF,,1,F
+      Dot,47,decorates yarn over oG,,1,G
+      Dot,48,decorates yarn over oH,,1,H
+      Dot,49,decorates yarn over oI,,1,I
+      Dot,4A,purl 2 together,,1,J
+      Dot,4B,ssp,,1,K
+      Dot,4C,k1, yarn over, k1,,1,L
+      Dot,4D,make one,,1,M
+      Dot,4E,yarn over decrease,,1,N
+      Dot,4F,short row,,1,O
+      Dot,50,short row,,1,P
+      Dot,51,slip or increase purlwise,,1,Q
+      Dot,52,,,1,R
+      Dot,53,bind off,,1,S
+      Dot,54,bind off,,1,T
+      Dot,55,knit 2 together,,1,U
+      Dot,56,ssk,,1,V
+      Dot,57,purl 2 together,,1,W
+      Dot,58,ssp,,1,X
+      Dot,59,purl 2 together,,1,Y
+      Dot,5A,ssp,,1,Z
+      Dot,5B,purl decrease,,1,[
+      Dot,5C,ssk,,1,\\
+      Dot,5D,k1 elongated (wrap yarn twice),,1,]
+      Dot,5E,,,1,^
+      Dot,5F,,,1,_
+      Dot,60,decorates increase *`Ã`,,1,`
+      Dot,61,decorates increase *aÃa,,1,a
+      Dot,62,decorates increase *bÃb,,1,b
+      Dot,63,decorates increase *cÃc,,1,c
+      Dot,64,decorates increase *dÃd,,1,d
+      Dot,65,decorates increase *eÃe,,1,e
+      Dot,66,decorates increase *fÃf,,1,f
+      Dot,67,decorates increase *gÃg,,1,g
+      Dot,68,decorates increase *hÃh,,1,h
+      Dot,69,centred increase,,1,i
+      Dot,6A,centred decrease,,1,j
+      Dot,6B,knit,,1,k
+      Dot,6C,purl 2 together,,1,l
+      Dot,6D,ssp,,1,m
+      Dot,6E,twisted stitch - knit tbl,,1,n
+      Dot,6F,yarn over,,1,o
+      Dot,70,purl,,1,p
+      Dot,71,ssk,,1,q
+      Dot,72,knit 2 together,,1,r
+      Dot,73,knit 3 together,,1,s
+      Dot,74,sssk,,1,t
+      Dot,75,purl 3 together,,1,u
+      Dot,76,sssp,,1,v
+      Dot,77,no stitch,,1,w
+      Dot,78,purl increase - left leaning,,1,x
+      Dot,79,purl increase - right leaning,,1,y
+      Dot,7A,nupp,,1,z
+      Dot,7B,nupp,,1,{
+      Dot,7C,,,1,|
+      Dot,7D,purl 1, yarn over, purl 1,,1,}
+      Dot,7E,nupp,,1,~
+      Dot,A1,decrease 4 to 1 - right leaning,,1,¡
+      Dot,A2,decrease 4 to 1 - left leaning,,1,¢
+      Dot,A3,decrease 3 to 1 - right leaning,,1,£
+      Dot,A4,decrease 3 to 1 - left leaning,,1,¤
+      Dot,A5,twined - front loop curved,,1,¥
+      Dot,A6,twined - front loop straight,,1,¦
+      Dot,A7,decorates other twined stitches,,1,§
+      Dot,A8,twined - use with 00A6,,1,¨
+      Dot,A9,twined - use with 00A6,,1,©
+      Dot,AA,twined - use with 00A5,,1,ª
+      Dot,AB,twined - use with 00A5,,1,«
+      Dot,AC,twined - use with 00A5,,1,¬
+      Dot,AD,decorates other twined stitches,,1,­
+      Dot,AE,twined - braid curved,,1,®
+      Dot,AF,twined - braid curved,,1,¯
+      Dot,B0,knit - decorates brioche sl1yof äåæ,,1,°
+      Dot,B1,twined - braid straight,,1,±
+      Dot,B2,twined - braid straight,,1,²
+      Dot,B3,decorates left leaning decrease – nupp V³q³\\³t³,,1,³
+      Dot,B4,decorates right leaning decrease – nupp U´r´s´/´,,1,´
+      Dot,B5,decorates right leaning decrease – twisted Uµrµsµ/µ,,1,µ
+      Dot,B6,decorates left leaning decrease – twisted V¶q¶t¶\\¶,,1,¶
+      Dot,B7,decorates right leaning decrease – twisted U·r·s·/·,,1,·
+      Dot,B8,decorates left leaning decrease – twisted V¸q¸t¸\\¸,,1,¸
+      Dot,B9,knit into stitch below,,1,¹
+      Dot,BA,bobble/special stitch,,1,º
+      Dot,BB,purl - decorates brioche sl1yof ä»å»æ»ï»,,1,»
+      Dot,BC,cast on,,1,¼
+      Dot,BD,move marker left,,1,½
+      Dot,BE,move marker right,,1,¾
+      Dot,BF,bobble/special stitch,,1,¿
+      Dot,C0,decrease through back loop,,1,À
+      Dot,C1,Estonian – gathered stitch,,1,Á
+      Dot,C2,Estonian – gathered stitch,,1,Â
+      Dot,C3,increase through back loop,,1,Ã
+      Dot,C4,Estonian – decorates gathered stitches ,,1,Ä
+      Dot,C5,Estonian – decorates gathered stitches ,,1,Å
+      Dot,C6,Estonian – decorates gathered stitches ,,1,Æ
+      Dot,C7,Estonian – decorates gathered stitches ,,1,Ç
+      Dot,C8,Estonian – decorates gathered stitches ,,1,È
+      Dot,C9,Estonian – decorates gathered stitches ,,1,É
+      Dot,CA,Estonian – decorates gathered stitches ,,1,Ê
+      Dot,CB,Estonian – decorates gathered stitches ,,1,Ë
+      Dot,CC,Estonian – decorates gathered stitches ,,1,Ì
+      Dot,CD,Estonian – decorates gathered stitches ,,1,Í
+      Dot,CE,Estonian – decorates gathered stitches ,,1,Î
+      Dot,CF,Estonian – decorates gathered stitches ,,1,Ï
+      Dot,D2,Estonian – decorates gathered stitches ,,1,Ò
+      Dot,D3,Estonian – decorates gathered stitches ,,1,Ó
+      Dot,D4,Estonian – decorates gathered stitches ,,1,Ô
+      Dot,D5,Estonian – decorates gathered stitches ,,1,Õ
+      Dot,D6,Estonian – decorates gathered stitches ,,1,Ö
+      Dot,D7,Estonian – decorates gathered stitches ,,1,×
+      Dot,D8,Estonian – decorates gathered stitches ,,1,Ø
+      Dot,D9,Estonian – decorates gathered stitches ,,1,Ù
+      Dot,DA,,,1,Ú
+      Dot,DB,,,1,Û
+      Dot,DC,k1 elongated twice (wrap yarn 3 times),,1,Ü
+      Dot,DD,move marker left ÝÝÅ,,1,Ý
+      Dot,DE,move marker right ÞÞ,,1,Þ
+      Dot,E0,decorates right leaning decrease – nupp Urs/,,1,ß
+      Dot,E1,decorates left leaning decrease – nupp Vq\\t,,1,à
+      Dot,E2,brioche - brp,,1,á
+      Dot,E3,brioche - brk,,1,â
+      Dot,E4,brioche - yf sl1yo fits with brp/brk,,1,ã
+      Dot,E5,brioche - sl1yof fits with brp/brk,,1,ä
+      Dot,E6,brioche - sl1yof fits with brp/brk,,1,å
+      Dot,E7,brioche - brkssk,,1,æ
+      Dot,E8,brioche - brksssk,,1,ç
+      Dot,E9,brioche - brk2tog,,1,è
+      Dot,EA,brioche - brk3tog,,1,é
+      Dot,EB,brioche - brkssp,,1,ê
+      Dot,EC,brioche - brksssp,,1,ë
+      Dot,ED,brioche - brp2tog,,1,ì
+      Dot,EE,brioche - brp3tog,,1,í
+      Dot,EF,brioche - yf sl1yo,,1,î
+      Dot,F1,brioche - brkyobrk,,1,ñ
+      Dot,F2,brioche - brkbrpbrk into one st,,1,ò
+      Dot,F3,brioche - brk tbl,,1,ó
+      Dot,F4,brioche - brp tbl,,1,ô
+      Dot,F5,decorates decreases 0À,,1,õ
+      Dot,F6,decorates increases *Ã,,1,ö
+      Dot,F7,decorates left leaning decreases V÷q÷\\÷t÷,,1,÷
+      Dot,F8,beading - knit,,1,ø
+      Dot,F9,beading - purl,,1,ù
+      Dot,FA,decorates yarn over oB,,1,ú
+      Dot,FB,Estonian – decorates gathered stitches ,,1,û
+      Dot,FC,Estonian – decorates gathered stitches ,,1,ü
+      Dot,FD,decorates decrease 0ýÀý,,1,ý
+      Dot,FE,decorates increase *þÃþ,,1,þ
+      Dot,100,decorates decrease 0ĀÀĀ,,1,Ā
+      Dot,101,decorates increase *āÃā,,1,ā
+      Dot,102,decorates decrease 0ĂÀĂ,,1,Ă
+      Dot,103,decorates increase *ăÃă,,1,ă
+      Dot,104,brioche - centred double decrease,,1,Ą
+      Dot,105,brioche - centred double purl dec,,1,ą
+      Dot,106,Estonian – decorates gathered stitches and decreases 0ĆÀĆ,,1,Ć
+      Dot,107,Estonian – decorates gathered stitches and increases *ćÃć,,1,ć
+      Dot,108,Estonian – decorates gathered stitches and decreases 0ĈÀĈ,,1,Ĉ
+      Dot,109,Estonian – decorates gathered stitches and increases *ĉÃĉ,,1,ĉ
+      Dot,10A,Estonian – decorates gathered stitches and decreases 0ĊÀĊ,,1,Ċ
+      Dot,10B,Estonian – decorates gathered stitches and increases *ċÃċ,,1,ċ
+      Dot,10C,Estonian – decorates gathered stitches and decreases 0ČÀČ,,1,Č
+      Dot,10D,Estonian – decorates gathered stitches and increases *čÃč,,1,č
+      Dot,10E,decorates decrease – bead 0ĎÀĎ,,1,Ď
+      Dot,10F,decorates increase – bead *ďÃď,,1,ď
+      Dot,110,decorates right leaning decreases – bead UĐrĐsĐ/Đ,,1,Đ
+      Dot,111,decorates left leaning decreases – bead Vđqđ\\đtđ,,1,đ
+      Dot,113,purlwise left-leaning increase,,1,ē
+      Dot,114,purlwise right-leaning increase,,1,Ĕ
+      Dot,115,purlwise left-leaning increase,,1,ĕ
+      Dot,116,purlwise right-leaning increase,,1,Ė
+      Dot,117,knitwise left-leaning increase,,1,ė
+      Dot,118,knitwise right-leaning increase,,1,Ę
+      Dot,119,,,1,ę
+      Dot,11A,,,1,Ě
+      Dot,11B,,,1,ě
+      Dot,11C,,,1,Ĝ
+      Dot,151,brioche - centred double decrease,,1,ű
+      Dot,152,brioche – purl centred double decrease,,1,ų
+      Dot,153,hook bead,,1,ŵ
+      Dot,156,catch strands,,1,ŷ
+      Dot,157,decorates right leaning decreases,,1,Ÿ
+      Dot,11D,increase to 2 stitches,,2,ĝ
+      Dot,125,Estonian – gathered stitch,,2,ĥ
+      Dot,134,Estonian – gathered stitch,,2,Ĵ
+      Dot,143,increase to 2 stitches,,2,ģ
+      Dot,154,bunny ears outward – k2tog + ssk,,2,ź
+      Dot,155,bunny ears inward – ssk + k2tog,,2,Ż
+      Dot,158,increase - left leaning,,2,Ž
+      Dot,159,increase - right leaning,,2,ž
+      Dot,15a,purl increase - left leaning,,2,ś
+      Dot,15b,purl increase - right leaning,,2,Ś
+      Dot,11E,increase to 3 stitches,,3,Ğ
+      Dot,126,Estonian – gathered stitch,,3,Ħ
+      Dot,135,Estonian – gathered stitch,,3,ĵ
+      Dot,144,increase to 3 stitches,,3,Ġ
+      Dot,14B,knit 1, yarn over, knit 1,,3,ı
+      Dot,14C,purl 1, yarn over, purl 1,,3,ŀ
+      Dot,14F,brioche - brk, yo, brk,,3,ő
+      Dot,150,brioche - brk, brp, brk,,3,Ő
+      Dot,11F,increase to 4 stitches,,4,ğ
+      Dot,127,Estonian – gathered stitch,,4,ħ
+      Dot,136,Estonian – gathered stitch,,4,Ķ
+      Dot,145,increase to 4 stitches,,4,ġ
+      Dot,120,increase to 5 stitches,,5,Ā
+      Dot,128,Estonian – gathered stitch,,5,Ĩ
+      Dot,137,Estonian – gathered stitch,,5,ķ
+      Dot,146,increase to 5 stitches,,5,Ģ
+      Dot,14D,brioche - brk, yo, brk, yo, brk,,5,ō
+      Dot,14E,brioche - brk, brp, brk, brp, brk,,5,Ō
+      Dot,121,increase to 6 stitches,,6,ā
+      Dot,129,Estonian – gathered stitch,,6,ĩ
+      Dot,138,Estonian – gathered stitch,,6,ĸ
+      Dot,147,increase to 6 stitches,,6,ģ
+      Dot,122,increase to 7 stitches,,7,â
+      Dot,12A,Estonian – gathered stitch,,7,Ī
+      Dot,139,Estonian – gathered stitch,,7,Ĺ
+      Dot,148,increase to 7 stitches,,7,Ĥ
+      Dot,123,increase to 8 stitches,,8,ă
+      Dot,12B,Estonian – gathered stitch,,8,ī
+      Dot,13A,Estonian – gathered stitch,,8,ĺ
+      Dot,149,increase to 8 stitches,,8,ĥ
+      Dot,124,increase to 9 stitches,,9,Ą
+      Dot,12C,Estonian – gathered stitch,,9,Ĭ
+      Dot,13B,Estonian – gathered stitch,,9,Ļ
+      Dot,14A,increase to 9 stitches,,9,Ħ
+      Dot,12D,Estonian – gathered stitch,,10,ĭ
+      Dot,13C,Estonian – gathered stitch,,10,ļ
+      Dot,12E,Estonian – gathered stitch,,11,Į
+      Dot,13D,Estonian – gathered stitch,,11,Ľ
+      Dot,12F,Estonian – gathered stitch,,12,į
+      Dot,13E,Estonian – gathered stitch,,12,ľ
+      Dot,130,Estonian – gathered stitch,,13,İ
+      Dot,13F,Estonian – gathered stitch,,13,ŀ
+      Dot,131,Estonian – gathered stitch,,14,Ĳ
+      Dot,140,Estonian – gathered stitch,,14,Ł
+      Dot,132,Estonian – gathered stitch,,15,ĳ
+      Dot,141,Estonian – gathered stitch,,15,Ń
+      Dot,133,Estonian – gathered stitch,,16,Ĵ
+      Dot,142,Estonian – gathered stitch,,16,ń
+      Dash,21,knit into stitch below,,1,!
+      Dash,22,bobble/special stitch,,1,"
+      Dash,23,make one purlwise,,1,#
+      Dash,24,bobble/special stitch,,1,$ Dash,25,purl into stitch below,,1,%
+      Dash,26,slip purlwise,,1,&
+      Dash,27,slip purlwise,,1,'
+      Dash,28,centred decrease - purl,,1,(
+      Dash,29,centred increase - purl,,1,)
+      Dash,2A,slip or increase,,1,*
+      Dash,2B,edge stitch,,1,+
+      Dash,2C,knit into stitch below,,1,,
+      Dash,2D,,,1,-
+      Dash,2E,purl (large version),,1,.
+      Dash,2F,knit 2 together,,1,/
+      Dash,30,decrease,,1,0
+      Dash,31,decorates decrease ￿1À1,,1,1
+      Dash,32,decorates decrease ￿2À2,,1,2
+      Dash,33,decorates decrease ￿3À3,,1,3
+      Dash,34,decorates decrease ￿4À4,,1,4
+      Dash,35,decorates decrease ￿5À5,,1,5
+      Dash,36,decorates decrease ￿6À6,,1,6
+      Dash,37,decorates decrease ￿7À7,,1,7
+      Dash,38,decorates decrease ￿8À8,,1,8
+      Dash,39,decorates decrease ￿9À9,,1,9
+      Dash,3A,increase - left leaning,,1,:
+      Dash,3B,increase - right leaning,,1,;
+      Dash,3C,centred decrease,,1,<
+      Dash,3D,centred increase,,1,=
+      Dash,3E,make one,,1,>
+      Dash,3F,twisted stitch - purl tbl,,1,?
+      Dash,40,make one - purl,,1,@
+      Dash,41,double yarn over,,1,A
+      Dash,42,decorates yarn over oB,,1,B
+      Dash,43,decorates yarn over oC,,1,C
+      Dash,44,decorates yarn over oD,,1,D
+      Dash,45,decorates yarn over oE,,1,E
+      Dash,46,decorates yarn over oF,,1,F
+      Dash,47,decorates yarn over oG,,1,G
+      Dash,48,decorates yarn over oH,,1,H
+      Dash,49,decorates yarn over oI,,1,I
+      Dash,4A,purl 2 together,,1,J
+      Dash,4B,ssp,,1,K
+      Dash,4C,k1, yarn over, k1,,1,L
+      Dash,4D,make one,,1,M
+      Dash,4E,yarn over decrease,,1,N
+      Dash,4F,short row,,1,O
+      Dash,50,short row,,1,P
+      Dash,51,slip or increase purlwise,,1,Q
+      Dash,52,,,1,R
+      Dash,53,bind off,,1,S
+      Dash,54,bind off,,1,T
+      Dash,55,knit 2 together,,1,U
+      Dash,56,ssk,,1,V
+      Dash,57,purl 2 together,,1,W
+      Dash,58,ssp,,1,X
+      Dash,59,purl 2 together,,1,Y
+      Dash,5A,ssp,,1,Z
+      Dash,5B,purl decrease,,1,[
+      Dash,5C,ssk,,1,\\
+      Dash,5D,k1 elongated (wrap yarn twice),,1,]
+      Dash,5E,,,1,^
+      Dash,5F,,,1,_
+      Dash,60,decorates increase *`Ã`,,1,`
+      Dash,61,decorates increase *aÃa,,1,a
+      Dash,62,decorates increase *bÃb,,1,b
+      Dash,63,decorates increase *cÃc,,1,c
+      Dash,64,decorates increase *dÃd,,1,d
+      Dash,65,decorates increase *eÃe,,1,e
+      Dash,66,decorates increase *fÃf,,1,f
+      Dash,67,decorates increase *gÃg,,1,g
+      Dash,68,decorates increase *hÃh,,1,h
+      Dash,69,centred increase,,1,i
+      Dash,6A,centred decrease,,1,j
+      Dash,6B,knit,,1,k
+      Dash,6C,purl 2 together,,1,l
+      Dash,6D,ssp,,1,m
+      Dash,6E,twisted stitch - knit tbl,,1,n
+      Dash,6F,yarn over,,1,o
+      Dash,70,purl,,1,p
+      Dash,71,ssk,,1,q
+      Dash,72,knit 2 together,,1,r
+      Dash,73,knit 3 together,,1,s
+      Dash,74,sssk,,1,t
+      Dash,75,purl 3 together,,1,u
+      Dash,76,sssp,,1,v
+      Dash,77,no stitch,,1,w
+      Dash,78,purl increase - left leaning,,1,x
+      Dash,79,purl increase - right leaning,,1,y
+      Dash,7A,nupp,,1,z
+      Dash,7B,nupp,,1,{
+      Dash,7C,,,1,|
+      Dash,7D,purl 1, yarn over, purl 1,,1,}
+      Dash,7E,nupp,,1,~
+      Dash,A1,decrease 4 to 1 - right leaning,,1,¡
+      Dash,A2,decrease 4 to 1 - left leaning,,1,¢
+      Dash,A3,decrease 3 to 1 - right leaning,,1,£
+      Dash,A4,decrease 3 to 1 - left leaning,,1,¤
+      Dash,A5,twined - front loop curved,,1,¥
+      Dash,A6,twined - front loop straight,,1,¦
+      Dash,A7,decorates other twined stitches,,1,§
+      Dash,A8,twined - use with 00A6,,1,¨
+      Dash,A9,twined - use with 00A6,,1,©
+      Dash,AA,twined - use with 00A5,,1,ª
+      Dash,AB,twined - use with 00A5,,1,«
+      Dash,AC,twined - use with 00A5,,1,¬
+      Dash,AD,decorates other twined stitches,,1,­
+      Dash,AE,twined - braid curved,,1,®
+      Dash,AF,twined - braid curved,,1,¯
+      Dash,B0,knit - decorates brioche sl1yof äåæ,,1,°
+      Dash,B1,twined - braid straight,,1,±
+      Dash,B2,twined - braid straight,,1,²
+      Dash,B3,decorates left leaning decrease – nupp V³q³\\³t³,,1,³
+      Dash,B4,decorates right leaning decrease – nupp U´r´s´/´,,1,´
+      Dash,B5,decorates right leaning decrease – twisted Uµrµsµ/µ,,1,µ
+      Dash,B6,decorates left leaning decrease – twisted V¶q¶t¶\\¶,,1,¶
+      Dash,B7,decorates right leaning decrease – twisted U·r·s·/·,,1,·
+      Dash,B8,decorates left leaning decrease – twisted V¸q¸t¸\\¸,,1,¸
+      Dash,B9,knit into stitch below,,1,¹
+      Dash,BA,bobble/special stitch,,1,º
+      Dash,BB,purl - decorates brioche sl1yof ä»å»æ»ï»,,1,»
+      Dash,BC,cast on,,1,¼
+      Dash,BD,move marker left,,1,½
+      Dash,BE,move marker right,,1,¾
+      Dash,BF,bobble/special stitch,,1,¿
+      Dash,C0,decrease through back loop,,1,À
+      Dash,C1,Estonian – gathered stitch,,1,Á
+      Dash,C2,Estonian – gathered stitch,,1,Â
+      Dash,C3,increase through back loop,,1,Ã
+      Dash,C4,Estonian – decorates gathered stitches ,,1,Ä
+      Dash,C5,Estonian – decorates gathered stitches ,,1,Å
+      Dash,C6,Estonian – decorates gathered stitches ,,1,Æ
+      Dash,C7,Estonian – decorates gathered stitches ,,1,Ç
+      Dash,C8,Estonian – decorates gathered stitches ,,1,È
+      Dash,C9,Estonian – decorates gathered stitches ,,1,É
+      Dash,CA,Estonian – decorates gathered stitches ,,1,Ê
+      Dash,CB,Estonian – decorates gathered stitches ,,1,Ë
+      Dash,CC,Estonian – decorates gathered stitches ,,1,Ì
+      Dash,CD,Estonian – decorates gathered stitches ,,1,Í
+      Dash,CE,Estonian – decorates gathered stitches ,,1,Î
+      Dash,CF,Estonian – decorates gathered stitches ,,1,Ï
+      Dash,D2,Estonian – decorates gathered stitches ,,1,Ò
+      Dash,D3,Estonian – decorates gathered stitches ,,1,Ó
+      Dash,D4,Estonian – decorates gathered stitches ,,1,Ô
+      Dash,D5,Estonian – decorates gathered stitches ,,1,Õ
+      Dash,D6,Estonian – decorates gathered stitches ,,1,Ö
+      Dash,D7,Estonian – decorates gathered stitches ,,1,×
+      Dash,D8,Estonian – decorates gathered stitches ,,1,Ø
+      Dash,D9,Estonian – decorates gathered stitches ,,1,Ù
+      Dash,DA,,,1,Ú
+      Dash,DB,,,1,Û
+      Dash,DC,k1 elongated twice (wrap yarn 3 times),,1,Ü
+      Dash,DD,move marker left ÝÝÅ,,1,Ý
+      Dash,DE,move marker right ÞÞ,,1,Þ
+      Dash,E0,decorates right leaning decrease – nupp Urs/,,1,ß
+      Dash,E1,decorates left leaning decrease – nupp Vq\\t,,1,à
+      Dash,E2,brioche - brp,,1,á
+      Dash,E3,brioche - brk,,1,â
+      Dash,E4,brioche - yf sl1yo fits with brp/brk,,1,ã
+      Dash,E5,brioche - sl1yof fits with brp/brk,,1,ä
+      Dash,E6,brioche - sl1yof fits with brp/brk,,1,å
+      Dash,E7,brioche - brkssk,,1,æ
+      Dash,E8,brioche - brksssk,,1,ç
+      Dash,E9,brioche - brk2tog,,1,è
+      Dash,EA,brioche - brk3tog,,1,é
+      Dash,EB,brioche - brkssp,,1,ê
+      Dash,EC,brioche - brksssp,,1,ë
+      Dash,ED,brioche - brp2tog,,1,ì
+      Dash,EE,brioche - brp3tog,,1,í
+      Dash,EF,brioche - yf sl1yo,,1,î
+      Dash,F1,brioche - brkyobrk,,1,ñ
+      Dash,F2,brioche - brkbrpbrk into one st,,1,ò
+      Dash,F3,brioche - brk tbl,,1,ó
+      Dash,F4,brioche - brp tbl,,1,ô
+      Dash,F5,decorates decreases ￿À,,1,õ
+      Dash,F6,decorates increases *Ã,,1,ö
+      Dash,F7,decorates left leaning decreases V÷q÷\\÷t÷,,1,÷
+      Dash,F8,beading - knit,,1,ø
+      Dash,F9,beading - purl,,1,ù
+      Dash,FA,decorates yarn over oB,,1,ú
+      Dash,FB,Estonian – decorates gathered stitches ,,1,û
+      Dash,FC,Estonian – decorates gathered stitches ,,1,ü
+      Dash,FD,decorates decrease ￿ýÀý,,1,ý
+      Dash,FE,decorates increase *þÃþ,,1,þ
+      Dash,100,decorates decrease ￿ĀÀĀ,,1,Ā
+      Dash,101,decorates increase *āÃā,,1,ā
+      Dash,102,decorates decrease ￿ĂÀĂ,,1,Ă
+      Dash,103,decorates increase *ăÃă,,1,ă
+      Dash,104,brioche - centred double decrease,,1,Ą
+      Dash,105,brioche - centred double purl dec,,1,ą
+      Dash,106,Estonian – decorates gathered stitches and decreases ￿ĆÀĆ,,1,Ć
+      Dash,107,Estonian – decorates gathered stitches and increases *ćÃć,,1,ć
+      Dash,108,Estonian – decorates gathered stitches and decreases ￿ĈÀĈ,,1,Ĉ
+      Dash,109,Estonian – decorates gathered stitches and increases *ĉÃĉ,,1,ĉ
+      Dash,10A,Estonian – decorates gathered stitches and decreases ￿ĊÀĊ,,1,Ċ
+      Dash,10B,Estonian – decorates gathered stitches and increases *ċÃċ,,1,ċ
+      Dash,10C,Estonian – decorates gathered stitches and decreases ￿ČÀČ,,1,Č
+      Dash,10D,Estonian – decorates gathered stitches and increases *čÃč,,1,č
+      Dash,10E,decorates decrease – bead ￿ĎÀĎ,,1,Ď
+      Dash,10F,decorates increase – bead *ďÃď,,1,ď
+      Dash,110,decorates right leaning decreases – bead UĐrĐsĐ/Đ,,1,Đ
+      Dash,111,decorates left leaning decreases – bead Vđqđ\\đtđ,,1,đ
+      Dash,113,purlwise left-leaning increase,,1,ē
+      Dash,114,purlwise right-leaning increase,,1,Ĕ
+      Dash,115,purlwise left-leaning increase,,1,ĕ
+      Dash,116,purlwise right-leaning increase,,1,Ė
+      Dash,117,knitwise left-leaning increase,,1,ė
+      Dash,118,knitwise right-leaning increase,,1,Ę
+      Dash,119,,,1,ę
+      Dash,11A,,,1,Ě
+      Dash,11B,,,1,ě
+      Dash,11C,,,1,Ĝ
+      Dash,151,brioche - centred double decrease,,1,ű
+      Dash,152,brioche – purl centred double decrease,,1,ų
+      Dash,153,hook bead,,1,ŵ
+      Dash,156,catch strands,,1,ŷ
+      Dash,157,decorates right leaning decreases,,1,Ÿ
+      Dash,11D,increase to 2 stitches,,2,ĝ
+      Dash,125,Estonian – gathered stitch,,2,ĥ
+      Dash,134,Estonian – gathered stitch,,2,Ĵ
+      Dash,143,increase to 2 stitches,,2,ģ
+      Dash,154,bunny ears outward – k2tog + ssk,,2,ź
+      Dash,155,bunny ears inward – ssk + k2tog,,2,Ż
+      Dash,158,increase - left leaning,,2,Ž
+      Dash,159,increase - right leaning,,2,ž
+      Dash,15a,purl increase - left leaning,,2,ś
+      Dash,15b,purl increase - right leaning,,2,Ś
+      Dash,11E,increase to 3 stitches,,3,Ğ
+      Dash,126,Estonian – gathered stitch,,3,Ħ
+      Dash,135,Estonian – gathered stitch,,3,ĵ
+      Dash,144,increase to 3 stitches,,3,Ġ
+      Dash,14B,knit 1, yarn over, knit 1,,3,ı
+      Dash,14C,purl 1, yarn over, purl 1,,3,ŀ
+      Dash,14F,brioche - brk, yo, brk,,3,ő
+      Dash,150,brioche - brk, brp, brk,,3,Ő
+      Dash,11F,increase to 4 stitches,,4,ğ
+      Dash,127,Estonian – gathered stitch,,4,ħ
+      Dash,136,Estonian – gathered stitch,,4,Ķ
+      Dash,145,increase to 4 stitches,,4,ġ
+      Dash,120,increase to 5 stitches,,5,Ā
+      Dash,128,Estonian – gathered stitch,,5,Ĩ
+      Dash,137,Estonian – gathered stitch,,5,ķ
+      Dash,146,increase to 5 stitches,,5,Ģ
+      Dash,14D,brioche - brk, yo, brk, yo, brk,,5,ō
+      Dash,14E,brioche - brk, brp, brk, brp, brk,,5,Ō
+      Dash,121,increase to 6 stitches,,6,ā
+      Dash,129,Estonian – gathered stitch,,6,ĩ
+      Dash,138,Estonian – gathered stitch,,6,ĸ
+      Dash,147,increase to 6 stitches,,6,ģ
+      Dash,122,increase to 7 stitches,,7,â
+      Dash,12A,Estonian – gathered stitch,,7,Ī
+      Dash,139,Estonian – gathered stitch,,7,Ĺ
+      Dash,148,increase to 7 stitches,,7,Ĥ
+      Dash,123,increase to 8 stitches,,8,ă
+      Dash,12B,Estonian – gathered stitch,,8,ī
+      Dash,13A,Estonian – gathered stitch,,8,ĺ
+      Dash,149,increase to 8 stitches,,8,ĥ
+      Dash,124,increase to 9 stitches,,9,Ą
+      Dash,12C,Estonian – gathered stitch,,9,Ĭ
+      Dash,13B,Estonian – gathered stitch,,9,Ļ
+      Dash,14A,increase to 9 stitches,,9,Ħ
+      Dash,12D,Estonian – gathered stitch,,10,ĭ
+      Dash,13C,Estonian – gathered stitch,,10,ļ
+      Dash,12E,Estonian – gathered stitch,,11,Į
+      Dash,13D,Estonian – gathered stitch,,11,Ľ
+      Dash,12F,Estonian – gathered stitch,,12,į
+      Dash,13E,Estonian – gathered stitch,,12,ľ
+      Dash,130,Estonian – gathered stitch,,13,İ
+      Dash,13F,Estonian – gathered stitch,,13,ŀ
+      Dash,131,Estonian – gathered stitch,,14,Ĳ
+      Dash,140,Estonian – gathered stitch,,14,Ł
+      Dash,132,Estonian – gathered stitch,,15,ĳ
+      Dash,141,Estonian – gathered stitch,,15,Ń
+      Dash,133,Estonian – gathered stitch,,16,Ĵ
+      Dash,142,Estonian – gathered stitch,,16,ń
+      DashCable,21,1/1 RC,,2,!
+      DashCable,22,1/1 LC,,2,"
+      DashCable,23,1/1 RPC,,2,#
+      DashCable,24,1/1 LPC,,2,$ DashCable,25,1/1 RT,,2,%
+      DashCable,26,1/1 LT,,2,&
+      DashCable,27,1/1 RT,,2,'
+      DashCable,28,1/1 LT,,2,(
+      DashCable,29,1/1 RPT,,2,)
+      DashCable,2A,1/1 LPT,,2,*
+      DashCable,F1,Custom cable,,2,ñ
+      DashCable,2B,2/1 RC,,3,+
+      DashCable,2C,2/1 LC,,3,,
+      DashCable,2D,2/1 RPC,,3,-
+      DashCable,2E,2/1 LPC,,3,.
+      DashCable,2F,1/2 RC,,3,/
+      DashCable,30,1/2 LC,,3,0
+      DashCable,31,1/2 RPC,,3,1
+      DashCable,32,1/2 LPC,,3,2
+      DashCable,33,2/1 RT,,3,3
+      DashCable,34,2/1 LT,,3,4
+      DashCable,35,2/1 RT,,3,5
+      DashCable,36,2/1 LT,,3,6
+      DashCable,37,2/1 RPT,,3,7
+      DashCable,38,2/1 LPT,,3,8
+      DashCable,39,1/1/1 RC,,3,9
+      DashCable,3A,1/1/1 LC,,3,:
+      DashCable,3B,1/1/1 RPC,,3,;
+      DashCable,3C,1/1/1 LPC,,3,<
+      DashCable,3D,1/1/1 Reverse,,3,=
+      DashCable,DE,1/1/1 RPT,,3,Þ
+      DashCable,DF,1/1/1 LPT,,3,ß
+      DashCable,F2,Custom cable,,3,ò
+      DashCable,100,1/2 LT,,3,Ā
+      DashCable,101,1/2 RT,,3,ā
+      DashCable,102,1/2 LT,,3,Ă
+      DashCable,103,1/2 RT,,3,ă
+      DashCable,104,1/1/1 RPT,,3,Ą
+      DashCable,105,1/1/1 LPT,,3,ą
+      DashCable,3E,2/2 RC,,4,>
+      DashCable,3F,2/2 LC,,4,?
+      DashCable,40,2/2 RPC,,4,@
+      DashCable,41,2/2 LPC,,4,A
+      DashCable,42,2/2 RT,,4,B
+      DashCable,43,2/2 LT,,4,C
+      DashCable,44,2/2 RT,,4,D
+      DashCable,45,2/2 LT,,4,E
+      DashCable,46,1/3 RC,,4,F
+      DashCable,47,1/3 LC,,4,G
+      DashCable,48,1/3 RPC,,4,H
+      DashCable,49,1/3 LPC,,4,I
+      DashCable,4A,3/1 RC,,4,J
+      DashCable,4B,3/1 LC,,4,K
+      DashCable,4C,3/1 RPC,,4,L
+      DashCable,4D,3/1 LPC,,4,M
+      DashCable,4E,1/2/1 RC,,4,N
+      DashCable,4F,1/2/1 LC,,4,O
+      DashCable,50,1/2/1 RPC,,4,P
+      DashCable,51,1/2/1 LPC,,4,Q
+      DashCable,DC,2/2 RPT,,4,Ü
+      DashCable,DD,2/2 LPT,,4,Ý
+      DashCable,F3,Custom cable,,4,ó
+      DashCable,106,1/3 LT,,4,Ċ
+      DashCable,107,1/3 RT,,4,ċ
+      DashCable,108,1/3 LT,,4,Č
+      DashCable,109,1/3 RT,,4,č
+      DashCable,10A,1/3 LPT,,4,Ď
+      DashCable,10B,1/3 RPT,,4,ď
+      DashCable,52,1/4 RC,,5,R
+      DashCable,53,1/4 LC,,5,S
+      DashCable,54,1/4 RPC,,5,T
+      DashCable,55,1/4 LPC,,5,U
+      DashCable,56,2/3 RC,,5,V
+      DashCable,57,2/3 LC,,5,W
+      DashCable,58,2/3 RPC,,5,X
+      DashCable,59,2/3 LPC,,5,Y
+      DashCable,5A,3/2 RC,,5,Z
+      DashCable,5B,3/2 LC,,5,[
+      DashCable,5C,3/2 RPC,,5,\\
+      DashCable,5D,3/2 LPC,,5,]
+      DashCable,5E,4/1 RC,,5,^
+      DashCable,5F,4/1 LC,,5,_
+      DashCable,60,4/1 RPC,,5,`
+      DashCable,61,4/1 LPC,,5,a
+      DashCable,62,2/1/2 RC,,5,b
+      DashCable,63,2/1/2 LC,,5,c
+      DashCable,64,2/1/2 RPC,,5,d
+      DashCable,65,2/1/2 LPC,,5,e
+      DashCable,66,1/3/1 RC,,5,f
+      DashCable,67,1/3/1 LC,,5,g
+      DashCable,68,1/3/1 RPC,,5,h
+      DashCable,69,1/3/1 LPC,,5,i
+      DashCable,F4,Custom cable,,5,ô
+      DashCable,6A,3/3 RC,,6,j
+      DashCable,6B,3/3 LC,,6,k
+      DashCable,6C,3/3 RPC,,6,l
+      DashCable,6D,3/3 LPC,,6,m
+      DashCable,6E,2/4 RC,,6,n
+      DashCable,6F,2/4 LC,,6,o
+      DashCable,70,2/4 RPC,,6,p
+      DashCable,71,2/4 LPC,,6,q
+      DashCable,72,4/2 RC,,6,r
+      DashCable,73,4/2 LC,,6,s
+      DashCable,74,4/2 RPC,,6,t
+      DashCable,75,4/2 LPC,,6,u
+      DashCable,76,2/2/2 RC,,6,v
+      DashCable,77,2/2/2 LC,,6,w
+      DashCable,78,2/2/2 RPC,,6,x
+      DashCable,79,2/2/2 LPC,,6,y
+      DashCable,7A,2/2/2 Reverse,,6,z
+      DashCable,F5,Custom cable,,6,õ
+      DashCable,7B,3/1/3 RC,,7,{
+      DashCable,7C,3/1/3 LC,,7,|
+      DashCable,7D,3/1/3 RPC,,7,}
+      DashCable,7E,3/1/3 LPC,,7,~
+      DashCable,C0,3/4 RC,,7,À
+      DashCable,C1,3/4 LC,,7,Á
+      DashCable,C2,3/4 RPC,,7,Â
+      DashCable,C3,3/4 LPC,,7,Ã
+      DashCable,C4,4/3 RC,,7,Ä
+      DashCable,C5,4/3 LC,,7,Å
+      DashCable,C6,4/3 RPC,,7,Æ
+      DashCable,C7,4/3 LPC,,7,Ç
+      DashCable,F6,Custom cable,,7,ö
+      DashCable,C8,4/4 RC,,8,È
+      DashCable,C9,4/4 LC,,8,É
+      DashCable,CA,4/4 RPC,,8,Ê
+      DashCable,CB,4/4 LPC,,8,Ë
+      DashCable,CC,3/2/3 RC,,8,Ì
+      DashCable,CD,3/2/3 LC,,8,Í
+      DashCable,CE,3/2/3 RPC,,8,Î
+      DashCable,CF,3/2/3 LPC,,8,Ï
+      DashCable,D1,3/2/3 Reverse,,8,Ñ
+      DashCable,F8,Custom cable,,8,ø
+      DashCable,116,2/6 RC,,8,Ŗ
+      DashCable,117,2/6 LC,,8,ŗ
+      DashCable,118,2/6 RPC,,8,Ř
+      DashCable,119,2/6 LPC,,8,ř
+      DashCable,D2,4/1/4 RC,,9,Ò
+      DashCable,D3,4/1/4 LC,,9,Ó
+      DashCable,D4,4/1/4 RPC,,9,Ô
+      DashCable,D5,4/1/4 LPC,,9,Õ
+      DashCable,D6,3/3/3 Reverse,,9,Ö
+      DashCable,D8,3/3/3 RC,,9,Ø
+      DashCable,D9,3/3/3 LC,,9,Ù
+      DashCable,DA,3/3/3 RPC,,9,Ú
+      DashCable,DB,3/3/3/ LPC,,9,Û
+      DashCable,F9,Custom cable,,9,ù
+      DashCable,11a,4/5 RC,,9,Š
+      DashCable,11b,4/5 LC,,9,š
+      DashCable,11c,4/5 RPC,,9,Ŝ
+      DashCable,11d,4/5 LPC,,9,ŝ
+      DashCable,11e,5/4 RC,,9,Ž
+      DashCable,11f,5/4 LC,,9,ž
+      DashCable,120,5/4 RPC,,9,Ā
+      DashCable,121,5/4 LPC,,9,ā
+      DashCable,E0,5/5 RC,,10,à
+      DashCable,E1,5/5 LC,,10,á
+      DashCable,E2,5/5 RPC,,10,â
+      DashCable,E3,5/5 LPC,,10,ã
+      DashCable,FA,Custom cable,,10,ú
+      DashCable,FB,Custom cable,,11,û
+      DashCable,E4,6/6 RC,,12,ä
+      DashCable,E5,6/6 LC,,12,å
+      DashCable,E6,6/6 RPC,,12,æ
+      DashCable,E7,6/6 LPC,,12,ç
+      DashCable,E8,4/4/4 RC,,12,è
+      DashCable,E9,4/4/4 LC,,12,é
+      DashCable,EA,4/4/4 RPC,,12,ê
+      DashCable,EB,4/4/4 LPC,,12,ë
+      DashCable,EC,4/4/4 Reverse,,12,ì
+      DashCable,FC,Custom cable,,12,ü
+      DashCable,FD,8/8 RC,,16,ý
+      DashCable,FE,8/8 LC,,16,þ
+      DashCable,10E,8/8 RPC,,16,Ď
+      DashCable,10F,8/8 LPC,,16,ď
+      DashCable,10C,9/9 RC,,18,Č
+      DashCable,10D,9/9 LC,,18,í
+      DashCable,110,9/9 RPC,,18,đ
+      DashCable,111,9/9 LPC,,18,Đ
+      DashCable,112,12/12 RC,,24,Œ
+      DashCable,113,12/12 LC,,24,œ
+      DashCable,114,12/12 RPC,,24,Ŕ
+      DashCable,115,12/12 LPC,,24,ŕ
+      DotCable,21,1/1 RC,,2,!
+      DotCable,22,1/1 LC,,2,"
+      DotCable,23,1/1 RPC,,2,#
+      DotCable,24,1/1 LPC,,2,$ DotCable,25,1/1 RT,,2,%
+      DotCable,26,1/1 LT,,2,&
+      DotCable,27,1/1 RT,,2,'
+      DotCable,28,1/1 LT,,2,(
+      DotCable,29,1/1 RPT,,2,)
+      DotCable,2A,1/1 LPT,,2,*
+      DotCable,F1,Custom cable,,2,ñ
+      DotCable,2B,2/1 RC,,3,+
+      DotCable,2C,2/1 LC,,3,,
+      DotCable,2D,2/1 RPC,,3,-
+      DotCable,2E,2/1 LPC,,3,.
+      DotCable,2F,1/2 RC,,3,/
+      DotCable,30,1/2 LC,,3,0
+      DotCable,31,1/2 RPC,,3,1
+      DotCable,32,1/2 LPC,,3,2
+      DotCable,33,2/1 RT,,3,3
+      DotCable,34,2/1 LT,,3,4
+      DotCable,35,2/1 RT,,3,5
+      DotCable,36,2/1 LT,,3,6
+      DotCable,37,2/1 RPT,,3,7
+      DotCable,38,2/1 LPT,,3,8
+      DotCable,39,1/1/1 RC,,3,9
+      DotCable,3A,1/1/1 LC,,3,:
+      DotCable,3B,1/1/1 RPC,,3,;
+      DotCable,3C,1/1/1 LPC,,3,<
+      DotCable,3D,1/1/1 Reverse,,3,=
+      DotCable,DE,1/1/1 RPT,,3,Þ
+      DotCable,DF,1/1/1 LPT,,3,ß
+      DotCable,F2,Custom cable,,3,ò
+      DotCable,100,1/2 LT,,3,Ā
+      DotCable,101,1/2 RT,,3,ā
+      DotCable,102,1/2 LT,,3,Ă
+      DotCable,103,1/2 RT,,3,ă
+      DotCable,104,1/1/1 RPT,,3,Ą
+      DotCable,105,1/1/1 LPT,,3,ą
+      DotCable,3E,2/2 RC,,4,>
+      DotCable,3F,2/2 LC,,4,?
+      DotCable,40,2/2 RPC,,4,@
+      DotCable,41,2/2 LPC,,4,A
+      DotCable,42,2/2 RT,,4,B
+      DotCable,43,2/2 LT,,4,C
+      DotCable,44,2/2 RT,,4,D
+      DotCable,45,2/2 LT,,4,E
+      DotCable,46,1/3 RC,,4,F
+      DotCable,47,1/3 LC,,4,G
+      DotCable,48,1/3 RPC,,4,H
+      DotCable,49,1/3 LPC,,4,I
+      DotCable,4A,3/1 RC,,4,J
+      DotCable,4B,3/1 LC,,4,K
+      DotCable,4C,3/1 RPC,,4,L
+      DotCable,4D,3/1 LPC,,4,M
+      DotCable,4E,1/2/1 RC,,4,N
+      DotCable,4F,1/2/1 LC,,4,O
+      DotCable,50,1/2/1 RPC,,4,P
+      DotCable,51,1/2/1 LPC,,4,Q
+      DotCable,DC,2/2 RPT,,4,Ü
+      DotCable,DD,2/2 LPT,,4,Ý
+      DotCable,F3,Custom cable,,4,ó
+      DotCable,106,1/3 LT,,4,Ċ
+      DotCable,107,1/3 RT,,4,ċ
+      DotCable,108,1/3 LT,,4,Č
+      DotCable,109,1/3 RT,,4,č
+      DotCable,10A,1/3 LPT,,4,Ď
+      DotCable,10B,1/3 RPT,,4,ď
+      DotCable,52,1/4 RC,,5,R
+      DotCable,53,1/4 LC,,5,S
+      DotCable,54,1/4 RPC,,5,T
+      DotCable,55,1/4 LPC,,5,U
+      DotCable,56,2/3 RC,,5,V
+      DotCable,57,2/3 LC,,5,W
+      DotCable,58,2/3 RPC,,5,X
+      DotCable,59,2/3 LPC,,5,Y
+      DotCable,5A,3/2 RC,,5,Z
+      DotCable,5B,3/2 LC,,5,[
+      DotCable,5C,3/2 RPC,,5,\\
+      DotCable,5D,3/2 LPC,,5,]
+      DotCable,5E,4/1 RC,,5,^
+      DotCable,5F,4/1 LC,,5,_
+      DotCable,60,4/1 RPC,,5,`
+      DotCable,61,4/1 LPC,,5,a
+      DotCable,62,2/1/2 RC,,5,b
+      DotCable,63,2/1/2 LC,,5,c
+      DotCable,64,2/1/2 RPC,,5,d
+      DotCable,65,2/1/2 LPC,,5,e
+      DotCable,66,1/3/1 RC,,5,f
+      DotCable,67,1/3/1 LC,,5,g
+      DotCable,68,1/3/1 RPC,,5,h
+      DotCable,69,1/3/1 LPC,,5,i
+      DotCable,F4,Custom cable,,5,ô
+      DotCable,6A,3/3 RC,,6,j
+      DotCable,6B,3/3 LC,,6,k
+      DotCable,6C,3/3 RPC,,6,l
+      DotCable,6D,3/3 LPC,,6,m
+      DotCable,6E,2/4 RC,,6,n
+      DotCable,6F,2/4 LC,,6,o
+      DotCable,70,2/4 RPC,,6,p
+      DotCable,71,2/4 LPC,,6,q
+      DotCable,72,4/2 RC,,6,r
+      DotCable,73,4/2 LC,,6,s
+      DotCable,74,4/2 RPC,,6,t
+      DotCable,75,4/2 LPC,,6,u
+      DotCable,76,2/2/2 RC,,6,v
+      DotCable,77,2/2/2 LC,,6,w
+      DotCable,78,2/2/2 RPC,,6,x
+      DotCable,79,2/2/2 LPC,,6,y
+      DotCable,7A,2/2/2 Reverse,,6,z
+      DotCable,F5,Custom cable,,6,õ
+      DotCable,7B,3/1/3 RC,,7,{
+      DotCable,7C,3/1/3 LC,,7,|
+      DotCable,7D,3/1/3 RPC,,7,}
+      DotCable,7E,3/1/3 LPC,,7,~
+      DotCable,C0,3/4 RC,,7,À
+      DotCable,C1,3/4 LC,,7,Á
+      DotCable,C2,3/4 RPC,,7,Â
+      DotCable,C3,3/4 LPC,,7,Ã
+      DotCable,C4,4/3 RC,,7,Ä
+      DotCable,C5,4/3 LC,,7,Å
+      DotCable,C6,4/3 RPC,,7,Æ
+      DotCable,C7,4/3 LPC,,7,Ç
+      DotCable,F6,Custom cable,,7,ö
+      DotCable,C8,4/4 RC,,8,È
+      DotCable,C9,4/4 LC,,8,É
+      DotCable,CA,4/4 RPC,,8,Ê
+      DotCable,CB,4/4 LPC,,8,Ë
+      DotCable,CC,3/2/3 RC,,8,Ì
+      DotCable,CD,3/2/3 LC,,8,Í
+      DotCable,CE,3/2/3 RPC,,8,Î
+      DotCable,CF,3/2/3 LPC,,8,Ï
+      DotCable,D1,3/2/3 Reverse,,8,Ñ
+      DotCable,F8,Custom cable,,8,ø
+      DotCable,116,2/6 RC,,8,Ŗ
+      DotCable,117,2/6 LC,,8,ŗ
+      DotCable,118,2/6 RPC,,8,Ř
+      DotCable,119,2/6 LPC,,8,ř
+      DotCable,D2,4/1/4 RC,,9,Ò
+      DotCable,D3,4/1/4 LC,,9,Ó
+      DotCable,D4,4/1/4 RPC,,9,Ô
+      DotCable,D5,4/1/4 LPC,,9,Õ
+      DotCable,D6,3/3/3 Reverse,,9,Ö
+      DotCable,D8,3/3/3 RC,,9,Ø
+      DotCable,D9,3/3/3 LC,,9,Ù
+      DotCable,DA,3/3/3 RPC,,9,Ú
+      DotCable,DB,3/3/3/ LPC,,9,Û
+      DotCable,F9,Custom cable,,9,ù
+      DotCable,11a,4/5 RC,,9,Š
+      DotCable,11b,4/5 LC,,9,š
+      DotCable,11c,4/5 RPC,,9,Ŝ
+      DotCable,11d,4/5 LPC,,9,ŝ
+      DotCable,11e,5/4 RC,,9,Ž
+      DotCable,11f,5/4 LC,,9,ž
+      DotCable,120,5/4 RPC,,9,Ā
+      DotCable,121,5/4 LPC,,9,ā
+      DotCable,E0,5/5 RC,,10,à
+      DotCable,E1,5/5 LC,,10,á
+      DotCable,E2,5/5 RPC,,10,â
+      DotCable,E3,5/5 LPC,,10,ã
+      DotCable,FA,Custom cable,,10,ú
+      DotCable,FB,Custom cable,,11,û
+      DotCable,E4,6/6 RC,,12,ä
+      DotCable,E5,6/6 LC,,12,å
+      DotCable,E6,6/6 RPC,,12,æ
+      DotCable,E7,6/6 LPC,,12,ç
+      DotCable,E8,4/4/4 RC,,12,è
+      DotCable,E9,4/4/4 LC,,12,é
+      DotCable,EA,4/4/4 RPC,,12,ê
+      DotCable,EB,4/4/4 LPC,,12,ë
+      DotCable,EC,4/4/4 Reverse,,12,ì
+      DotCable,FC,Custom cable,,12,ü
+      DotCable,FD,8/8 RC,,16,ý
+      DotCable,FE,8/8 LC,,16,þ
+      DotCable,10E,8/8 RPC,,16,Ď
+      DotCable,10F,8/8 LPC,,16,ď
+      DotCable,10C,9/9 RC,,18,Č
+      DotCable,10D,9/9 LC,,18,í
+      DotCable,110,9/9 RPC,,18,đ
+      DotCable,111,9/9 LPC,,18,Đ
+      DotCable,112,12/12 RC,,24,Œ
+      DotCable,113,12/12 LC,,24,œ
+      DotCable,114,12/12 RPC,,24,Ŕ
+      DotCable,115,12/12 LPC,,24,ŕ
+      DashCableEH,21,1/1 RC,,2,!
+      DashCableEH,22,1/1 LC,,2,"
+      DashCableEH,23,1/1 RPC,,2,#
+      DashCableEH,24,1/1 LPC,,2,$ DashCableEH,25,1/1 RT,,2,%
+      DashCableEH,26,1/1 LT,,2,&
+      DashCableEH,27,1/1 RT,,2,'
+      DashCableEH,28,1/1 LT,,2,(
+      DashCableEH,29,1/1 RPT,,2,)
+      DashCableEH,2A,1/1 LPT,,2,*
+      DashCableEH,F1,Custom cable,,2,ñ
+      DashCableEH,2B,2/1 RC,,3,+
+      DashCableEH,2C,2/1 LC,,3,,
+      DashCableEH,2D,2/1 RPC,,3,-
+      DashCableEH,2E,2/1 LPC,,3,.
+      DashCableEH,2F,1/2 RC,,3,/
+      DashCableEH,30,1/2 LC,,3,0
+      DashCableEH,31,1/2 RPC,,3,1
+      DashCableEH,32,1/2 LPC,,3,2
+      DashCableEH,33,2/1 RT,,3,3
+      DashCableEH,34,2/1 LT,,3,4
+      DashCableEH,35,2/1 RT,,3,5
+      DashCableEH,36,2/1 LT,,3,6
+      DashCableEH,37,2/1 RPT,,3,7
+      DashCableEH,38,2/1 LPT,,3,8
+      DashCableEH,39,1/1/1 RC,,3,9
+      DashCableEH,3A,1/1/1 LC,,3,:
+      DashCableEH,3B,1/1/1 RPC,,3,;
+      DashCableEH,3C,1/1/1 LPC,,3,<
+      DashCableEH,3D,1/1/1 Reverse,,3,=
+      DashCableEH,DE,1/1/1 RPT,,3,Þ
+      DashCableEH,DF,1/1/1 LPT,,3,ß
+      DashCableEH,F2,Custom cable,,3,ò
+      DashCableEH,100,1/2 LT,,3,Ā
+      DashCableEH,101,1/2 RT,,3,ā
+      DashCableEH,102,1/2 LT,,3,Ă
+      DashCableEH,103,1/2 RT,,3,ă
+      DashCableEH,104,1/1/1 RPT,,3,Ą
+      DashCableEH,105,1/1/1 LPT,,3,ą
+      DashCableEH,3E,2/2 RC,,4,>
+      DashCableEH,3F,2/2 LC,,4,?
+      DashCableEH,40,2/2 RPC,,4,@
+      DashCableEH,41,2/2 LPC,,4,A
+      DashCableEH,42,2/2 RT,,4,B
+      DashCableEH,43,2/2 LT,,4,C
+      DashCableEH,44,2/2 RT,,4,D
+      DashCableEH,45,2/2 LT,,4,E
+      DashCableEH,46,1/3 RC,,4,F
+      DashCableEH,47,1/3 LC,,4,G
+      DashCableEH,48,1/3 RPC,,4,H
+      DashCableEH,49,1/3 LPC,,4,I
+      DashCableEH,4A,3/1 RC,,4,J
+      DashCableEH,4B,3/1 LC,,4,K
+      DashCableEH,4C,3/1 RPC,,4,L
+      DashCableEH,4D,3/1 LPC,,4,M
+      DashCableEH,4E,1/2/1 RC,,4,N
+      DashCableEH,4F,1/2/1 LC,,4,O
+      DashCableEH,50,1/2/1 RPC,,4,P
+      DashCableEH,51,1/2/1 LPC,,4,Q
+      DashCableEH,DC,2/2 RPT,,4,Ü
+      DashCableEH,DD,2/2 LPT,,4,Ý
+      DashCableEH,F3,Custom cable,,4,ó
+      DashCableEH,106,1/3 LT,,4,Ċ
+      DashCableEH,107,1/3 RT,,4,ċ
+      DashCableEH,108,1/3 LT,,4,Č
+      DashCableEH,109,1/3 RT,,4,č
+      DashCableEH,10A,1/3 LPT,,4,Ď
+      DashCableEH,10B,1/3 RPT,,4,ď
+      DashCableEH,52,1/4 RC,,5,R
+      DashCableEH,53,1/4 LC,,5,S
+      DashCableEH,54,1/4 RPC,,5,T
+      DashCableEH,55,1/4 LPC,,5,U
+      DashCableEH,56,2/3 RC,,5,V
+      DashCableEH,57,2/3 LC,,5,W
+      DashCableEH,58,2/3 RPC,,5,X
+      DashCableEH,59,2/3 LPC,,5,Y
+      DashCableEH,5A,3/2 RC,,5,Z
+      DashCableEH,5B,3/2 LC,,5,[
+      DashCableEH,5C,3/2 RPC,,5,\\
+      DashCableEH,5D,3/2 LPC,,5,]
+      DashCableEH,5E,4/1 RC,,5,^
+      DashCableEH,5F,4/1 LC,,5,_
+      DashCableEH,60,4/1 RPC,,5,`
+      DashCableEH,61,4/1 LPC,,5,a
+      DashCableEH,62,2/1/2 RC,,5,b
+      DashCableEH,63,2/1/2 LC,,5,c
+      DashCableEH,64,2/1/2 RPC,,5,d
+      DashCableEH,65,2/1/2 LPC,,5,e
+      DashCableEH,66,1/3/1 RC,,5,f
+      DashCableEH,67,1/3/1 LC,,5,g
+      DashCableEH,68,1/3/1 RPC,,5,h
+      DashCableEH,69,1/3/1 LPC,,5,i
+      DashCableEH,F4,Custom cable,,5,ô
+      DashCableEH,6A,3/3 RC,,6,j
+      DashCableEH,6B,3/3 LC,,6,k
+      DashCableEH,6C,3/3 RPC,,6,l
+      DashCableEH,6D,3/3 LPC,,6,m
+      DashCableEH,6E,2/4 RC,,6,n
+      DashCableEH,6F,2/4 LC,,6,o
+      DashCableEH,70,2/4 RPC,,6,p
+      DashCableEH,71,2/4 LPC,,6,q
+      DashCableEH,72,4/2 RC,,6,r
+      DashCableEH,73,4/2 LC,,6,s
+      DashCableEH,74,4/2 RPC,,6,t
+      DashCableEH,75,4/2 LPC,,6,u
+      DashCableEH,76,2/2/2 RC,,6,v
+      DashCableEH,77,2/2/2 LC,,6,w
+      DashCableEH,78,2/2/2 RPC,,6,x
+      DashCableEH,79,2/2/2 LPC,,6,y
+      DashCableEH,7A,2/2/2 Reverse,,6,z
+      DashCableEH,F5,Custom cable,,6,õ
+      DashCableEH,7B,3/1/3 RC,,7,{
+      DashCableEH,7C,3/1/3 LC,,7,|
+      DashCableEH,7D,3/1/3 RPC,,7,}
+      DashCableEH,7E,3/1/3 LPC,,7,~
+      DashCableEH,C0,3/4 RC,,7,À
+      DashCableEH,C1,3/4 LC,,7,Á
+      DashCableEH,C2,3/4 RPC,,7,Â
+      DashCableEH,C3,3/4 LPC,,7,Ã
+      DashCableEH,C4,4/3 RC,,7,Ä
+      DashCableEH,C5,4/3 LC,,7,Å
+      DashCableEH,C6,4/3 RPC,,7,Æ
+      DashCableEH,C7,4/3 LPC,,7,Ç
+      DashCableEH,F6,Custom cable,,7,ö
+      DashCableEH,C8,4/4 RC,,8,È
+      DashCableEH,C9,4/4 LC,,8,É
+      DashCableEH,CA,4/4 RPC,,8,Ê
+      DashCableEH,CB,4/4 LPC,,8,Ë
+      DashCableEH,CC,3/2/3 RC,,8,Ì
+      DashCableEH,CD,3/2/3 LC,,8,Í
+      DashCableEH,CE,3/2/3 RPC,,8,Î
+      DashCableEH,CF,3/2/3 LPC,,8,Ï
+      DashCableEH,D1,3/2/3 Reverse,,8,Ñ
+      DashCableEH,F8,Custom cable,,8,ø
+      DashCableEH,116,2/6 RC,,8,Ŗ
+      DashCableEH,117,2/6 LC,,8,ŗ
+      DashCableEH,118,2/6 RPC,,8,Ř
+      DashCableEH,119,2/6 LPC,,8,ř
+      DashCableEH,D2,4/1/4 RC,,9,Ò
+      DashCableEH,D3,4/1/4 LC,,9,Ó
+      DashCableEH,D4,4/1/4 RPC,,9,Ô
+      DashCableEH,D5,4/1/4 LPC,,9,Õ
+      DashCableEH,D6,3/3/3 Reverse,,9,Ö
+      DashCableEH,D8,3/3/3 RC,,9,Ø
+      DashCableEH,D9,3/3/3 LC,,9,Ù
+      DashCableEH,DA,3/3/3 RPC,,9,Ú
+      DashCableEH,DB,3/3/3/ LPC,,9,Û
+      DashCableEH,F9,Custom cable,,9,ù
+      DashCableEH,11a,4/5 RC,,9,Š
+      DashCableEH,11b,4/5 LC,,9,š
+      DashCableEH,11c,4/5 RPC,,9,Ŝ
+      DashCableEH,11d,4/5 LPC,,9,ŝ
+      DashCableEH,11e,5/4 RC,,9,Ž
+      DashCableEH,11f,5/4 LC,,9,ž
+      DashCableEH,120,5/4 RPC,,9,Ā
+      DashCableEH,121,5/4 LPC,,9,ā
+      DashCableEH,E0,5/5 RC,,10,à
+      DashCableEH,E1,5/5 LC,,10,á
+      DashCableEH,E2,5/5 RPC,,10,â
+      DashCableEH,E3,5/5 LPC,,10,ã
+      DashCableEH,FA,Custom cable,,10,ú
+      DashCableEH,FB,Custom cable,,11,û
+      DashCableEH,E4,6/6 RC,,12,ä
+      DashCableEH,E5,6/6 LC,,12,å
+      DashCableEH,E6,6/6 RPC,,12,æ
+      DashCableEH,E7,6/6 LPC,,12,ç
+      DashCableEH,E8,4/4/4 RC,,12,è
+      DashCableEH,E9,4/4/4 LC,,12,é
+      DashCableEH,EA,4/4/4 RPC,,12,ê
+      DashCableEH,EB,4/4/4 LPC,,12,ë
+      DashCableEH,EC,4/4/4 Reverse,,12,ì
+      DashCableEH,FC,Custom cable,,12,ü
+      DashCableEH,FD,8/8 RC,,16,ý
+      DashCableEH,FE,8/8 LC,,16,þ
+      DashCableEH,10E,8/8 RPC,,16,Ď
+      DashCableEH,10F,8/8 LPC,,16,ď
+      DashCableEH,10C,9/9 RC,,18,Č
+      DashCableEH,10D,9/9 LC,,18,í
+      DashCableEH,110,9/9 RPC,,18,đ
+      DashCableEH,111,9/9 LPC,,18,Đ
+      DashCableEH,112,12/12 RC,,24,Œ
+      DashCableEH,113,12/12 LC,,24,œ
+      DashCableEH,114,12/12 RPC,,24,Ŕ
+      DashCableEH,115,12/12 LPC,,24,ŕ
+      DotCableEH,21,1/1 RC,,2,!
+      DotCableEH,22,1/1 LC,,2,"
+      DotCableEH,23,1/1 RPC,,2,#
+      DotCableEH,24,1/1 LPC,,2,$ DotCableEH,25,1/1 RT,,2,%
+      DotCableEH,26,1/1 LT,,2,&
+      DotCableEH,27,1/1 RT,,2,'
+      DotCableEH,28,1/1 LT,,2,(
+      DotCableEH,29,1/1 RPT,,2,)
+      DotCableEH,2A,1/1 LPT,,2,*
+      DotCableEH,F1,Custom cable,,2,ñ
+      DotCableEH,2B,2/1 RC,,3,+
+      DotCableEH,2C,2/1 LC,,3,,
+      DotCableEH,2D,2/1 RPC,,3,-
+      DotCableEH,2E,2/1 LPC,,3,.
+      DotCableEH,2F,1/2 RC,,3,/
+      DotCableEH,30,1/2 LC,,3,0
+      DotCableEH,31,1/2 RPC,,3,1
+      DotCableEH,32,1/2 LPC,,3,2
+      DotCableEH,33,2/1 RT,,3,3
+      DotCableEH,34,2/1 LT,,3,4
+      DotCableEH,35,2/1 RT,,3,5
+      DotCableEH,36,2/1 LT,,3,6
+      DotCableEH,37,2/1 RPT,,3,7
+      DotCableEH,38,2/1 LPT,,3,8
+      DotCableEH,39,1/1/1 RC,,3,9
+      DotCableEH,3A,1/1/1 LC,,3,:
+      DotCableEH,3B,1/1/1 RPC,,3,;
+      DotCableEH,3C,1/1/1 LPC,,3,<
+      DotCableEH,3D,1/1/1 Reverse,,3,=
+      DotCableEH,DE,1/1/1 RPT,,3,Þ
+      DotCableEH,DF,1/1/1 LPT,,3,ß
+      DotCableEH,F2,Custom cable,,3,ò
+      DotCableEH,100,1/2 LT,,3,Ā
+      DotCableEH,101,1/2 RT,,3,ā
+      DotCableEH,102,1/2 LT,,3,Ă
+      DotCableEH,103,1/2 RT,,3,ă
+      DotCableEH,104,1/1/1 RPT,,3,Ą
+      DotCableEH,105,1/1/1 LPT,,3,ą
+      DotCableEH,3E,2/2 RC,,4,>
+      DotCableEH,3F,2/2 LC,,4,?
+      DotCableEH,40,2/2 RPC,,4,@
+      DotCableEH,41,2/2 LPC,,4,A
+      DotCableEH,42,2/2 RT,,4,B
+      DotCableEH,43,2/2 LT,,4,C
+      DotCableEH,44,2/2 RT,,4,D
+      DotCableEH,45,2/2 LT,,4,E
+      DotCableEH,46,1/3 RC,,4,F
+      DotCableEH,47,1/3 LC,,4,G
+      DotCableEH,48,1/3 RPC,,4,H
+      DotCableEH,49,1/3 LPC,,4,I
+      DotCableEH,4A,3/1 RC,,4,J
+      DotCableEH,4B,3/1 LC,,4,K
+      DotCableEH,4C,3/1 RPC,,4,L
+      DotCableEH,4D,3/1 LPC,,4,M
+      DotCableEH,4E,1/2/1 RC,,4,N
+      DotCableEH,4F,1/2/1 LC,,4,O
+      DotCableEH,50,1/2/1 RPC,,4,P
+      DotCableEH,51,1/2/1 LPC,,4,Q
+      DotCableEH,DC,2/2 RPT,,4,Ü
+      DotCableEH,DD,2/2 LPT,,4,Ý
+      DotCableEH,F3,Custom cable,,4,ó
+      DotCableEH,106,1/3 LT,,4,Ċ
+      DotCableEH,107,1/3 RT,,4,ċ
+      DotCableEH,108,1/3 LT,,4,Č
+      DotCableEH,109,1/3 RT,,4,č
+      DotCableEH,10A,1/3 LPT,,4,Ď
+      DotCableEH,10B,1/3 RPT,,4,ď
+      DotCableEH,52,1/4 RC,,5,R
+      DotCableEH,53,1/4 LC,,5,S
+      DotCableEH,54,1/4 RPC,,5,T
+      DotCableEH,55,1/4 LPC,,5,U
+      DotCableEH,56,2/3 RC,,5,V
+      DotCableEH,57,2/3 LC,,5,W
+      DotCableEH,58,2/3 RPC,,5,X
+      DotCableEH,59,2/3 LPC,,5,Y
+      DotCableEH,5A,3/2 RC,,5,Z
+      DotCableEH,5B,3/2 LC,,5,[
+      DotCableEH,5C,3/2 RPC,,5,\\
+      DotCableEH,5D,3/2 LPC,,5,]
+      DotCableEH,5E,4/1 RC,,5,^
+      DotCableEH,5F,4/1 LC,,5,_
+      DotCableEH,60,4/1 RPC,,5,`
+      DotCableEH,61,4/1 LPC,,5,a
+      DotCableEH,62,2/1/2 RC,,5,b
+      DotCableEH,63,2/1/2 LC,,5,c
+      DotCableEH,64,2/1/2 RPC,,5,d
+      DotCableEH,65,2/1/2 LPC,,5,e
+      DotCableEH,66,1/3/1 RC,,5,f
+      DotCableEH,67,1/3/1 LC,,5,g
+      DotCableEH,68,1/3/1 RPC,,5,h
+      DotCableEH,69,1/3/1 LPC,,5,i
+      DotCableEH,F4,Custom cable,,5,ô
+      DotCableEH,6A,3/3 RC,,6,j
+      DotCableEH,6B,3/3 LC,,6,k
+      DotCableEH,6C,3/3 RPC,,6,l
+      DotCableEH,6D,3/3 LPC,,6,m
+      DotCableEH,6E,2/4 RC,,6,n
+      DotCableEH,6F,2/4 LC,,6,o
+      DotCableEH,70,2/4 RPC,,6,p
+      DotCableEH,71,2/4 LPC,,6,q
+      DotCableEH,72,4/2 RC,,6,r
+      DotCableEH,73,4/2 LC,,6,s
+      DotCableEH,74,4/2 RPC,,6,t
+      DotCableEH,75,4/2 LPC,,6,u
+      DotCableEH,76,2/2/2 RC,,6,v
+      DotCableEH,77,2/2/2 LC,,6,w
+      DotCableEH,78,2/2/2 RPC,,6,x
+      DotCableEH,79,2/2/2 LPC,,6,y
+      DotCableEH,7A,2/2/2 Reverse,,6,z
+      DotCableEH,F5,Custom cable,,6,õ
+      DotCableEH,7B,3/1/3 RC,,7,{
+      DotCableEH,7C,3/1/3 LC,,7,|
+      DotCableEH,7D,3/1/3 RPC,,7,}
+      DotCableEH,7E,3/1/3 LPC,,7,~
+      DotCableEH,C0,3/4 RC,,7,À
+      DotCableEH,C1,3/4 LC,,7,Á
+      DotCableEH,C2,3/4 RPC,,7,Â
+      DotCableEH,C3,3/4 LPC,,7,Ã
+      DotCableEH,C4,4/3 RC,,7,Ä
+      DotCableEH,C5,4/3 LC,,7,Å
+      DotCableEH,C6,4/3 RPC,,7,Æ
+      DotCableEH,C7,4/3 LPC,,7,Ç
+      DotCableEH,F6,Custom cable,,7,ö
+      DotCableEH,C8,4/4 RC,,8,È
+      DotCableEH,C9,4/4 LC,,8,É
+      DotCableEH,CA,4/4 RPC,,8,Ê
+      DotCableEH,CB,4/4 LPC,,8,Ë
+      DotCableEH,CC,3/2/3 RC,,8,Ì
+      DotCableEH,CD,3/2/3 LC,,8,Í
+      DotCableEH,CE,3/2/3 RPC,,8,Î
+      DotCableEH,CF,3/2/3 LPC,,8,Ï
+      DotCableEH,D1,3/2/3 Reverse,,8,Ñ
+      DotCableEH,F8,Custom cable,,8,ø
+      DotCableEH,116,2/6 RC,,8,Ŗ
+      DotCableEH,117,2/6 LC,,8,ŗ
+      DotCableEH,118,2/6 RPC,,8,Ř
+      DotCableEH,119,2/6 LPC,,8,ř
+      DotCableEH,D2,4/1/4 RC,,9,Ò
+      DotCableEH,D3,4/1/4 LC,,9,Ó
+      DotCableEH,D4,4/1/4 RPC,,9,Ô
+      DotCableEH,D5,4/1/4 LPC,,9,Õ
+      DotCableEH,D6,3/3/3 Reverse,,9,Ö
+      DotCableEH,D8,3/3/3 RC,,9,Ø
+      DotCableEH,D9,3/3/3 LC,,9,Ù
+      DotCableEH,DA,3/3/3 RPC,,9,Ú
+      DotCableEH,DB,3/3/3/ LPC,,9,Û
+      DotCableEH,F9,Custom cable,,9,ù
+      DotCableEH,11a,4/5 RC,,9,Š
+      DotCableEH,11b,4/5 LC,,9,š
+      DotCableEH,11c,4/5 RPC,,9,Ŝ
+      DotCableEH,11d,4/5 LPC,,9,ŝ
+      DotCableEH,11e,5/4 RC,,9,Ž
+      DotCableEH,11f,5/4 LC,,9,ž
+      DotCableEH,120,5/4 RPC,,9,Ā
+      DotCableEH,121,5/4 LPC,,9,ā
+      DotCableEH,E0,5/5 RC,,10,à
+      DotCableEH,E1,5/5 LC,,10,á
+      DotCableEH,E2,5/5 RPC,,10,â
+      DotCableEH,E3,5/5 LPC,,10,ã
+      DotCableEH,FA,Custom cable,,10,ú
+      DotCableEH,FB,Custom cable,,11,û
+      DotCableEH,E4,6/6 RC,,12,ä
+      DotCableEH,E5,6/6 LC,,12,å
+      DotCableEH,E6,6/6 RPC,,12,æ
+      DotCableEH,E7,6/6 LPC,,12,ç
+      DotCableEH,E8,4/4/4 RC,,12,è
+      DotCableEH,E9,4/4/4 LC,,12,é
+      DotCableEH,EA,4/4/4 RPC,,12,ê
+      DotCableEH,EB,4/4/4 LPC,,12,ë
+      DotCableEH,EC,4/4/4 Reverse,,12,ì
+      DotCableEH,FC,Custom cable,,12,ü
+      DotCableEH,FD,8/8 RC,,16,ý
+      DotCableEH,FE,8/8 LC,,16,þ
+      DotCableEH,10E,8/8 RPC,,16,Ď
+      DotCableEH,10F,8/8 LPC,,16,ď
+      DotCableEH,10C,9/9 RC,,18,Č
+      DotCableEH,10D,9/9 LC,,18,í
+      DotCableEH,110,9/9 RPC,,18,đ
+      DotCableEH,111,9/9 LPC,,18,Đ
+      DotCableEH,112,12/12 RC,,24,Œ
+      DotCableEH,113,12/12 LC,,24,œ
+      DotCableEH,114,12/12 RPC,,24,Ŕ
+      DotCableEH,115,12/12 LPC,,24,ŕ`;
+
+          const TAXONOMY = {
+          "Basic Stitches": [
+          "knit","purl","slip","slip purlwise with yarn in front","no stitch","grey no stitch","k tbl","p tbl","k1 below","p1 below"
+          ],
+          "Knit Increases":[
+          "m1","m1 right leaning","m1 left leaning","knit into fb","knit into fbf","(k1, p1) in 1 stitch","(k1, p1, k1) in 1 stitch",
+          "increase 1 to 3","increase 1 to 4","increase 1 to 5","increase 1 to 6","increase 1 to 7","increase 1 to 8","increase 1 to 9",
+          "right-leaning lifted increase","left-leaning lifted increase"
+          ],
+          "Purl Increases":[
+          "m1 purlwise","m1 purlwise right leaning","m1 purlwise left leaning","purl into fb","purl into fbf","(p1, k1) in 1 stitch",
+          "(p1, k1, p1) in 1 stitch","right-leaning lifted increase purl","left-leaning lifted increase purl"
+          ],
+          "Yarn Over Increases":[
+          "yo","yo twice","yo 3 times","yo 4 times","yo 5 times","yo 6 times","yo 7 times","yo 8 times","yo 9 times",
+          "(k1, yo, k1) in 1 stitch","(p1, yo, p1) in 1 stitch"
+          ],
+          "Knit Decreases":[
+          "k2tog","ssk","sl1, k1, psso","k3tog","sssk","sl1, k2tog, psso","sl2, k1, p2sso","central double decrease",
+          "sl2, k2tog, p2sso","k4tog","k5tog","k6tog","k7tog","k8tog","k9tog",
+          "decrease 4 to 1","decrease 5 to 1","decrease 6 to 1","decrease 7 to 1","decrease 8 to 1","decrease 9 to 1",
+          "twisted k2tog","twisted ssk","twisted cdd","bunny ears outward","bunny ears inward"
+          ],
+          "Purl Decreases":[
+          "p2tog","p2tog tbl","ssp","p3tog","p3tog tbl","sssp","p2tog, sl1 wyif, psso","sl2, p1, p2sso",
+          "central double decrease purl","sl1 wyif, p2tog tbl, psso","twisted p2tog","twisted ssp"
+          ],
+          "Miscellaneous":[
+          "k1 elongated","p1 elongated","k1 elongated twice","p1 elongated twice","k1 elongated thrice","p1 elongated thrice",
+          "bobble","cast on","bind off","cluster 2 sts","cluster 3 sts","cluster 4 sts","cluster 5 sts",
+          "place marker","slip marker","move marker 1 stitch left","move marker 1 stitch right",
+          "move marker 2 stitches left","move marker 2 stitches right",
+          "left twist purl braid","right twist purl braid","short row left","short row right","catch strands"
+          ],
+          "2 Stitch Cables":[
+          "1/1 RC","1/1 LC","1/1 RPC","1/1 LPC","1/1 RT","1/1 LT","1/1 RPT","1/1 LPT","2 stitch custom cable"
+          ],
+          "3 Stitch Cables":[
+          "2/1 RC","2/1 LC","1/2 RC","1/2 LC","2/1 RPC","2/1 LPC","1/2 RPC","1/2 LPC",
+          "1/1/1 RC","1/1/1 LC","1/1/1 RPC","1/1/1 LPC","1/1/1 RRC","1/1/1 LRC",
+          "2/1 RT","2/1 LT","2/1 RPT","2/1 LPT","1/2 RT","1/2 LT","1/2 RPT","1/2 LPT","1/1/1 RPT","1/1/1 LPT",
+          "3 stitch custom cable"
+          ],
+          "4 Stitch Cables":[
+          "2/2 RC","2/2 LC","2/2 RPC","2/2 LPC","1/3 RC","1/3 LC","1/3 RPC","1/3 LPC","3/1 RC","3/1 LC","3/1 RPC","3/1 LPC",
+          "1/2/1 RC","1/2/1 LC","1/2/1 RPC","1/2/1 LPC",
+          "2/2 RT","2/2 LT","2/2 RPT","2/2 LPT","1/3 RT","1/3 LT","1/3 RPT","1/3 LPT",
+          "4 stitch custom cable"
+          ],
+          "5 Stitch Cables":[
+          "2/3 RC","2/3 LC","2/3 RPC","2/3 LPC","3/2 RC","3/2 LC","3/2 RPC","3/2 LPC",
+          "4/1 RC","4/1 LC","4/1 RPC","4/1 LPC","1/4 RC","1/4 LC","1/4 RPC","1/4 LPC",
+          "2/1/2 RC","2/1/2 LC","2/1/2 RPC","2/1/2 LPC","1/3/1 RC","1/3/1 LC","1/3/1 RPC","1/3/1 LPC",
+          "5 stitch custom cable"
+          ],
+          "6 Stitch Cables":[
+          "3/3 RC","3/3 LC","3/3 RPC","3/3 LPC","2/4 RC","2/4 LC","2/4 RPC","2/4 LPC","4/2 RC","4/2 LC","4/2 RPC","4/2 LPC",
+          "2/2/2 RC","2/2/2 LC","2/2/2 RPC","2/2/2 LPC","2/2/2 RRC","2/2/2 LRC","6 stitch custom cable"
+          ],
+          "7 Stitch Cables":[
+          "3/4 RC","3/4 LC","3/4 RPC","3/4 LPC","4/3 RC","4/3 LC","4/3 RPC","4/3 LPC",
+          "3/1/3 RC","3/1/3 LC","3/1/3 RPC","3/1/3 LPC","7 stitch custom cable"
+          ],
+          "8 Stitch Cables":[
+          "4/4 RC","4/4 LC","4/4 RPC","4/4 LPC","3/2/3 RC","3/2/3 LC","3/2/3 RPC","3/2/3 LPC","3/2/3 RRC","3/2/3 LRC",
+          "8 stitch custom cable"
+          ],
+          "9 Stitch Cables":[
+          "3/3/3 RC","3/3/3 LC","3/3/3 RPC","3/3/3 LPC","3/3/3 RRC","3/3/3 LRC",
+          "4/1/4 RC","4/1/4 LC","4/1/4 RPC","4/1/4 LPC","9 stitch custom cable"
+          ],
+          "10 Stitch Cables":[
+          "5/5 RC","5/5 LC","10 stitch custom cable"
+          ],
+          "11 Stitch Cables":[
+          "11 stitch custom cable"
+          ],
+          "12 Stitch Cables":[
+          "6/6 RC","6/6 LC","4/4/4 RC","4/4/4 LC","4/4/4 RPC","4/4/4 LPC","4/4/4 RRC","4/4/4 LRC","12 stitch custom cable"
+          ],
+          "Estonian Gathered Stitches":[
+          "2 into 2 gathered","3 into 3 gathered","6 into 2 gathered","5 into 5 gathered","3 into 7 gathered","7 into 5 gathered",
+          "2 into 2 gathered tbl","2 into 3 gathered tbl","3 into 3 gathered tbl","4 into 3 gathered tbl","5 into 3 gathered tbl",
+          "2 into 5 gathered tbl","3 into 5 gathered tbl","5 into 5 gathered tbl","7 into 5 gathered tbl","9 into 5 gathered tbl",
+          "2 into 9 gathered tbl","3 into 9 gathered tbl","5 into 9 gathered tbl","7 into 9 gathered tbl","9 into 9 gathered tbl",
+          "5 into 11 gathered tbl","3 into 7 gathered tbl"
+          ],
+          "Estonian Increases":[
+          "inc 1 to 3 tbl","inc 1 to 4 tbl","inc 1 to 5 tbl","inc 1 to 6 tbl","inc 1 to 7 tbl","inc 1 to 8 tbl","inc 1 to 9 tbl"
+          ],
+          "Estonian Decreases":[
+          "k2tog tbl","k3tog tbl","k4tog tbl","k5tog tbl","k6tog tbl","k7tog tbl","k8tog tbl","k9tog tbl","k2tog-nupp","ssk-nupp"
+          ],
+          "More Estonian Stitches":[
+          "nupp","N stitch","Reverse N stitch","k2tog-nupp","ssk-nupp"
+          ],
+          "Brioche Stitches":[
+          "brk","brp","yf sl1yo","yf sl1yo plus","brk2tog","brssk","brk3tog","brsssk","brkyobrk","brk tbl","yf sl2yo",
+          "brcdd","brcdd purl","br4st inc","brssp","brp2tog","brsssp","brp3tog"
+          ],
+          "Beaded Stitches":[
+          "knit and bead","purl and bead","beaded yarn over","beaded 2 yarn over","beaded 3 yarn over","beaded 4 yarn over",
+          "bead last stitch","hook bead","beaded central double decrease"
+          ],
+          "Twined Stitches":[
+          "twined knit","twined purl","twined purl reverse twist","hook stitch end","hook stitch strand","hook stitch start","hook stitch middle",
+          "hook 3 stitches","hook 5 stitches","hook 7 stitches"
+          ],
+          "V2 Old Stitches":[
+          "knit into fb old","knit into fbf old","(k1, p1) in 1 stitch","(k1, p1, k1) in 1 stitch",
+          "increase 1 to 3 old","increase 1 to 4 old","increase 1 to 5 old","increase 1 to 6 old","increase 1 to 7 old","increase 1 to 8 old"
+          ]
+          };
+
+          // Global State
+          const FONT_DATA = {}; // { fontFamily: { stitchName: { char, width } } }
+          const CORRECTIONS = {}; // { stitchName: { overrideChar, isIncorrect } }
+          let db;
+
+          // --- Initialization ---
+
+          async function init() {
+              await Promise.all([initDB(), parseCSV(), loadCorrections()]);
+              setupEventListeners();
+              renderUI();
+              setStatus("Ready");
+          }
+
+          function setStatus(msg) {
+              document.getElementById('status-text').textContent = msg;
+          }
+
+          // --- Data Parsing ---
+
+          function parseCSV() {
+              return new Promise((resolve) => {
+                  const lines = CSV_DATA.trim().split('\n');
+                  // Skip header
+                  for (let i = 1; i < lines.length; i++) {
+                      const line = lines[i];
+                      // Handle commas inside quotes? The CSV provided seems mostly simple or escaped.
+                      // Simple split by comma for this specific dataset as it doesn't look like it contains commas in the "Suggested use" in a way that breaks rows easily (mostly simple phrases).
+                      // However, to be safe:
+                      const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+
+                      if (parts.length < 6) continue;
+
+                      const typeRaw = parts[0].trim();
+                      const suggestedUse = parts[2].trim();
+                      const widthRaw = parts[4].trim();
+                      const char = parts[5].trim();
+
+                      // Map CSV Type to Font Family Name
+                      let fontFamily = "";
+                      if (typeRaw === "Dot") fontFamily = "StitchMasteryDot";
+                      else if (typeRaw === "Dash") fontFamily = "StitchMasteryDash";
+                      else if (typeRaw === "DotCable") fontFamily = "StitchMasteryDotCable";
+                      else if (typeRaw === "DashCable") fontFamily = "StitchMasteryDashCable";
+                      else if (typeRaw === "DotCableEH") fontFamily = "StitchMasteryDotCableEH";
+                      else if (typeRaw === "DashCableEH") fontFamily = "StitchMasteryDashCableEH";
+                      else continue; // Skip unknown types like Estonian if they don't map to provided fonts
+
+                      if (!FONT_DATA[fontFamily]) FONT_DATA[fontFamily] = {};
+
+                      // Normalize width
+                      let width = 1;
+                      if (widthRaw.includes("One")) width = 1;
+                      else if (widthRaw.includes("Two")) width = 2;
+                      else if (widthRaw.includes("Three")) width = 3;
+                      else if (widthRaw.includes("Four")) width = 4;
+                      else if (widthRaw.includes("Five")) width = 5;
+                      else if (widthRaw.includes("Six")) width = 6;
+                      else if (widthRaw.includes("Seven")) width = 7;
+                      else if (widthRaw.includes("Eight")) width = 8;
+                      else if (widthRaw.includes("Nine")) width = 9;
+                      else if (widthRaw.includes("Ten")) width = 10;
+                      else if (widthRaw.includes("Eleven")) width = 11;
+                      else if (widthRaw.includes("Twelve")) width = 12;
+                      else if (widthRaw.includes("Thirteen")) width = 13;
+                      else if (widthRaw.includes("Fourteen")) width = 14;
+                      else if (widthRaw.includes("Fifteen")) width = 15;
+                      else if (widthRaw.includes("Sixteen")) width = 16;
+                      else if (widthRaw.includes("Eighteen")) width = 18;
+                      else if (widthRaw.includes("Twentyfour")) width = 24;
+                      else if (!isNaN(parseInt(widthRaw))) width = parseInt(widthRaw);
+
+                      FONT_DATA[fontFamily][suggestedUse] = { char, width };
+                  }
+                  resolve();
+              });
+          }
+
+          function findStitchData(stitchName, fontFamily) {
+              // 1. Check Exact Match
+              if (FONT_DATA[fontFamily] && FONT_DATA[fontFamily][stitchName]) {
+                  return FONT_DATA[fontFamily][stitchName];
+              }
+
+              // 2. Check Fuzzy Match / Substring
+              if (FONT_DATA[fontFamily]) {
+                  // Search keys that are substrings or superset
+                  const keys = Object.keys(FONT_DATA[fontFamily]);
+                  for (let k of keys) {
+                      // Simple heuristics
+                      if (stitchName.toLowerCase() === k.toLowerCase()) return FONT_DATA[fontFamily][k];
+                      if (k.toLowerCase().includes(stitchName.toLowerCase()) && k.length < stitchName.length + 5) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("k2tog") && k.toLowerCase().includes("knit 2 together")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("ssk") && k.toLowerCase().includes("ssk")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("m1") && k.toLowerCase().includes("make one")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("p2tog") && k.toLowerCase().includes("purl 2 together")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("k3tog") && k.toLowerCase().includes("knit 3 together")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("yo") && k.toLowerCase().includes("yarn over")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("k tbl") && k.toLowerCase().includes("knit tbl")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("p tbl") && k.toLowerCase().includes("purl tbl")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("k1 below") && k.toLowerCase().includes("knit into stitch below")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("p1 below") && k.toLowerCase().includes("purl into stitch below")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("bobble") && k.toLowerCase().includes("bobble")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("nupp") && k.toLowerCase().includes("nupp")) return FONT_DATA[fontFamily][k];
+                      if (stitchName.toLowerCase().includes("no stitch") && k.toLowerCase().includes("no stitch")) return FONT_DATA[fontFamily][k];
+                  }
+              }
+
+              return null;
+          }
+
+          // --- IndexedDB ---
+
+          function initDB() {
+              return new Promise((resolve, reject) => {
+                  const request = indexedDB.open("StitchCorrectionsDB", 1);
+
+                  request.onupgradeneeded = (event) => {
+                      const db = event.target.result;
+                      if (!db.objectStoreNames.contains("corrections")) {
+                          db.createObjectStore("corrections", { keyPath: "stitchName" });
+                      }
+                  };
+
+                  request.onsuccess = (event) => {
+                      db = event.target.result;
+                      resolve(db);
+                  };
+
+                  request.onerror = (event) => {
+                      console.error("DB Error", event);
+                      reject(event);
+                  };
+              });
+          }
+
+          function loadCorrections() {
+              return new Promise((resolve) => {
+                  const transaction = db.transaction("corrections", "readonly");
+                  const store = transaction.objectStore("corrections");
+                  const request = store.getAll();
+
+                  request.onsuccess = () => {
+                      request.result.forEach(c => {
+                          CORRECTIONS[c.stitchName] = c;
+                      });
+                      resolve();
+                  };
+              });
+          }
+
+          function saveCorrection(stitchName, data) {
+              return new Promise((resolve, reject) => {
+                  const transaction = db.transaction("corrections", "readwrite");
+                  const store = transaction.objectStore("corrections");
+                  const entry = { stitchName, ...data };
+                  const request = store.put(entry);
+
+                  request.onsuccess = () => {
+                      CORRECTIONS[stitchName] = entry;
+                      resolve();
+                  };
+                  request.onerror = reject;
+              });
+          }
+
+          function deleteCorrection(stitchName) {
+              return new Promise((resolve, reject) => {
+                  const transaction = db.transaction("corrections", "readwrite");
+                  const store = transaction.objectStore("corrections");
+                  const request = store.delete(stitchName);
+
+                  request.onsuccess = () => {
+                      delete CORRECTIONS[stitchName];
+                      resolve();
+                  };
+                  request.onerror = reject;
+              });
+          }
+
+          // --- UI Logic ---
+
+          function setupEventListeners() {
+              // Filter
+              const filterSelect = document.getElementById('category-filter');
+              Object.keys(TAXONOMY).forEach(cat => {
+                  const opt = document.createElement('option');
+                  opt.value = cat;
+                  opt.textContent = cat;
+                  filterSelect.appendChild(opt);
+              });
+
+              filterSelect.addEventListener('change', renderUI);
+
+              // Font Toggles
+              document.getElementById('font-toggles').addEventListener('change', renderUI);
+          }
+
+          function renderUI() {
+              const app = document.getElementById('app');
+              app.innerHTML = '';
+              const filter = document.getElementById('category-filter').value;
+              const activeFonts = Array.from(document.querySelectorAll('#font-toggles input:checked')).map(cb => cb.value);
+
+              const categoriesToShow = filter === "All" ? Object.keys(TAXONOMY) : [filter];
+
+              categoriesToShow.forEach(cat => {
+                  if (!TAXONOMY[cat]) return;
+
+                  const section = document.createElement('section');
+                  section.className = 'category-section';
+
+                  const title = document.createElement('h2');
+                  title.className = 'category-title';
+                  title.textContent = cat;
+                  section.appendChild(title);
+
+                  const grid = document.createElement('div');
+                  grid.className = 'stitch-grid';
+
+                  TAXONOMY[cat].forEach(stitchName => {
+                      grid.appendChild(createStitchCard(stitchName, activeFonts));
+                  });
+
+                  section.appendChild(grid);
+                  app.appendChild(section);
+              });
+          }
+
+          function createStitchCard(stitchName, activeFonts) {
+              const card = document.createElement('div');
+              card.className = 'stitch-card';
+
+              // Check correction status
+              const correction = CORRECTIONS[stitchName];
+              if (correction && correction.isIncorrect) {
+                  card.classList.add('incorrect');
+              }
+
+              const header = document.createElement('div');
+              header.className = 'stitch-header';
+              header.innerHTML = `
+                  <span class="stitch-name">${stitchName}</span>
+                  <div class="stitch-actions">
+                      <button class="btn secondary" style="font-size:0.7rem; padding:2px 5px;" onclick="markIncorrect('${stitchName}')">Mark Incorrect</button>
+                  </div>
+              `;
+              card.appendChild(header);
+
+              const renders = document.createElement('div');
+              renders.className = 'renders-area';
+
+              activeFonts.forEach(fontFamily => {
+                  const data = findStitchData(stitchName, fontFamily);
+
+                  // Determine char and width to use
+                  let char = "";
+                  let width = 1;
+
+                  if (correction && correction.overrideChar) {
+                      char = correction.overrideChar;
+                      width = 1; // Default to 1 if manually corrected, user didn't specify width usually
+                  } else if (data) {
+                      char = data.char;
+                      width = data.width;
+                  }
+
+                  const row = document.createElement('div');
+                  row.className = 'render-row';
+
+                  const svgString = generateSVG(char, fontFamily, width);
+                  const blob = new Blob([svgString], {type: 'image/svg+xml'});
+                  const url = URL.createObjectURL(blob);
+
+                  const fontLabel = document.createElement('div');
+                  fontLabel.className = 'font-label';
+                  fontLabel.textContent = fontFamily.replace('StitchMastery', '');
+
+                  const img = document.createElement('img');
+                  img.className = 'svg-preview';
+                  img.src = url;
+                  img.onload = () => URL.revokeObjectURL(url); // Cleanup
+
+                  const input = document.createElement('input');
+                  input.type = 'text';
+                  input.className = 'char-code';
+                  input.value = char;
+                  input.placeholder = "Char";
+                  input.onchange = (e) => {
+                      updateOverride(stitchName, e.target.value, fontFamily);
+                  };
+
+                  // Click to copy char code
+                  input.title = "Click to copy";
+                  input.onclick = function() { this.select(); document.execCommand('copy'); setStatus("Copied char code"); };
+
+                  row.appendChild(fontLabel);
+                  row.appendChild(img);
+                  row.appendChild(input);
+
+                  renders.appendChild(row);
+              });
+
+              // If no active fonts selected, or no data found
+              if (activeFonts.length === 0) {
+                  renders.innerHTML = '<div style="color:#666; padding:10px;">Select fonts above to see symbols.</div>';
+              }
+
+              card.appendChild(renders);
+              return card;
+          }
+
+          function generateSVG(char, fontFamily, width) {
+              // 50px height, width variable based on stitch width
+              const w = width * 50;
+              const h = 50;
+              return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+                <text x="0" y="35" font-family="${fontFamily}" font-size="30" fill="black">${char}</text>
+              </svg>`;
+          }
+
+          function markIncorrect(stitchName) {
+              const correction = CORRECTIONS[stitchName] || { stitchName, isIncorrect: false, overrideChar: "" };
+              correction.isIncorrect = !correction.isIncorrect;
+              saveCorrection(stitchName, correction).then(() => renderUI());
+          }
+
+          function updateOverride(stitchName, char, fontFamily) {
+              const correction = CORRECTIONS[stitchName] || { stitchName, isIncorrect: false, overrideChar: "" };
+              correction.overrideChar = char;
+              saveCorrection(stitchName, correction).then(() => {
+                  setStatus("Saved override for " + stitchName);
+                  renderUI();
+              });
+          }
+
+          // --- Download & Export ---
+
+          async function downloadSVGs() {
+              const zip = new JSZip();
+              const filter = document.getElementById('category-filter').value;
+              const activeFonts = Array.from(document.querySelectorAll('#font-toggles input:checked')).map(cb => cb.value);
+              const categoriesToShow = filter === "All" ? Object.keys(TAXONOMY) : [filter];
+              let count = 0;
+
+              categoriesToShow.forEach(cat => {
+                  TAXONOMY[cat].forEach(stitchName => {
+                      activeFonts.forEach(fontFamily => {
+                          let char = "";
+                          let width = 1;
+                          const correction = CORRECTIONS[stitchName];
+                          const data = findStitchData(stitchName, fontFamily);
+
+                          if (correction && correction.overrideChar) {
+                              char = correction.overrideChar;
+                          } else if (data) {
+                              char = data.char;
+                              width = data.width;
+                          } else {
+                              return; // No data
+                          }
+
+                          // Generate filename
+                          const safeName = stitchName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                          const safeFont = fontFamily.replace('StitchMastery', '');
+                          const filename = `${safeFont}_${safeName}.svg`;
+
+                          const svgContent = generateSVG(char, fontFamily, width);
+                          zip.file(filename, svgContent);
+                          count++;
+                      });
+                  });
+              });
+
+              if (count === 0) {
+                  alert("No symbols found to download based on current selection.");
+                  return;
+              }
+
+              setStatus("Generating zip...");
+              const blob = await zip.generateAsync({type:"blob"});
+              saveAs(blob, "stitch_symbols.zip");
+              setStatus("Download complete.");
+          }
+
+          // --- Correction Modal Management ---
+
+          function openCorrectionsModal() {
+              document.getElementById('correctionsModal').style.display = 'block';
+              renderCorrectionsTable();
+          }
+
+          function closeCorrectionsModal() {
+              document.getElementById('correctionsModal').style.display = 'none';
+              renderUI(); // Refresh UI in case changes were made
+          }
+
+          function renderCorrectionsTable() {
+              const tbody = document.getElementById('correction-table-body');
+              tbody.innerHTML = '';
+
+              const list = Object.values(CORRECTIONS);
+              if (list.length === 0) {
+                  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No corrections saved.</td></tr>';
+                  return;
+              }
+
+              list.forEach(c => {
+                  const tr = document.createElement('tr');
+                  tr.innerHTML = `
+                      <td>${c.stitchName}</td>
+                      <td><input type="text" value="${c.overrideChar || ''}" onchange="updateCorrectionFromModal('${c.stitchName}', this.value, 'overrideChar')" style="width:60px;"></td>
+                      <td>
+                          <input type="checkbox" ${c.isIncorrect ? 'checked' : ''} onchange="updateCorrectionFromModal('${c.stitchName}', this.checked, 'isIncorrect')">
+                      </td>
+                      <td><button class="btn danger" style="padding:2px 5px; font-size:0.7rem;" onclick="deleteCorrectionFromModal('${c.stitchName}')">Delete</button></td>
+                  `;
+                  tbody.appendChild(tr);
+              });
+          }
+
+          function updateCorrectionFromModal(stitchName, value, field) {
+              const correction = CORRECTIONS[stitchName] || { stitchName, isIncorrect: false, overrideChar: "" };
+              correction[field] = value;
+              saveCorrection(stitchName, correction).then(() => {
+                  renderCorrectionsTable();
+                  renderUI();
+              });
+          }
+
+          function deleteCorrectionFromModal(stitchName) {
+              if(confirm("Delete this correction?")) {
+                  deleteCorrection(stitchName).then(() => {
+                      renderCorrectionsTable();
+                      renderUI();
+                  });
+              }
+          }
+
+          function clearAllCorrections() {
+              if(confirm("Clear all corrections?")) {
+                  Object.keys(CORRECTIONS).forEach(key => deleteCorrection(key));
+                  setTimeout(() => {
+                      renderCorrectionsTable();
+                      renderUI();
+                  }, 500);
+              }
+          }
+
+          function copyCorrectionsToClipboard() {
+              const data = JSON.stringify(CORRECTIONS, null, 2);
+              navigator.clipboard.writeText(data).then(() => {
+                  alert("Corrections copied to clipboard as JSON.");
+              });
+          }
+
+          // --- Start ---
+          // Ensure fonts are loaded before rendering
+          document.fonts.ready.then(() => {
+              init();
+          });
+    </script>
+  </body>
 </html>
