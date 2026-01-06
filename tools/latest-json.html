@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Check and update NPM dependencies instantly. Parallel requests to NPM, Bun, Yarn registries for maximum speed. Latest JSON privacy first apps."
+    />
+    <meta
+      name="keywords"
+      content="npm, package.json, update dependencies, latestjson.privacyfirstapps.org, semver, brutalist, json tools, parallel fetch"
+    />
+    <meta name="author" content="latestjson.privacyfirstapps.org" />
+    <title>PARALLEL NPM UPDATER | latestjson.privacyfirstapps.org</title>
+
+    <style>
+      /* BRUTALIST DESIGN SYSTEM */
+      :root {
+        --bg-color: #f4f4f0;
+        --text-color: #111;
+        --border-color: #000;
+        --primary: #00ff41; /* Terminal Green */
+        --secondary: #ffcc00; /* Warning Yellow */
+        --danger: #ff3333; /* Error Red */
+        --code-bg: #e0e0e0;
+        --shadow-offset: 4px;
+        --bun-color: #fbf0df;
+        --bun-text: #000000;
+        --npm-color: #cb3837;
+        --npm-text: #ffffff;
+        --yarn-color: #2c8ebb;
+        --yarn-text: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Courier New", Courier, monospace;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 20px;
+        line-height: 1.4;
+        font-size: 16px;
+      }
+
+      header,
+      main,
+      footer {
+        max-width: 1200px;
+        margin: 0 auto;
+        border: 3px solid var(--border-color);
+        margin-bottom: 2rem;
+        background: #fff;
+        box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--border-color);
+      }
+
+      h1,
+      h2,
+      h3 {
+        text-transform: uppercase;
+        letter-spacing: -1px;
+        font-weight: 700;
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin: 0;
+        padding: 1rem;
+        border-bottom: 3px solid var(--border-color);
+        background: var(--text-color);
+        color: var(--bg-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .speed-badge {
+        font-size: 0.8rem;
+        background: var(--primary);
+        color: black;
+        padding: 0.2rem 0.5rem;
+        border: 2px solid white;
+        animation: pulse 1s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      section {
+        padding: 1.5rem;
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      section:last-child {
+        border-bottom: none;
+      }
+
+      /* CONTROLS & INPUTS */
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      label {
+        font-weight: bold;
+        text-decoration: underline;
+      }
+
+      textarea {
+        width: 100%;
+        height: 200px;
+        font-family: "Courier New", Courier, monospace;
+        padding: 1rem;
+        border: 3px solid var(--border-color);
+        background: var(--code-bg);
+        resize: vertical;
+        font-size: 14px;
+        outline: none;
+      }
+
+      textarea:focus {
+        background: #fff;
+        box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--border-color);
+      }
+
+      .btn {
+        background: #fff;
+        color: var(--text-color);
+        border: 3px solid var(--border-color);
+        padding: 0.75rem 1.5rem;
+        text-transform: uppercase;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--border-color);
+        transition: all 0.1s;
+        font-family: inherit;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .btn:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: calc(var(--shadow-offset) + 2px) calc(var(--shadow-offset) + 2px) 0
+          var(--border-color);
+      }
+
+      .btn:active {
+        transform: translate(2px, 2px);
+        box-shadow: 0 0 0 var(--border-color);
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        border-color: #000;
+      }
+
+      .btn-danger {
+        background: var(--danger);
+      }
+
+      /* OPTIONS */
+      .options-group {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1rem;
+        background: #eee;
+        border: 2px dashed var(--border-color);
+        flex-wrap: wrap;
+      }
+
+      .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-weight: bold;
+      }
+
+      input[type="radio"] {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border-color);
+        background: #fff;
+        display: grid;
+        place-content: center;
+      }
+
+      input[type="radio"]::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        background: var(--text-color);
+        transform: scale(0);
+        transition: 0.1s transform;
+      }
+
+      input[type="radio"]:checked::before {
+        transform: scale(1);
+      }
+
+      /* RESULTS TABLE */
+      .results-container {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+      }
+
+      th {
+        background: var(--text-color);
+        color: #fff;
+        text-transform: uppercase;
+      }
+
+      tr:nth-child(even) {
+        background: #f9f9f9;
+      }
+
+      /* SOURCE BADGES */
+      .src-bun {
+        background: var(--bun-color);
+        color: var(--bun-text);
+        font-weight: bold;
+        padding: 2px 4px;
+        border: 1px solid #000;
+      }
+      .src-npm {
+        background: var(--npm-color);
+        color: var(--npm-text);
+        font-weight: bold;
+        padding: 2px 4px;
+        border: 1px solid #000;
+      }
+      .src-yarn {
+        background: var(--yarn-color);
+        color: var(--yarn-text);
+        font-weight: bold;
+        padding: 2px 4px;
+        border: 1px solid #000;
+      }
+
+      /* STATUS COLORS */
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-weight: bold;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        border: 2px solid transparent;
+      }
+
+      .status-patch {
+        color: #000;
+        background: var(--primary);
+        border-color: #000;
+      }
+
+      .status-minor {
+        color: #000;
+        background: var(--secondary);
+        border-color: #000;
+      }
+
+      .status-major {
+        color: #fff;
+        background: var(--danger);
+        border-color: #000;
+      }
+
+      .status-current {
+        color: #666;
+        background: #ddd;
+      }
+
+      /* TOAST NOTIFICATION */
+      #toast {
+        visibility: hidden;
+        min-width: 250px;
+        background-color: #000;
+        color: #fff;
+        text-align: center;
+        padding: 16px;
+        position: fixed;
+        z-index: 100;
+        left: 50%;
+        bottom: 30px;
+        transform: translateX(-50%);
+        border: 2px solid #fff;
+        font-weight: bold;
+      }
+
+      #toast.show {
+        visibility: visible;
+        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      }
+
+      @keyframes fadein {
+        from {
+          bottom: 0;
+          opacity: 0;
+        }
+        to {
+          bottom: 30px;
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadeout {
+        from {
+          bottom: 30px;
+          opacity: 1;
+        }
+        to {
+          bottom: 0;
+          opacity: 0;
+        }
+      }
+
+      /* FOOTER */
+      footer {
+        text-align: center;
+        padding: 2rem;
+        font-size: 0.8rem;
+      }
+
+      .file-upload {
+        margin-bottom: 1rem;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .loading-bar {
+        width: 100%;
+        height: 20px;
+        background: #ddd;
+        margin-top: 10px;
+        display: none;
+        position: relative;
+        border: 2px solid var(--border-color);
+      }
+
+      .loading-progress {
+        height: 100%;
+        background: var(--primary);
+        width: 0%;
+        transition: width 0.1s linear;
+      }
+
+      .stats {
+        margin-top: 1rem;
+        font-weight: bold;
+        display: flex;
+        gap: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>
+        PARALLEL NPM UPDATER
+        <span class="speed-badge">MULTI-CDN RACE</span>
+      </h1>
+    </header>
+
+    <main>
+      <!-- INPUT SECTION -->
+      <section id="input-section">
+        <div class="controls">
+          <h2 style="margin: 0">1. INPUT</h2>
+          <input type="file" id="fileInput" accept=".json" class="file-upload btn" />
+          <div style="flex-grow: 1"></div>
+          <small>PASTE package.json BELOW OR UPLOAD FILE</small>
+        </div>
+        <textarea
+          id="jsonInput"
+          placeholder='{
+  "name": "my-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.18.2",
+    "lodash": "~4.17.21"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}'
+        ></textarea>
+
+        <div class="loading-bar" id="loadingBar">
+          <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+        <div style="margin-top: 5px; font-size: 0.8rem; color: #555" id="statusText">
+          Waiting...
+        </div>
+      </section>
+
+      <!-- CONTROLS SECTION -->
+      <section>
+        <div class="controls">
+          <h2 style="margin: 0">2. CONFIGURE</h2>
+          <div class="options-group">
+            <span>UPDATE STRATEGY:</span>
+            <label class="radio-label">
+              <input type="radio" name="updateStrategy" value="all" checked />
+              All (Major + Minor + Patch)
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="updateStrategy" value="minor" />
+              Minor + Patch Only
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="updateStrategy" value="patch" />
+              Patch Only
+            </label>
+          </div>
+          <button id="checkBtn" class="btn btn-primary">RACE REGISTRIES</button>
+        </div>
+      </section>
+
+      <!-- RESULTS SECTION -->
+      <section id="results-section" class="hidden">
+        <div class="controls" style="justify-content: space-between">
+          <h2 style="margin: 0">3. RESULTS</h2>
+          <div style="display: flex; gap: 10px">
+            <button id="updateAllBtn" class="btn">1-Click Update All</button>
+            <button id="copyBtn" class="btn">Copy Result</button>
+          </div>
+        </div>
+
+        <div class="stats" id="statsBar">
+          <!-- Stats injected here -->
+        </div>
+
+        <div class="results-container">
+          <table id="resultsTable">
+            <thead>
+              <tr>
+                <th>Package</th>
+                <th>Type</th>
+                <th>Current</th>
+                <th>Latest</th>
+                <th>Source</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Rows injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        PRIVACY FIRST APPS &bull; LATESTJSON &bull; NO DATA IS SENT TO OUR SERVERS (CLIENT SIDE
+        ONLY)
+      </p>
+      <p>Checks versions against public NPM, Bun, and Yarn registries in parallel.</p>
+    </footer>
+
+    <div id="toast">Message</div>
+
+    <script>
+      /* REGISTRY CONFIGURATION */
+      // We define multiple endpoints. The logic will race them.
+      // We use Promise.any() to take the first successful response.
+      const REGISTRIES = [
+          { name: 'NPM', url: 'https://registry.npmjs.org' },
+          { name: 'BUN', url: 'https://registry.npm.bun.sh' }, // Bun's registry is very fast
+          { name: 'YARN', url: 'https://registry.yarnpkg.com' }
+      ];
+
+      /* STATE MANAGEMENT */
+      let originalPackageJson = null;
+      let processedData = [];
+      let latestVersions = {};
+
+      /* DOM ELEMENTS */
+      const fileInput = document.getElementById('fileInput');
+      const jsonInput = document.getElementById('jsonInput');
+      const checkBtn = document.getElementById('checkBtn');
+      const updateAllBtn = document.getElementById('updateAllBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      const resultsSection = document.getElementById('results-section');
+      const resultsTableBody = document.querySelector('#resultsTable tbody');
+      const loadingBar = document.getElementById('loadingBar');
+      const loadingProgress = document.getElementById('loadingProgress');
+      const statusText = document.getElementById('statusText');
+      const statsBar = document.getElementById('statsBar');
+      const toast = document.getElementById('toast');
+      const strategyRadios = document.getElementsByName('updateStrategy');
+
+      /* EVENT LISTENERS */
+      fileInput.addEventListener('change', handleFileUpload);
+      checkBtn.addEventListener('click', processDependencies);
+      updateAllBtn.addEventListener('click', applyUpdates);
+      copyBtn.addEventListener('click', copyToClipboard);
+
+      /* FUNCTIONS */
+
+      function showToast(msg) {
+          toast.textContent = msg;
+          toast.className = "show";
+          setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+      }
+
+      function handleFileUpload(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+              jsonInput.value = e.target.result;
+              showToast("File loaded successfully");
+          };
+          reader.readAsText(file);
+      }
+
+      function parseInput() {
+          try {
+              const content = jsonInput.value.trim();
+              if (!content) throw new Error("Input is empty");
+              return JSON.parse(content);
+          } catch (e) {
+              showToast("Invalid JSON format");
+              return null;
+          }
+      }
+
+      function getUpdateStrategy() {
+          for (const radio of strategyRadios) {
+              if (radio.checked) return radio.value;
+          }
+          return 'all';
+      }
+
+      /**
+       * Fetches version from a specific registry
+       */
+      async function fetchFromRegistry(registry, packageName) {
+          const controller = new AbortController();
+          const id = setTimeout(() => controller.abort(), 5000); // 5s timeout per source
+
+          try {
+              const response = await fetch(`${registry.url}/${packageName}`, {
+                  signal: controller.signal,
+                  headers: { 'Accept': 'application/json' }
+              });
+              clearTimeout(id);
+
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+              const data = await response.json();
+              // Most registries (NPM, Bun, Yarn) follow this standard format
+              const latest = data['dist-tags']?.latest;
+
+              if (latest) {
+                  return { version: latest, source: registry.name };
+              }
+              throw new Error("No latest tag found");
+          } catch (error) {
+              clearTimeout(id);
+              throw error; // Re-throw so Promise.any can ignore this failed promise
+          }
+      }
+
+      /**
+       * Races multiple registries for a single package
+       */
+      async function fetchLatestVersion(packageName) {
+          // Create an array of promises for all registries
+          const promises = REGISTRIES.map(reg => fetchFromRegistry(reg, packageName));
+
+          try {
+              // Promise.any returns the first fulfilled promise
+              return await Promise.any(promises);
+          } catch (errors) {
+              // If all fail, errors is an AggregateError
+              console.error(`All registries failed for ${packageName}:`, errors);
+              return { version: 'error', source: 'ERR' };
+          }
+      }
+
+      async function processDependencies() {
+          const pkg = parseInput();
+          if (!pkg) return;
+
+          originalPackageJson = pkg;
+          processedData = [];
+          latestVersions = {};
+
+          // Reset UI
+          resultsSection.classList.add('hidden');
+          loadingBar.style.display = 'block';
+          loadingProgress.style.width = '0%';
+          statusText.textContent = "Racing NPM, Bun, and Yarn registries...";
+          resultsTableBody.innerHTML = '';
+
+          // Collect dependencies
+          const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+          const depNames = Object.keys(deps);
+
+          if (depNames.length === 0) {
+              showToast("No dependencies found");
+              loadingBar.style.display = 'none';
+              return;
+          }
+
+          const startTime = Date.now();
+
+          // PARALLEL PROCESSING
+          // We map all names to promises, then fire them all at once with Promise.all
+          const checkPromises = depNames.map(async (name) => {
+              const currentVersion = deps[name];
+              const type = pkg.dependencies && pkg.dependencies[name] ? 'Prod' : 'Dev';
+
+              // This fires the internal race logic immediately
+              const result = await fetchLatestVersion(name);
+
+              const diff = compareVersions(currentVersion, result.version);
+
+              return {
+                  name,
+                  current: currentVersion,
+                  latest: result.version,
+                  source: result.source,
+                  type,
+                  diff
+              };
+          });
+
+          // Wait for all parallel requests to finish
+          processedData = await Promise.all(checkPromises);
+
+          const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+          statusText.textContent = `Checked ${depNames.length} packages in ${duration}s via parallel racing.`;
+
+          renderTable();
+          loadingBar.style.display = 'none';
+          resultsSection.classList.remove('hidden');
+          showToast("Version check complete");
+      }
+
+      function compareVersions(current, latest) {
+          if (latest === 'error') return 'error';
+
+          // Strip ^, ~, >=, <=, etc for comparison
+          const cleanCurrent = current.replace(/^[^0-9]*/, '');
+
+          if (cleanCurrent === latest) return 'current';
+
+          const partsC = cleanCurrent.split('.').map(Number);
+          const partsL = latest.split('.').map(Number);
+
+          // Simple semver comparison
+          for (let i = 0; i < 3; i++) {
+              const c = partsC[i] || 0;
+              const l = partsL[i] || 0;
+              if (l > c) {
+                  if (i === 0) return 'major';
+                  if (i === 1) return 'minor';
+                  return 'patch';
+              }
+              if (c > l) return 'downgrade'; // Weird state
+          }
+          return 'current';
+      }
+
+      function renderTable() {
+          resultsTableBody.innerHTML = '';
+
+          let counts = { major: 0, minor: 0, patch: 0, current: 0 };
+
+          processedData.forEach(item => {
+              counts[item.diff]++;
+              const row = document.createElement('tr');
+
+              let badgeClass = '';
+              let badgeText = '';
+
+              switch(item.diff) {
+                  case 'major': badgeClass = 'status-major'; badgeText = 'MAJOR'; break;
+                  case 'minor': badgeClass = 'status-minor'; badgeText = 'MINOR'; break;
+                  case 'patch': badgeClass = 'status-patch'; badgeText = 'PATCH'; break;
+                  case 'error': badgeClass = 'status-current'; badgeText = 'ERR'; break;
+                  default: badgeClass = 'status-current'; badgeText = 'OK';
+              }
+
+              // Determine Source Badge Class
+              let srcClass = '';
+              const srcLower = item.source.toLowerCase();
+              if(srcLower === 'bun') srcClass = 'src-bun';
+              else if(srcLower === 'npm') srcClass = 'src-npm';
+              else if(srcLower === 'yarn') srcClass = 'src-yarn';
+              else srcClass = 'status-current'; // Default for error
+
+              row.innerHTML = `
+                  <td><strong>${item.name}</strong></td>
+                  <td>${item.type}</td>
+                  <td>${item.current}</td>
+                  <td style="font-weight:bold;">${item.latest}</td>
+                  <td><span class="${srcClass}">${item.source}</span></td>
+                  <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+              `;
+              resultsTableBody.appendChild(row);
+          });
+
+          statsBar.innerHTML = `
+              <span style="color:var(--danger)">MAJOR: ${counts.major}</span>
+              <span style="color:#bfa300">MINOR: ${counts.minor}</span>
+              <span style="color:green">PATCH: ${counts.patch}</span>
+              <span>OK: ${counts.current}</span>
+          `;
+      }
+
+      function applyUpdates() {
+          if (!originalPackageJson) return;
+
+          const strategy = getUpdateStrategy();
+          const newPkg = JSON.parse(JSON.stringify(originalPackageJson)); // Deep copy
+          let updatedCount = 0;
+
+          const updateObj = (deps) => {
+              if (!deps) return;
+              for (const [name, currentVer] of Object.entries(deps)) {
+                  const info = processedData.find(p => p.name === name);
+                  if (!info || info.diff === 'error') continue;
+
+                  let shouldUpdate = false;
+
+                  if (info.diff === 'patch' && (strategy === 'patch' || strategy === 'minor' || strategy === 'all')) shouldUpdate = true;
+                  if (info.diff === 'minor' && (strategy === 'minor' || strategy === 'all')) shouldUpdate = true;
+                  if (info.diff === 'major' && (strategy === 'all')) shouldUpdate = true;
+
+                  if (shouldUpdate) {
+                      deps[name] = info.latest;
+                      updatedCount++;
+                  }
+              }
+          };
+
+          updateObj(newPkg.dependencies);
+          updateObj(newPkg.devDependencies);
+
+          jsonInput.value = JSON.stringify(newPkg, null, 2);
+          showToast(`Updated ${updatedCount} packages.`);
+
+          // Re-run check to update table visuals
+          processDependencies();
+      }
+
+      function copyToClipboard() {
+          jsonInput.select();
+          document.execCommand('copy');
+          if (navigator.clipboard) {
+              navigator.clipboard.writeText(jsonInput.value);
+          }
+          showToast("JSON copied to clipboard");
+      }
+    </script>
+  </body>
+</html>
