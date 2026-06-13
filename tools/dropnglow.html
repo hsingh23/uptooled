@@ -1,0 +1,1464 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Drop N' Glow Decision Workbook</title>
+  <meta name="description" content="A single-file decision workbook for Drop N' Glow mobile sauna business strategy, pricing, waivers, bookings, memberships, operations, and launch planning." />
+  <style>
+    :root {
+      --bg: #fbf7ef;
+      --paper: #fffaf2;
+      --ink: #1c1712;
+      --muted: #6f6257;
+      --line: #eadfcf;
+      --charcoal: #171412;
+      --cedar: #8a4e2d;
+      --ember: #e7833a;
+      --gold: #c89b47;
+      --cream: #fff7e8;
+      --green: #3f8d67;
+      --amber: #b46b22;
+      --red: #b84a3a;
+      --blue: #385e86;
+      --shadow: 0 20px 70px rgba(44, 26, 10, .10);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 8%, rgba(231,131,58,.20), transparent 32rem),
+        radial-gradient(circle at 88% 15%, rgba(200,155,71,.18), transparent 26rem),
+        linear-gradient(180deg, #fff7ea 0%, #fbf7ef 44%, #f7efe3 100%);
+      min-height: 100vh;
+    }
+
+    button, input, textarea, select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    a { color: var(--cedar); }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(251,247,239,.82);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(234,223,207,.85);
+    }
+
+    .topbar-inner {
+      display: grid;
+      grid-template-columns: minmax(190px, 1fr) minmax(240px, 580px) auto;
+      gap: 18px;
+      align-items: center;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 14px 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .flame {
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #201711, #6e321e 54%, #ee9943);
+      box-shadow: 0 12px 28px rgba(126, 65, 28, .22);
+      color: #fff8e5;
+      font-size: 22px;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+
+    .brand-sub {
+      display: inline-flex;
+      margin-left: 8px;
+      color: var(--cedar);
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .save-hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .progress-wrap {
+      min-width: 0;
+    }
+
+    .progress-line {
+      height: 10px;
+      background: rgba(138,78,45,.12);
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(138,78,45,.08);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cedar), var(--ember), #f4c064);
+      transition: width .35s ease;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 6px;
+      gap: 12px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 750;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 8px 18px rgba(42, 24, 12, .06);
+      transition: .18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(42, 24, 12, .10);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #26160d, #8c4b28 55%, #e99841);
+      color: #fff7e4;
+      border-color: transparent;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .btn.small {
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+
+    .layout {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px 22px 80px;
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr) 310px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(255,250,242,.86);
+      border: 1px solid rgba(234,223,207,.92);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      grid-column: 1 / -1;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(23,20,18,.96), rgba(91,49,28,.92)),
+        radial-gradient(circle at 70% 20%, rgba(231,131,58,.38), transparent 20rem);
+      color: #fff8e8;
+      padding: 0;
+      position: relative;
+      min-height: 220px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      align-items: stretch;
+      min-height: 240px;
+    }
+
+    .hero-copy {
+      padding: 34px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .eyebrow {
+      color: #f6c072;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: .18em;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      line-height: 1.05;
+    }
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(34px, 5vw, 68px);
+      max-width: 820px;
+      letter-spacing: -.04em;
+    }
+
+    .hero p {
+      max-width: 760px;
+      color: rgba(255,248,232,.78);
+      font-size: 17px;
+      line-height: 1.65;
+    }
+
+    .hero-art {
+      min-height: 220px;
+      display: grid;
+      place-items: end center;
+      padding: 24px 24px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-art svg {
+      width: min(100%, 560px);
+      height: auto;
+      filter: drop-shadow(0 22px 30px rgba(0,0,0,.28));
+    }
+
+    .side {
+      position: sticky;
+      top: 102px;
+      max-height: calc(100vh - 126px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .side-header {
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .side-header h2 {
+      font-size: 16px;
+      letter-spacing: -.01em;
+    }
+
+    .search {
+      margin-top: 12px;
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 11px 12px;
+      background: #fffdf7;
+      outline: none;
+    }
+
+    .search:focus {
+      box-shadow: 0 0 0 4px rgba(231,131,58,.16);
+      border-color: rgba(231,131,58,.58);
+    }
+
+    .question-list {
+      overflow: auto;
+      padding: 10px;
+    }
+
+    .qnav {
+      width: 100%;
+      text-align: left;
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: start;
+      border-radius: 16px;
+      padding: 11px 10px;
+      color: var(--ink);
+      background: transparent;
+      margin: 3px 0;
+    }
+
+    .qnav:hover, .qnav.active {
+      background: rgba(231,131,58,.10);
+    }
+
+    .qnav.active {
+      box-shadow: inset 0 0 0 1px rgba(231,131,58,.26);
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      margin-top: 2px;
+      background: #d7c7b5;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
+    }
+
+    .dot.decided { background: var(--green); }
+    .dot.research { background: #d59531; }
+    .dot.open { background: #cbbba8; }
+
+    .qnav-title {
+      font-weight: 750;
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .qnav-cat {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .main-card {
+      padding: clamp(22px, 4vw, 38px);
+      min-height: 650px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .main-card:before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(231,131,58,.17), transparent 70%);
+      pointer-events: none;
+    }
+
+    .q-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: rgba(138,78,45,.08);
+      color: var(--cedar);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .pill.green { color: var(--green); background: rgba(63,141,103,.11); }
+    .pill.amber { color: var(--amber); background: rgba(180,107,34,.12); }
+    .pill.dark { color: #fff6e4; background: var(--charcoal); }
+
+    .q-title {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(32px, 4.3vw, 58px);
+      letter-spacing: -.045em;
+      max-width: 980px;
+      margin-bottom: 16px;
+    }
+
+    .prompt {
+      color: var(--muted);
+      line-height: 1.72;
+      max-width: 920px;
+      font-size: 17px;
+      margin: 0 0 18px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin: 22px 0;
+    }
+
+    .info-box {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.66);
+      border-radius: 18px;
+      padding: 16px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .info-box strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .choices {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .choice-card {
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      border-radius: 20px;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 14px;
+      text-align: left;
+      color: var(--ink);
+      box-shadow: 0 10px 24px rgba(42,24,12,.05);
+      transition: .18s ease;
+    }
+
+    .choice-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(231,131,58,.42);
+      box-shadow: 0 18px 34px rgba(42,24,12,.09);
+    }
+
+    .choice-card.selected {
+      border-color: rgba(231,131,58,.9);
+      background: linear-gradient(180deg, #fff8ec, #fffdf9);
+      box-shadow: 0 20px 40px rgba(231,131,58,.13);
+    }
+
+    .choice-radio {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 2px solid #cdbda8;
+      margin-top: 2px;
+      display: grid;
+      place-items: center;
+    }
+
+    .choice-card.selected .choice-radio {
+      border-color: var(--ember);
+    }
+
+    .choice-card.selected .choice-radio:after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--ember);
+    }
+
+    .choice-title {
+      font-weight: 850;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .rec-badge {
+      color: #fff9e8;
+      background: linear-gradient(135deg, var(--cedar), var(--ember));
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .choice-detail {
+      color: var(--muted);
+      margin: 6px 0 10px;
+      line-height: 1.55;
+    }
+
+    .choice-procon {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .choice-procon span {
+      display: block;
+      background: rgba(138,78,45,.05);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 126px;
+      resize: vertical;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      padding: 14px;
+      outline: none;
+      background: #fffdf8;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    textarea:focus {
+      box-shadow: 0 0 0 4px rgba(231,131,58,.14);
+      border-color: rgba(231,131,58,.58);
+    }
+
+    label.field-label {
+      display: block;
+      font-weight: 850;
+      font-size: 13px;
+      color: var(--ink);
+      margin: 0 0 8px;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+      align-items: center;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(138,78,45,.06);
+    }
+
+    .status-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 10px 13px;
+      font-weight: 800;
+    }
+
+    .status-btn.active.decided {
+      background: rgba(63,141,103,.12);
+      color: var(--green);
+      border-color: rgba(63,141,103,.35);
+    }
+
+    .status-btn.active.research {
+      background: rgba(213,149,49,.14);
+      color: #996111;
+      border-color: rgba(213,149,49,.40);
+    }
+
+    .status-btn.active.open {
+      background: rgba(23,20,18,.08);
+    }
+
+    .nav-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 28px;
+      flex-wrap: wrap;
+    }
+
+    .right-rail {
+      position: sticky;
+      top: 102px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .mini-panel {
+      padding: 18px;
+    }
+
+    .mini-panel h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .mini-panel p, .mini-panel li {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .encourage {
+      background:
+        radial-gradient(circle at 70% 15%, rgba(255,255,255,.2), transparent 12rem),
+        linear-gradient(140deg, #201711, #7e4324 62%, #e78b37);
+      color: #fff8e8;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .encourage p {
+      color: rgba(255,248,232,.82);
+    }
+
+    .sun {
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      right: -44px;
+      bottom: -44px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(255,218,135,.82), rgba(231,131,58,.08) 65%, transparent);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .stat {
+      background: rgba(255,255,255,.64);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .stat-number {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -.04em;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .source-link {
+      font-size: 12px;
+      line-height: 1.35;
+      color: var(--cedar);
+      text-decoration: none;
+      border-bottom: 1px dotted rgba(138,78,45,.42);
+      width: fit-content;
+    }
+
+    .report-view {
+      max-width: 1100px;
+      margin: 0 auto 80px;
+      padding: 24px 22px 80px;
+    }
+
+    .report-card {
+      padding: clamp(22px, 4vw, 42px);
+    }
+
+    .report-card h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(30px, 4vw, 54px);
+      letter-spacing: -.04em;
+      margin-bottom: 12px;
+    }
+
+    .report-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .decision-item {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      margin: 12px 0;
+      padding: 16px;
+      background: #fffdf8;
+      break-inside: avoid;
+    }
+
+    .decision-item h4 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .decision-item p {
+      margin: 6px 0;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+
+    .decision-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 8px 0;
+    }
+
+    .hidden { display: none !important; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      background: var(--charcoal);
+      color: #fff7e8;
+      padding: 12px 16px;
+      border-radius: 999px;
+      z-index: 99;
+      transition: .25s ease;
+      box-shadow: 0 20px 40px rgba(0,0,0,.22);
+      pointer-events: none;
+      max-width: calc(100vw - 32px);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .kbd {
+      border: 1px solid var(--line);
+      border-bottom-width: 2px;
+      border-radius: 7px;
+      padding: 1px 6px;
+      background: #fff;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1180px) {
+      .layout {
+        grid-template-columns: 290px minmax(0, 1fr);
+      }
+      .right-rail {
+        grid-column: 1 / -1;
+        position: static;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 820px) {
+      .topbar-inner {
+        grid-template-columns: 1fr;
+      }
+      .top-actions {
+        justify-content: flex-start;
+      }
+      .layout {
+        grid-template-columns: 1fr;
+        padding: 14px 14px 80px;
+      }
+      .side {
+        position: static;
+        max-height: 260px;
+      }
+      .hero-grid, .info-grid, .notes-grid, .choice-procon, .right-rail {
+        grid-template-columns: 1fr;
+      }
+      .hero-copy {
+        padding: 26px;
+      }
+      .hero-art {
+        display: none;
+      }
+      .main-card {
+        padding: 22px;
+        min-height: auto;
+      }
+      .q-title {
+        font-size: 34px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff !important;
+        color: #111;
+      }
+      .screen-only, .topbar, .layout, .toast {
+        display: none !important;
+      }
+      .report-view {
+        display: block !important;
+        padding: 0;
+        margin: 0;
+        max-width: none;
+      }
+      .report-card {
+        box-shadow: none !important;
+        border: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+      }
+      .report-actions {
+        display: none !important;
+      }
+      .decision-item {
+        border-color: #bbb;
+        background: #fff;
+        break-inside: avoid;
+      }
+      a {
+        color: #111;
+        text-decoration: none;
+      }
+      .pill {
+        border: 1px solid #aaa;
+        background: #fff !important;
+        color: #111 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar screen-only">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="flame" aria-hidden="true">🔥</div>
+        <div>
+          <div class="brand-title">Drop N' Glow <span class="brand-sub">mobile sauna</span></div>
+          <div class="save-hint">Single HTML file. Your decisions autosave locally in IndexedDB.</div>
+        </div>
+      </div>
+      <div class="progress-wrap" aria-label="Workbook progress">
+        <div class="progress-line"><div id="progressBar" class="progress-bar"></div></div>
+        <div class="progress-meta">
+          <span id="progressText">Loading…</span>
+          <span id="remainingText">Saved locally</span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn small" id="jumpIncompleteBtn">Next unresolved</button>
+        <button class="btn small" id="showReportBtn">Report</button>
+        <button class="btn small ghost" id="exportBtn">Export JSON</button>
+        <button class="btn small ghost" id="resetBtn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="appShell" class="layout screen-only">
+    <section class="hero panel" aria-labelledby="heroTitle">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">Decision workbook</div>
+          <h1 id="heroTitle">Build the business before the website locks it in.</h1>
+          <p>Answer the major decisions behind Drop N' Glow: pricing, waivers, delivery, memberships, operations, admin controls, safety, and launch sequencing. Choose a decision, mark it for research, add notes, and print a clean report when ready.</p>
+          <button class="btn primary" id="startBtn">Start deciding</button>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 680 430" role="img">
+            <defs>
+              <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stop-color="#f3be70"/>
+                <stop offset="45%" stop-color="#a95a33"/>
+                <stop offset="100%" stop-color="#211713"/>
+              </linearGradient>
+              <linearGradient id="wood" x1="0" x2="1">
+                <stop offset="0%" stop-color="#6e351f"/>
+                <stop offset="100%" stop-color="#d48a47"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="680" height="430" rx="34" fill="url(#sky)" opacity=".72"/>
+            <circle cx="560" cy="95" r="74" fill="#ffd98e" opacity=".70"/>
+            <path d="M0 326 C120 280 230 322 350 286 C470 251 570 278 680 235 L680 430 L0 430 Z" fill="#1d1714" opacity=".88"/>
+            <path d="M80 312 C170 282 300 312 394 283 C497 252 575 260 680 228 L680 430 L80 430 Z" fill="#2c211b" opacity=".92"/>
+            <g transform="translate(185 170)">
+              <rect x="0" y="98" width="340" height="30" rx="15" fill="#16120f"/>
+              <circle cx="76" cy="137" r="26" fill="#15110f"/>
+              <circle cx="76" cy="137" r="10" fill="#5a524a"/>
+              <circle cx="270" cy="137" r="26" fill="#15110f"/>
+              <circle cx="270" cy="137" r="10" fill="#5a524a"/>
+              <path d="M42 102 L42 58 C42 18 78 -14 123 -14 L232 -14 C278 -14 314 18 314 58 L314 102 Z" fill="url(#wood)"/>
+              <path d="M68 91 L68 60 C68 37 88 18 116 18 L240 18 C268 18 288 37 288 60 L288 91 Z" fill="#201713" opacity=".55"/>
+              <path d="M92 84 L92 58 C92 45 104 35 121 35 L238 35 C255 35 266 45 266 58 L266 84 Z" fill="#ffd084" opacity=".28"/>
+              <rect x="245" y="-45" width="22" height="54" rx="9" fill="#201713"/>
+              <path d="M254 -55 C240 -86 274 -91 260 -124 C297 -90 265 -70 291 -48" fill="none" stroke="#ffd48a" stroke-width="6" stroke-linecap="round" opacity=".78"/>
+              <rect x="110" y="102" width="140" height="18" rx="8" fill="#2a211b"/>
+              <text x="177" y="72" text-anchor="middle" fill="#fff5df" font-family="Arial" font-size="22" font-weight="700">DNG</text>
+            </g>
+            <text x="42" y="54" fill="#fff8e6" font-family="Georgia" font-size="34" font-weight="700">Keep going.</text>
+            <text x="42" y="88" fill="#fff8e6" font-family="Arial" font-size="17" opacity=".82">One decision at a time.</text>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side panel" aria-label="Question navigation">
+      <div class="side-header">
+        <h2>Questions</h2>
+        <input id="questionSearch" class="search" type="search" placeholder="Search questions…" autocomplete="off" />
+      </div>
+      <div id="questionList" class="question-list"></div>
+    </aside>
+
+    <section id="questionCard" class="main-card panel" aria-live="polite"></section>
+
+    <aside class="right-rail">
+      <div class="mini-panel panel encourage">
+        <div class="sun" aria-hidden="true"></div>
+        <h3 id="encourageTitle">Keep going, you got this.</h3>
+        <p id="encourageCopy">Each answer becomes a cleaner requirement for your website, operations, and future Supabase build.</p>
+      </div>
+      <div class="mini-panel panel">
+        <h3>Progress</h3>
+        <div class="stats">
+          <div class="stat"><div class="stat-number" id="decidedCount">0</div><div class="stat-label">Decided</div></div>
+          <div class="stat"><div class="stat-number" id="researchCount">0</div><div class="stat-label">Research</div></div>
+        </div>
+        <p>Done means a question has either a selected decision or is marked "need research."</p>
+      </div>
+      <div class="mini-panel panel">
+        <h3>Market research built in</h3>
+        <p>Pricing, waivers, account friction, delivery visibility, firewood, and safety recommendations are grounded in cited operator examples and UX/safety sources.</p>
+        <button class="btn small" id="marketBtn">Open market notes</button>
+      </div>
+      <div class="mini-panel panel">
+        <h3>Keyboard</h3>
+        <p><span class="kbd">←</span> previous &nbsp; <span class="kbd">→</span> next</p>
+      </div>
+    </aside>
+  </main>
+
+  <section id="reportView" class="report-view hidden"></section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const QUESTIONS = [{"id": "strategy_model", "category": "Strategy", "title": "What business model are we launching first?", "prompt": "Decide whether Drop N' Glow is primarily a private mobile sauna rental, an event wellness provider, a public pop-up sauna brand, or a hybrid.", "why": "This choice affects pricing, booking flow, waivers, memberships, staffing, insurance, and how much friction the website should introduce.", "recommendation": "Launch as premium private rentals first, support custom events second, and treat public pop-ups as a later expansion. This keeps the initial website high-converting while leaving room for memberships and community events later.", "choices": [{"id": "private", "label": "Premium private rentals first", "detail": "Customers rent one sauna for a date range at their home, cabin, retreat, or event location.", "pros": "Simple customer promise, clean pricing, strong fit for Ixonia/Lake Country service area.", "cons": "Requires strong delivery and setup operations."}, {"id": "events", "label": "Event wellness provider first", "detail": "Every booking is treated like a custom event quote.", "pros": "Higher ticket sizes and more control.", "cons": "More sales labor, slower conversion."}, {"id": "popups", "label": "Public pop-ups first", "detail": "Sell per-person seats at partner locations.", "pros": "Memberships and guest passes make more sense.", "cons": "Requires venues, staffing, and event calendar."}, {"id": "hybrid", "label": "Full hybrid from day one", "detail": "Private rentals, events, pop-ups, and memberships all launch together.", "pros": "Broad market coverage.", "cons": "High operational complexity before demand is proven."}], "recChoice": "private", "evidence": ["S6", "S1"]}, {"id": "positioning", "category": "Strategy", "title": "Should Drop N' Glow compete as budget, mid-market, or premium?", "prompt": "Choose the market position that matches the three-sauna fleet, delivery radius, and premium visual brand.", "why": "Positioning changes pricing confidence, copy, package names, photography, and what customers expect from service.", "recommendation": "Position as premium-local with a value anchor. Hitch N Heat gives price-sensitive customers a path in, while Rolling Retreat carries the flagship premium story.", "choices": [{"id": "budget", "label": "Budget rental", "detail": "Undercut the market and maximize booking volume.", "pros": "Can generate quick traction.", "cons": "Hard to cover towing, cleaning, maintenance, insurance, and owner time."}, {"id": "mid", "label": "Mid-market", "detail": "Accessible pricing, less premium copy.", "pros": "Broad appeal.", "cons": "May not support premium assets or high-touch service."}, {"id": "premium-local", "label": "Premium-local with value anchor", "detail": "Premium design and service, but Hitch N Heat remains approachable.", "pros": "Best margin potential while keeping conversion paths.", "cons": "Must deliver a polished experience."}, {"id": "luxury-event", "label": "Luxury event-only", "detail": "High-ticket retreats, companies, weddings.", "pros": "Large bookings.", "cons": "Narrower market and more custom sales."}], "recChoice": "premium-local", "evidence": ["S3", "S5", "S6"]}, {"id": "service_area", "category": "Strategy", "title": "How should the 100-mile service area be exposed?", "prompt": "Decide how to communicate service radius without making far-away bookings unprofitable.", "why": "A 100-mile radius is good for SEO, but delivery, pickup, travel time, terrain, and opportunity cost can quietly destroy profit.", "recommendation": "Advertise the 100-mile radius, but use delivery zones and final confirmation. Make close bookings feel easy and far bookings feel possible but reviewed.", "choices": [{"id": "radius-only", "label": "Simple 100-mile radius", "detail": "Anyone within 100 miles can request service.", "pros": "Simple marketing.", "cons": "Does not protect margin."}, {"id": "zone", "label": "Delivery zones", "detail": "0-20 included, 21-50 fixed fee, 51-75 higher fee, 76-100 custom confirmation.", "pros": "Simple, transparent, conversion-friendly.", "cons": "Less exact than address-based mileage."}, {"id": "exact", "label": "Exact address mileage", "detail": "Use maps/distance API later to estimate exact miles.", "pros": "Accurate.", "cons": "Not available in current no-API build."}, {"id": "quote", "label": "Quote-only delivery", "detail": "No estimate until the owner reviews.", "pros": "Safest operationally.", "cons": "Lower conversion."}], "recChoice": "zone", "evidence": ["S2", "S4", "S10"]}, {"id": "booking_promise", "category": "Strategy", "title": "Should bookings be instant or request-first?", "prompt": "Decide whether customers can instantly confirm dates, or whether they submit a request that the admin approves.", "why": "Mobile sauna rentals depend on weather, terrain, driveway access, fire rules, equipment status, and travel logistics.", "recommendation": "Use request-first booking: customer sees availability and price estimate, submits request, gets soft hold, admin approves, then customer pays deposit.", "choices": [{"id": "instant", "label": "Instant booking", "detail": "Customer books and pays immediately.", "pros": "Lowest friction.", "cons": "High operational risk."}, {"id": "request", "label": "Request-first with soft hold", "detail": "Customer chooses dates, admin verifies, then deposit happens.", "pros": "Best balance of conversion and operations.", "cons": "One extra approval step."}, {"id": "quote", "label": "Quote-only", "detail": "Customer sends details and waits for quote.", "pros": "Maximum control.", "cons": "Feels slow."}], "recChoice": "request", "evidence": ["S4", "S10"]}, {"id": "priority_segments", "category": "Strategy", "title": "Which customer segments should the website prioritize?", "prompt": "Pick the first segments for copy, SEO, photography, FAQ, and packages.", "why": "A site that tries to speak to everyone often feels generic. The strongest launch copy should target the highest-fit buyers.", "recommendation": "Prioritize backyard/cabin weekends, Lake Country gatherings, retreats, and premium small events. Add corporate wellness and weddings as custom quote paths.", "choices": [{"id": "backyard", "label": "Backyard and cabin weekends", "detail": "Private rentals for homes, lake houses, cabins, birthdays, and friend groups.", "pros": "Natural fit for mobile sauna and date-range pricing.", "cons": "Ticket size can vary."}, {"id": "retreats", "label": "Retreats and wellness gatherings", "detail": "Yoga, recovery, corporate wellness, team offsites.", "pros": "Higher value and add-on fit.", "cons": "Needs stronger logistics."}, {"id": "weddings", "label": "Weddings and parties", "detail": "Experiential add-on for celebrations.", "pros": "Higher custom pricing.", "cons": "Alcohol and crowd-management risk."}, {"id": "all", "label": "All equally", "detail": "Promote every use case equally.", "pros": "Broad.", "cons": "Less focused."}], "recChoice": "backyard", "evidence": ["S6", "S3"]}, {"id": "private_guest_pricing", "category": "Pricing", "title": "Should private rentals charge extra per guest?", "prompt": "Decide whether guest count should change price within the sauna's capacity.", "why": "Guest-based pricing creates more forms, more confusion, and can make customers feel nickel-and-dimed. But guest count still matters for capacity and waivers.", "recommendation": "Do not charge per guest for private rentals within capacity. Use guest count for capacity, waivers, staffing, and safety. Use per-person pricing only for public pop-ups.", "choices": [{"id": "flat", "label": "Flat private rental up to capacity", "detail": "Price is based on sauna, date range, delivery, add-ons, and attendant.", "pros": "Best conversion and simplest customer mental model.", "cons": "May miss revenue from larger groups."}, {"id": "extra", "label": "Included guests + extra guest fee", "detail": "Base includes X guests; extra guests add cost up to capacity.", "pros": "More granular revenue.", "cons": "Higher friction and feels less premium."}, {"id": "per-person", "label": "Per-person pricing", "detail": "Every participant affects price.", "pros": "Works for public sessions.", "cons": "Poor fit for private rental capacity."}], "recChoice": "flat", "evidence": ["S6", "S9"]}, {"id": "package_pricing", "category": "Pricing", "title": "Should multi-day pricing be formula-based or fixed packages?", "prompt": "Decide whether the site should calculate days as 100%, 85%, 75% or use fixed packages.", "why": "The earlier formula makes week-long rentals too expensive compared with real market examples. Delivery/setup labor is mostly spent once, so longer rentals should discount harder.", "recommendation": "Use fixed packages: weekday/overnight, weekend/overnight, 2-night weekend, 3-night long weekend, and 7-day week.", "choices": [{"id": "formula", "label": "Percentage day formula", "detail": "Day 1 full, day 2 discounted, day 3+ discounted.", "pros": "Easy to calculate.", "cons": "Can become overpriced for week-long rentals."}, {"id": "packages", "label": "Fixed packages", "detail": "Specific rates for 1 day, 2-night weekend, 3-day, and weekly.", "pros": "Matches market norms and is easier to understand.", "cons": "Requires more data entries."}, {"id": "custom", "label": "Custom quote for 2+ days", "detail": "Only show one-day price, quote longer stays.", "pros": "Protects margin.", "cons": "More sales friction."}], "recChoice": "packages", "evidence": ["S2", "S3", "S4", "S6"]}, {"id": "launch_rates", "category": "Pricing", "title": "What launch pricing should Drop N' Glow use?", "prompt": "Choose the opening price architecture for the three saunas.", "why": "Pricing needs to be high enough to cover delivery, cleaning, maintenance, and owner time, while not overshooting regional expectations.", "recommendation": "Use Hitch as value, Tow-ster as mid-tier, Rolling Retreat as flagship: Hitch $325/$375/$550/$900; Tow-ster $475/$525/$750/$1,250; Rolling $625/$700/$995/$1,750 across weekday, weekend, 2-night, week.", "choices": [{"id": "current", "label": "Keep current day-rate formula", "detail": "Hitch $325, Tow $475, Rolling $625 with percentage day stacking.", "pros": "Simple and premium.", "cons": "Weekly prices become too high."}, {"id": "recommended", "label": "Recommended package ladder", "detail": "Fixed package ladder by sauna and date range.", "pros": "Market-aligned and easier to sell.", "cons": "Requires pricing table."}, {"id": "premium", "label": "More premium than recommended", "detail": "Raise Rolling and Tow-ster, keep Hitch approachable.", "pros": "Protects capacity and brand.", "cons": "May reduce early conversion."}, {"id": "intro", "label": "Introductory discount", "detail": "Launch with 10-15% off first bookings.", "pros": "Generates demand.", "cons": "Can train customers to wait for discounts."}], "recChoice": "recommended", "evidence": ["S1", "S3", "S5", "S6"]}, {"id": "delivery_pricing", "category": "Pricing", "title": "How should delivery pricing work?", "prompt": "Decide how delivery should be charged and shown before checkout.", "why": "Hidden delivery fees cause distrust. Too much precision too early can overwhelm users. Delivery also needs to protect profit.", "recommendation": "Use delivery zones now: 0-20 miles included, 21-50 $95, 51-75 $175, 76-100 custom. Later use exact address mileage.", "choices": [{"id": "mile-one", "label": "$3.25/mile from mile one", "detail": "Customer sees mileage fee immediately.", "pros": "Direct cost recovery.", "cons": "Can feel punitive close to Ixonia."}, {"id": "included-then-mile", "label": "First 20 miles included, then $3.25/mile", "detail": "Simpler local value proposition.", "pros": "Higher conversion nearby.", "cons": "Must bake local delivery into base rates."}, {"id": "zones", "label": "Zone pricing", "detail": "Clear distance bands with fixed fees.", "pros": "Easiest to understand.", "cons": "Less precise."}, {"id": "exact-later", "label": "Exact estimate later", "detail": "Use maps API after backend phase.", "pros": "Most accurate later.", "cons": "Not for this single-file strategy."}], "recChoice": "zones", "evidence": ["S2", "S4", "S10"]}, {"id": "deposit_model", "category": "Pricing", "title": "What deposit should hold approved dates?", "prompt": "Decide how much customers pay after admin approves a booking request.", "why": "Deposits protect calendar time without forcing full final payment before logistics are confirmed.", "recommendation": "Use a booking deposit equal to the greater of $100 or 25% of the estimate. Final balance is due after final confirmation or before service.", "choices": [{"id": "none", "label": "No deposit", "detail": "Admin confirms without collecting money.", "pros": "Low friction.", "cons": "High no-show and calendar risk."}, {"id": "small", "label": "Flat $100 deposit", "detail": "Same deposit for all bookings.", "pros": "Easy.", "cons": "Too low for premium bookings."}, {"id": "percent", "label": "25% deposit, $100 minimum", "detail": "Scales with booking size.", "pros": "Good balance of trust and commitment.", "cons": "Needs clear refund policy."}, {"id": "full", "label": "Full payment upfront", "detail": "Customer pays full estimate.", "pros": "Strong cash flow.", "cons": "Risky if final logistics change."}], "recChoice": "percent", "evidence": ["S6", "S10"]}, {"id": "damage_deposit", "category": "Pricing", "title": "Should there be a refundable damage deposit or card hold?", "prompt": "Decide how to protect expensive equipment from damage, misuse, late access, or extra cleaning.", "why": "A wood-fired trailer sauna has real asset risk. But deposits add conversion friction.", "recommendation": "For launch, document damage responsibility and add a refundable deposit for unattended overnight or multi-day rentals. Later use a card hold.", "choices": [{"id": "terms-only", "label": "Terms only", "detail": "Customer agrees to equipment responsibility but no separate deposit.", "pros": "Low friction.", "cons": "Harder to collect after damage."}, {"id": "refundable", "label": "Refundable deposit", "detail": "Collect refundable security deposit for higher-risk rentals.", "pros": "Protects equipment.", "cons": "More friction."}, {"id": "card-hold", "label": "Card hold later", "detail": "Authorize card without capture after real Stripe backend.", "pros": "Clean production pattern.", "cons": "Not current frontend-only build."}, {"id": "insurance-only", "label": "Rely on insurance only", "detail": "No customer deposit.", "pros": "Simple.", "cons": "Bad for small incidents and deductibles."}], "recChoice": "refundable", "evidence": ["S6"]}, {"id": "tax_policy", "category": "Pricing", "title": "How should taxes be handled?", "prompt": "Decide whether the website displays tax estimates and whether admin can override.", "why": "Rental, delivery, and add-on tax treatment may vary. The website should not hard-code one permanent tax rule.", "recommendation": "Show tax as an estimate with configurable rate and admin override. Confirm exact tax treatment with a Wisconsin CPA.", "choices": [{"id": "hardcoded", "label": "Hard-code 5.5%", "detail": "Use one fixed rate in calculator.", "pros": "Simple.", "cons": "May be wrong by jurisdiction or service mix."}, {"id": "configurable", "label": "Configurable tax estimate", "detail": "Default rate, editable by admin later.", "pros": "Flexible and transparent.", "cons": "Requires settings."}, {"id": "hidden", "label": "Do not show tax estimate", "detail": "Only reveal during final invoice.", "pros": "Simple.", "cons": "Hurts trust and total-cost clarity."}], "recChoice": "configurable", "evidence": ["S10"]}, {"id": "seasonal_pricing", "category": "Pricing", "title": "Should there be seasonal, weekend, or holiday pricing?", "prompt": "Decide whether high-demand periods should carry a premium.", "why": "Winter weekends and holidays may be scarce inventory. Pricing should protect margin and availability.", "recommendation": "Add configurable weekend, winter peak, and holiday premiums, but keep launch public pricing simple. Show premiums clearly before checkout.", "choices": [{"id": "none", "label": "No seasonal pricing", "detail": "Same price every day.", "pros": "Simple.", "cons": "Leaves money on table during peak demand."}, {"id": "weekend", "label": "Weekend premium only", "detail": "Weekend dates cost more.", "pros": "Easy to explain.", "cons": "Misses holidays/winter peaks."}, {"id": "config", "label": "Configurable premiums", "detail": "Admin config for weekend, holiday, winter, last-minute.", "pros": "Best long-term control.", "cons": "More setup."}], "recChoice": "config", "evidence": ["S3", "S5"]}, {"id": "addon_strategy", "category": "Add-ons", "title": "Should add-ons be individual items or packages?", "prompt": "Decide how customers choose firewood, cold plunge, bucket dump, fire pit, and attendant.", "why": "Too many add-ons can feel like a junk drawer. Packages create value and help customers make decisions faster.", "recommendation": "Use bundles first, with individual add-ons available beneath. Suggested bundles: Essentials, Contrast, Glow Lounge, Hosted Experience.", "choices": [{"id": "individual", "label": "Individual add-ons only", "detail": "Each item has its own selector.", "pros": "Precise.", "cons": "More decision fatigue."}, {"id": "bundles", "label": "Bundles first", "detail": "Group add-ons into helpful packages.", "pros": "Higher conversion and clearer value.", "cons": "Needs bundle definitions."}, {"id": "admin-only", "label": "Admin recommends add-ons", "detail": "Customer requests interest, admin finalizes.", "pros": "Operationally safe.", "cons": "Less immediate upsell."}], "recChoice": "bundles", "evidence": ["S3", "S9"]}, {"id": "firewood_policy", "category": "Add-ons", "title": "Who supplies firewood?", "prompt": "Decide whether customers can provide their own wood or Drop N' Glow requires approved wood.", "why": "Wood quality affects heat, stove performance, smoke, catalytic converters, safety, and invasive species risk.", "recommendation": "Require Drop N' Glow supplied wood. Include normal-use wood in the base package and sell extra premium dry bundles.", "choices": [{"id": "customer", "label": "Customer can use their own wood", "detail": "Customer saves money and brings wood.", "pros": "Less supply burden.", "cons": "Stove risk, poor heat, pest/firewood concerns."}, {"id": "dng-only", "label": "Drop N' Glow wood only", "detail": "DNG supplies approved dry wood.", "pros": "Best heat, safety, environmental control.", "cons": "Requires inventory."}, {"id": "hybrid", "label": "Customer wood with approval", "detail": "Customer wood allowed if it meets standards.", "pros": "Flexible.", "cons": "Hard to enforce."}], "recChoice": "dng-only", "evidence": ["S12"]}, {"id": "cold_plunge", "category": "Add-ons", "title": "How should cold plunge be offered?", "prompt": "Decide whether cold plunge is a normal add-on, approval-required add-on, or future-only feature.", "why": "Cold plunge adds water source, drainage, sanitation, slip risk, weather issues, and more waiver complexity.", "recommendation": "Offer cold plunge by request with admin approval at launch. Upgrade to instant add-on later after the setup process is proven.", "choices": [{"id": "instant", "label": "Instant checkbox add-on", "detail": "Customer adds plunge with one click.", "pros": "Easy upsell.", "cons": "Operationally risky."}, {"id": "approval", "label": "Request and approve", "detail": "Customer asks for it, admin verifies hose/space/drainage.", "pros": "Safer and still marketable.", "cons": "Extra review step."}, {"id": "later", "label": "Future only", "detail": "Do not offer at launch.", "pros": "Simplifies launch.", "cons": "Misses contrast-therapy demand."}], "recChoice": "approval", "evidence": ["S3", "S13"]}, {"id": "attendant_rules", "category": "Add-ons", "title": "When should a sauna attendant be optional or required?", "prompt": "Decide when Drop N' Glow needs staff onsite to tend the fire and manage experience flow.", "why": "Customer-tended wood-fired rentals can be efficient, but events, cold plunge, alcohol, first-time users, and bigger groups increase risk.", "recommendation": "Make attendant optional for small private rentals, recommended for first-timers, and required for public events, cold plunge, large groups, or complex setups.", "choices": [{"id": "always-optional", "label": "Always optional", "detail": "Customers decide if they want help.", "pros": "Low friction.", "cons": "May under-protect risky bookings."}, {"id": "rules", "label": "Rule-based requirement", "detail": "Attendant required when risk or complexity is high.", "pros": "Best balance.", "cons": "Needs clear logic."}, {"id": "always-required", "label": "Always required", "detail": "Every booking is hosted.", "pros": "Strong control.", "cons": "Higher price and staffing burden."}], "recChoice": "rules", "evidence": ["S14", "S13"]}, {"id": "attendant_price", "category": "Add-ons", "title": "How should attendants be priced?", "prompt": "Decide whether attendant pricing is per day, per hour, per event, or quote-only.", "why": "A $125/day attendant may be too low if the person is onsite for hours. Labor must include travel, setup, event time, cleanup, and opportunity cost.", "recommendation": "Use event-based or hourly pricing: e.g., $250 minimum hosted event or $75/hour after setup. Keep $125/day only if it is brief support, not continuous staffing.", "choices": [{"id": "low-day", "label": "$125/day", "detail": "Simple add-on price.", "pros": "Easy to sell.", "cons": "Likely underprices real labor."}, {"id": "event-min", "label": "Hosted event minimum", "detail": "$250+ per event depending on duration.", "pros": "Protects labor margin.", "cons": "Higher price."}, {"id": "hourly", "label": "Hourly", "detail": "$75/hour or similar.", "pros": "Fair and scalable.", "cons": "Less predictable for customer."}, {"id": "quote", "label": "Quote only", "detail": "Custom attendant quote.", "pros": "Maximum margin control.", "cons": "More friction."}], "recChoice": "event-min", "evidence": ["S4"]}, {"id": "participant_waivers", "category": "Waivers", "title": "Does every guest need to sign a waiver?", "prompt": "Decide whether only the booking host signs, or every participant must sign before using or interacting with the sauna/add-ons.", "why": "The host may not control every guest. A participant-specific waiver creates stronger tracking and clearer safety communication.", "recommendation": "Require every participant to sign. Host signs before booking request; guests sign before service through a waiver center.", "choices": [{"id": "host-only", "label": "Host only", "detail": "The renter signs and accepts responsibility for guests.", "pros": "Lowest friction.", "cons": "Weaker participant tracking."}, {"id": "all", "label": "Every participant signs", "detail": "Each user signs a quick waiver.", "pros": "Best safety posture and clearer records.", "cons": "Needs guest invite/QR flow."}, {"id": "hybrid", "label": "Host plus group acknowledgment", "detail": "Host signs and confirms all guests saw terms.", "pros": "Less friction.", "cons": "Less robust than individual signatures."}], "recChoice": "all", "evidence": ["S7", "S14"]}, {"id": "guest_accounts", "category": "Waivers", "title": "Do guests need full website accounts?", "prompt": "Decide whether each guest must create a full account to sign the waiver.", "why": "Forcing every guest through account creation is a conversion and compliance risk. People may simply avoid signing.", "recommendation": "Use waiver-only identity for guests. Later use Supabase Magic Links so guests can sign without passwords.", "choices": [{"id": "full", "label": "Full guest account", "detail": "Each guest creates profile/dashboard.", "pros": "Repeat-user data.", "cons": "Too much friction."}, {"id": "waiver-only", "label": "Waiver-only flow", "detail": "Guest signs with legal name, email/phone, age, signature.", "pros": "Fast and focused.", "cons": "Less account data."}, {"id": "magic", "label": "Magic link account later", "detail": "Email link signs guest in without password.", "pros": "Smooth future production path.", "cons": "Needs backend later."}], "recChoice": "waiver-only", "evidence": ["S8", "S11"]}, {"id": "waiver_delivery", "category": "Waivers", "title": "How should guests receive the waiver?", "prompt": "Choose the fastest way for the host to get guests signed before service.", "why": "The more steps required, the more likely waivers remain incomplete on service day.", "recommendation": "Provide shareable link, QR code, email/SMS invite, and reminder status in the booking's Waiver Center.", "choices": [{"id": "email-only", "label": "Email only", "detail": "Host enters guest emails.", "pros": "Traceable.", "cons": "Not enough for day-of guests."}, {"id": "qr-link", "label": "QR + shareable link", "detail": "Host shares link or shows QR code.", "pros": "Fast and flexible.", "cons": "Less controlled if link is forwarded."}, {"id": "all", "label": "Email, SMS, QR, share link", "detail": "Multiple ways to sign.", "pros": "Best completion rate.", "cons": "More UI."}], "recChoice": "all", "evidence": ["S8", "S9"]}, {"id": "signature_method", "category": "Waivers", "title": "What signature method should the waiver use?", "prompt": "Decide whether typed name is enough or a drawn signature is required.", "why": "A drawn signature feels more serious, but it can add mobile friction if poorly implemented.", "recommendation": "Use typed legal name plus a simple draw-signature field with clear fallback. Keep one final agreement checkbox.", "choices": [{"id": "typed", "label": "Typed name only", "detail": "Easy and fast.", "pros": "Lowest friction.", "cons": "Feels less formal."}, {"id": "drawn", "label": "Drawn signature only", "detail": "More formal.", "pros": "Feels legitimate.", "cons": "Can be annoying on mobile."}, {"id": "both", "label": "Typed legal name + drawn signature", "detail": "Combines clarity and formality.", "pros": "Best perceived seriousness.", "cons": "Slightly more work."}], "recChoice": "both", "evidence": ["S7"]}, {"id": "minors_policy", "category": "Waivers", "title": "Are minors allowed to use the sauna?", "prompt": "Decide the minor policy and whether parent/guardian signature is required.", "why": "Minors raise waiver, supervision, heat-safety, and insurance questions.", "recommendation": "Mark as needs legal/insurance review. If allowed, require parent/guardian signature and adult supervision at all times.", "choices": [{"id": "no-minors", "label": "No minors", "detail": "Only adults may participate.", "pros": "Simplest risk policy.", "cons": "May limit family bookings."}, {"id": "guardian", "label": "Minors with guardian waiver", "detail": "Parent/guardian signs and supervises.", "pros": "Family-friendly.", "cons": "More policy complexity."}, {"id": "research", "label": "Research with insurer/attorney", "detail": "Decide after legal/insurance review.", "pros": "Safest decision process.", "cons": "Not resolved today."}], "recChoice": "research", "evidence": ["S7", "S13"]}, {"id": "emergency_contact", "category": "Waivers", "title": "Is emergency contact required?", "prompt": "Decide what emergency information is required for host and guests.", "why": "Emergency contacts can support safety, but asking for too much too early increases friction.", "recommendation": "Require emergency contact for the host before service. Keep it optional for adult guests unless insurer requires it or cold plunge/minors are involved.", "choices": [{"id": "all-required", "label": "Required for everyone", "detail": "Every participant enters emergency contact.", "pros": "More complete safety info.", "cons": "High friction."}, {"id": "host-required", "label": "Host required, guests optional", "detail": "Host gives contact; guests can add optional info.", "pros": "Best balance.", "cons": "Less complete for every guest."}, {"id": "none", "label": "Not required", "detail": "No emergency contact collection.", "pros": "Low friction.", "cons": "Weak emergency planning."}], "recChoice": "host-required", "evidence": ["S9", "S14"]}, {"id": "medical_screening", "category": "Waivers", "title": "Should the site collect detailed medical information?", "prompt": "Decide whether customers disclose conditions or simply acknowledge risk warnings.", "why": "Detailed medical screening can create privacy risk and make the business look responsible for evaluating fitness.", "recommendation": "Use clear safety acknowledgments and optional notes, not detailed medical screening.", "choices": [{"id": "detailed", "label": "Detailed health questionnaire", "detail": "Ask about conditions and medication.", "pros": "More information.", "cons": "Privacy and liability complexity."}, {"id": "ack", "label": "Acknowledgments + optional notes", "detail": "Participants acknowledge risks and can add notes.", "pros": "Safer and lower friction.", "cons": "Less information."}, {"id": "none", "label": "No health questions", "detail": "Only general waiver.", "pros": "Fast.", "cons": "Misses important warnings."}], "recChoice": "ack", "evidence": ["S13", "S14"]}, {"id": "required_fields", "category": "Booking Flow", "title": "What information is required before each stage?", "prompt": "Decide what is required for draft, booking request, deposit, and service readiness.", "why": "Asking for everything upfront hurts conversion. Asking too little before dispatch hurts operations.", "recommendation": "Stage the form: draft requires minimal details, request requires host profile + waiver + exact address, service readiness requires guest waivers and final setup confirmation.", "choices": [{"id": "all-upfront", "label": "Everything upfront", "detail": "Collect full profile, guests, waivers, setup, add-ons immediately.", "pros": "Complete data early.", "cons": "High abandonment."}, {"id": "staged", "label": "Staged requirements", "detail": "Only ask what is needed at each step.", "pros": "Best conversion and operations.", "cons": "Requires status tracking."}, {"id": "light", "label": "Very light request", "detail": "Name, date, email only.", "pros": "Low friction.", "cons": "Admin has to chase details."}], "recChoice": "staged", "evidence": ["S8", "S9"]}, {"id": "setup_checklist", "category": "Booking Flow", "title": "What setup feasibility questions must be asked?", "prompt": "Choose which logistics are required before admin approval.", "why": "A date may be available but the site may be impossible or unsafe to serve.", "recommendation": "Require exact address, surface type, slope, parking access, turnaround space, overhead clearance, fire restrictions, hose access for water add-ons, and setup notes before approval.", "choices": [{"id": "minimal", "label": "Minimal setup questions", "detail": "Address and notes only.", "pros": "Fast.", "cons": "Operational surprises."}, {"id": "checklist", "label": "Required feasibility checklist", "detail": "Structured questions before approval.", "pros": "Protects schedule and margin.", "cons": "More fields."}, {"id": "call-only", "label": "Handle by phone only", "detail": "Website asks little; call confirms everything.", "pros": "Flexible.", "cons": "More owner labor."}], "recChoice": "checklist", "evidence": ["S4", "S10"]}, {"id": "setup_photos", "category": "Booking Flow", "title": "Should customers upload setup-area photos?", "prompt": "Decide whether photos are required, optional, or future-only.", "why": "Photos can reveal slope, tight access, grass/mud, overhead branches, and fire pit placement issues.", "recommendation": "Make photos optional for normal bookings, but required by admin for complex, far-away, event, or cold plunge bookings.", "choices": [{"id": "none", "label": "No photos", "detail": "Rely on notes and phone call.", "pros": "Low friction.", "cons": "More uncertainty."}, {"id": "optional", "label": "Optional photos", "detail": "Ask customers to upload if helpful.", "pros": "Low friction plus useful data.", "cons": "Not guaranteed."}, {"id": "required-risky", "label": "Required for risky bookings", "detail": "Admin can require before approval.", "pros": "Best control.", "cons": "Needs file handling later."}], "recChoice": "required-risky", "evidence": ["S10"]}, {"id": "date_changes", "category": "Booking Flow", "title": "How should date changes work?", "prompt": "Decide whether customers can change dates themselves or must request approval.", "why": "Date changes affect availability, travel schedule, soft holds, and other customers.", "recommendation": "Require admin approval for date/duration changes. Validate every date in the requested range and keep original booking active until approved.", "choices": [{"id": "self-service", "label": "Self-service if available", "detail": "Customer changes dates directly.", "pros": "Fast.", "cons": "Operational risk."}, {"id": "request", "label": "Request + admin approval", "detail": "Customer proposes new range, admin approves.", "pros": "Best control.", "cons": "More admin work."}, {"id": "no-changes", "label": "No date changes", "detail": "Cancel and rebook only.", "pros": "Simple.", "cons": "Customer-unfriendly."}], "recChoice": "request", "evidence": ["S4"]}, {"id": "guest_count_changes", "category": "Booking Flow", "title": "Can customers change guest count after booking?", "prompt": "Decide whether guest count changes require admin approval.", "why": "Guest count affects waivers and safety, but not price if within capacity.", "recommendation": "Allow guest count changes without approval if within capacity. Recalculate readiness and waiver count.", "choices": [{"id": "approval", "label": "Admin approval required", "detail": "Every guest-count edit needs approval.", "pros": "Control.", "cons": "Unnecessary friction."}, {"id": "self", "label": "Self-service within capacity", "detail": "Customer can update if not above capacity.", "pros": "Best UX.", "cons": "Needs validation."}, {"id": "locked", "label": "Locked after request", "detail": "Cannot change.", "pros": "Simple.", "cons": "Unrealistic."}], "recChoice": "self", "evidence": ["S9"]}, {"id": "cancellation_policy", "category": "Booking Flow", "title": "What cancellation policy should apply?", "prompt": "Decide how refunds, credits, weather, and late cancellation work.", "why": "Cancellation policy protects calendar value and reduces disputes.", "recommendation": "Use a tiered policy: full/mostly refundable early, credit window closer in, limited refund near service, weather/safety reschedule credit at Drop N' Glow discretion.", "choices": [{"id": "flex", "label": "Very flexible", "detail": "Cancel anytime for refund.", "pros": "High conversion.", "cons": "Calendar risk."}, {"id": "tiered", "label": "Tiered policy", "detail": "Refund/credit depends on timing.", "pros": "Fair and scalable.", "cons": "Must be explained clearly."}, {"id": "strict", "label": "Strict no-refund", "detail": "Deposit nonrefundable.", "pros": "Protects revenue.", "cons": "Can hurt trust."}], "recChoice": "tiered", "evidence": ["S10"]}, {"id": "soft_holds", "category": "Booking Flow", "title": "How long should soft holds last?", "prompt": "Decide how long pending requests and approved-but-unpaid bookings block availability.", "why": "Soft holds protect customers while they complete steps, but can block high-demand dates if they never expire.", "recommendation": "Pending request soft hold: 24 hours after approval. Date-change soft hold: 12 hours. Admin can extend manually.", "choices": [{"id": "none", "label": "No expiration", "detail": "Holds last until admin clears them.", "pros": "Simple.", "cons": "Can clog prime dates."}, {"id": "standard", "label": "24-hour holds", "detail": "Most holds expire after 24 hours.", "pros": "Balanced.", "cons": "Requires clear reminders."}, {"id": "short", "label": "Short holds", "detail": "6-12 hours.", "pros": "Protects calendar.", "cons": "Can feel rushed."}], "recChoice": "standard", "evidence": ["S10"]}, {"id": "availability_system", "category": "Booking Flow", "title": "What availability system does the app need?", "prompt": "Decide whether availability is table-based, calendar-based, or fleet-calendar-first.", "why": "Customers and admin both need to see what is available, booked, soft-held, blacked out, in maintenance, or out of commission.", "recommendation": "Use one shared range calendar and one shared availability validator for customer booking, date changes, admin calendar, blackouts, and maintenance.", "choices": [{"id": "table", "label": "Tables only", "detail": "Admin sees lists of requests.", "pros": "Quick.", "cons": "Hard to understand fleet availability."}, {"id": "calendar", "label": "Customer calendar only", "detail": "Customer sees dates, admin uses tables.", "pros": "Improves booking.", "cons": "Admin still weak."}, {"id": "shared", "label": "Shared customer/admin calendar", "detail": "Same logic and calendar states for both.", "pros": "Best accuracy and usability.", "cons": "More build effort."}], "recChoice": "shared", "evidence": ["S10"]}, {"id": "readiness_status", "category": "Booking Flow", "title": "What readiness statuses should bookings have?", "prompt": "Decide whether booking status is simple or detailed enough to run operations.", "why": "Pending/confirmed is too vague for a mobile sauna business with waivers, deposits, setup, add-ons, and final calls.", "recommendation": "Use readiness statuses: Draft, Needs Profile, Needs Host Waiver, Needs Setup Details, Pending Approval, Approved, Deposit Paid, Needs Guest Waivers, Needs Final Confirmation, Ready for Service, Completed.", "choices": [{"id": "simple", "label": "Simple statuses", "detail": "Draft, pending, confirmed, canceled.", "pros": "Easy.", "cons": "Not operationally specific."}, {"id": "readiness", "label": "Readiness checklist statuses", "detail": "Each blocker is visible.", "pros": "Best admin/customer clarity.", "cons": "More state logic."}, {"id": "manual", "label": "Admin notes only", "detail": "Admin handles status in notes.", "pros": "Flexible.", "cons": "Hard to scale."}], "recChoice": "readiness", "evidence": ["S10"]}, {"id": "admin_dashboard", "category": "Operations", "title": "What should the admin dashboard optimize for?", "prompt": "Decide what the owner needs to see first when logging in.", "why": "The admin panel protects profitability, availability, safety, and customer experience.", "recommendation": "Build a calendar-first fleet dashboard with booking requests, waiver counts, soft holds, sauna status, maintenance, and margin warnings.", "choices": [{"id": "requests", "label": "Request queue first", "detail": "Admin sees booking requests as list.", "pros": "Simple.", "cons": "Weak calendar visibility."}, {"id": "calendar", "label": "Calendar-first fleet view", "detail": "Toggle sauna and inspect dates/ranges.", "pros": "Best for availability operations.", "cons": "More UI work."}, {"id": "profit", "label": "Profitability first", "detail": "Bookings ranked by expected margin.", "pros": "Financial control.", "cons": "Needs cost assumptions."}], "recChoice": "calendar", "evidence": ["S4"]}, {"id": "sauna_status", "category": "Operations", "title": "How should sauna status be managed?", "prompt": "Decide how admin marks saunas available, coming soon, out of commission, in maintenance, or hidden.", "why": "Customers must never be able to book a sauna that is not actually available.", "recommendation": "Only Available is bookable. Coming Soon, Pending Launch, Out of Commission, Maintenance, and Hidden disable booking and gray out the UI.", "choices": [{"id": "manual-note", "label": "Manual notes only", "detail": "Admin remembers unavailable equipment.", "pros": "Simple.", "cons": "Dangerous."}, {"id": "status", "label": "Explicit status controls", "detail": "Status affects public cards, calendars, and checkout.", "pros": "Best correctness.", "cons": "Needs validation."}, {"id": "hide-only", "label": "Hide unavailable sauna", "detail": "Remove it from public site.", "pros": "Avoids confusion.", "cons": "Misses Coming Soon marketing."}], "recChoice": "status", "evidence": ["S10"]}, {"id": "buffers", "category": "Operations", "title": "How much buffer is needed between rentals?", "prompt": "Decide whether the system should auto-block cleaning, travel, inspection, and restock windows.", "why": "Back-to-back bookings can fail due to ash removal, cleaning, drying, firewood restock, trailer inspection, and travel time.", "recommendation": "Add admin-configured buffers per sauna and distance band. Start conservative until real operational data exists.", "choices": [{"id": "none", "label": "No buffers", "detail": "Book any available date.", "pros": "Maximum inventory.", "cons": "High operations risk."}, {"id": "manual", "label": "Manual buffers", "detail": "Admin adds blackout/maintenance ranges.", "pros": "Simple current implementation.", "cons": "Admin must remember."}, {"id": "automatic", "label": "Automatic buffers", "detail": "System blocks before/after bookings.", "pros": "Scalable.", "cons": "More logic."}], "recChoice": "manual", "evidence": ["S4"]}, {"id": "weather_policy", "category": "Operations", "title": "What weather and burn restriction policy is needed?", "prompt": "Decide how to handle high wind, storms, ice, unsafe roads, burn bans, and severe weather.", "why": "Weather can make delivery unsafe or wood-fired operation inappropriate.", "recommendation": "Add a weather/safety reschedule policy: Drop N' Glow may delay, relocate, reschedule, or decline when safety, roads, terrain, or burn restrictions make service unsafe.", "choices": [{"id": "customer-risk", "label": "Customer risk", "detail": "Booking proceeds unless customer cancels.", "pros": "Protects revenue.", "cons": "Unsafe and customer-unfriendly."}, {"id": "safety-reschedule", "label": "Safety reschedule policy", "detail": "Unsafe conditions trigger reschedule/credit.", "pros": "Balanced and professional.", "cons": "Requires judgment."}, {"id": "strict-refund", "label": "Weather refund", "detail": "Refund if weather affects booking.", "pros": "Trustworthy.", "cons": "Revenue risk."}], "recChoice": "safety-reschedule", "evidence": ["S14", "S13"]}, {"id": "customer_fire_tending", "category": "Operations", "title": "Can customers tend the wood stove themselves?", "prompt": "Decide who manages the fire for unhosted rentals.", "why": "Wood-fired operation involves hot metal, ash, fuel quality, ventilation, and user behavior.", "recommendation": "Allow unhosted stove tending only after host orientation and waiver acknowledgment. Require attendant for higher-risk bookings.", "choices": [{"id": "never", "label": "Customer never tends fire", "detail": "Attendant required for all use.", "pros": "Maximum control.", "cons": "Hard to staff and expensive."}, {"id": "orientation", "label": "Allowed after orientation", "detail": "Host receives clear stove instructions.", "pros": "Scalable for private rentals.", "cons": "Needs serious instructions."}, {"id": "always", "label": "Always customer-managed", "detail": "Customer handles stove after delivery.", "pros": "Low labor.", "cons": "Higher risk."}], "recChoice": "orientation", "evidence": ["S14", "S12"]}, {"id": "alcohol_policy", "category": "Operations", "title": "What is the alcohol policy?", "prompt": "Decide how the business handles alcohol around sauna and cold plunge use.", "why": "Alcohol increases dehydration and decision-risk. Events and parties may involve alcohol even if not promoted.", "recommendation": "State that participants must not use the sauna or cold plunge while impaired. Admin may require attendant or decline alcohol-centered events.", "choices": [{"id": "ban", "label": "Strict no-alcohol policy", "detail": "No alcohol at events using sauna.", "pros": "Safest.", "cons": "Hard to enforce at private properties."}, {"id": "no-impaired", "label": "No impaired use", "detail": "Do not use while impaired; host responsible.", "pros": "Practical and safety-focused.", "cons": "Requires host enforcement."}, {"id": "silent", "label": "No policy", "detail": "Do not mention alcohol.", "pros": "Avoids friction.", "cons": "Unsafe and unclear."}], "recChoice": "no-impaired", "evidence": ["S13", "S14"]}, {"id": "maintenance_logs", "category": "Operations", "title": "What maintenance records should be tracked?", "prompt": "Decide whether the app should include basic equipment logs.", "why": "Three mobile saunas means recurring inspections, tires/trailer, stoves, cleaning, ash, damage, and downtime.", "recommendation": "Track maintenance notes per sauna: status, reason, date range, inspection notes, cleaning log, damage log, next review date.", "choices": [{"id": "none", "label": "No logs", "detail": "Manage maintenance outside the app.", "pros": "Simple.", "cons": "Easy to forget."}, {"id": "basic", "label": "Basic logs", "detail": "Status, reason, dates, notes.", "pros": "Enough for launch.", "cons": "Not a full asset system."}, {"id": "full", "label": "Full fleet maintenance system", "detail": "Detailed inspection and asset history.", "pros": "Scalable.", "cons": "Overbuilt for launch."}], "recChoice": "basic", "evidence": []}, {"id": "profitability_view", "category": "Operations", "title": "Should admin see booking profitability?", "prompt": "Decide whether admin approval should include a margin estimate.", "why": "A booking can look good to the customer but lose money after fuel, labor, firewood, cleaning, maintenance reserve, and travel time.", "recommendation": "Add an admin-only profitability estimate with revenue, labor hours, travel, fuel, firewood, cleaning, maintenance reserve, and estimated profit per hour.", "choices": [{"id": "none", "label": "No profitability view", "detail": "Admin approves based on judgment.", "pros": "Simple.", "cons": "Hard to learn margin."}, {"id": "estimate", "label": "Simple profitability estimate", "detail": "Show revenue, estimated costs, margin warning.", "pros": "Best launch tool.", "cons": "Uses assumptions."}, {"id": "advanced", "label": "Detailed cost accounting", "detail": "Track exact cost per booking.", "pros": "Accurate.", "cons": "Too much for launch."}], "recChoice": "estimate", "evidence": ["S2", "S4"]}, {"id": "insurance_review", "category": "Operations", "title": "What must be reviewed with insurance/legal counsel?", "prompt": "Identify unresolved legal/insurance decisions before launch.", "why": "The website can collect signatures and acknowledgments, but the owner needs professional guidance on enforceability and coverage.", "recommendation": "Mark this as research: review waivers, minors, alcohol, cold plunge, unattended rentals, public events, towing, attendants, and property damage with insurer/attorney.", "choices": [{"id": "owner-diy", "label": "Owner writes policies alone", "detail": "Use online examples and common sense.", "pros": "Fast.", "cons": "Risky."}, {"id": "review", "label": "Legal/insurance review", "detail": "Use professional review before production.", "pros": "Safer and more scalable.", "cons": "Costs time/money."}, {"id": "defer", "label": "Defer until revenue", "detail": "Launch first, review later.", "pros": "Fast launch.", "cons": "Potentially bad risk."}], "recChoice": "review", "evidence": ["S7", "S13", "S14"]}, {"id": "membership_type", "category": "Membership", "title": "What kind of membership should launch first?", "prompt": "Decide whether memberships should be monthly, seasonal, punch-pass, pop-up-based, or delayed.", "why": "Memberships create recurring revenue but can overpromise inventory. Unlimited access is dangerous with only three saunas.", "recommendation": "Start with gift cards, punch passes, and a Winter Glow seasonal priority pass. Add monthly credits only after utilization is known.", "choices": [{"id": "monthly", "label": "Monthly credit membership", "detail": "Monthly fee creates credits and perks.", "pros": "Recurring revenue.", "cons": "Requires credit ledger and inventory controls."}, {"id": "seasonal", "label": "Seasonal Winter Glow Pass", "detail": "Priority/perks for winter season.", "pros": "Matches demand and feels special.", "cons": "Seasonal not year-round."}, {"id": "punch", "label": "Punch pass / prepaid package", "detail": "Buy 3 bookings or credits upfront.", "pros": "Simple cash and no recurring complexity.", "cons": "Less recurring revenue."}, {"id": "delay", "label": "Delay memberships", "detail": "Launch rentals first.", "pros": "Avoids complexity.", "cons": "Misses loyalty opportunity."}], "recChoice": "seasonal", "evidence": ["S6", "S3"]}, {"id": "membership_unlimited", "category": "Membership", "title": "Should memberships include unlimited use?", "prompt": "Decide whether members can use saunas without limits.", "why": "Unlimited sounds good, but it can consume prime inventory and damage margins.", "recommendation": "Do not offer unlimited. Use credits, priority windows, add-on discounts, and flexible rescheduling.", "choices": [{"id": "unlimited", "label": "Unlimited use", "detail": "Members book freely.", "pros": "Easy to market.", "cons": "Bad for capacity and margins."}, {"id": "credits", "label": "Credits and priority", "detail": "Members get credits, early access, and discounts.", "pros": "Margin-safe.", "cons": "Less flashy."}, {"id": "popups", "label": "Unlimited public pop-ups only", "detail": "Unlimited access to low-cost community events.", "pros": "Could build community.", "cons": "Requires pop-up calendar."}], "recChoice": "credits", "evidence": ["S6", "S3"]}, {"id": "guest_passes", "category": "Membership", "title": "What should guest passes mean?", "prompt": "Define guest passes so they do not violate sauna capacity or confuse private rentals.", "why": "If private rentals are flat-rate up to capacity, a guest pass cannot mean extra people beyond capacity.", "recommendation": "Define guest passes as public pop-up passes or dollar credits for friends, not extra private-rental capacity.", "choices": [{"id": "capacity", "label": "Extra person beyond capacity", "detail": "Guest pass allows additional guest.", "pros": "Sounds generous.", "cons": "Unsafe and should not be allowed."}, {"id": "popup", "label": "Public pop-up pass", "detail": "Guest pass covers one community session.", "pros": "Clear and margin-safe.", "cons": "Requires pop-ups."}, {"id": "credit", "label": "Dollar credit", "detail": "Pass is credit toward another booking.", "pros": "Works before pop-ups exist.", "cons": "Less exciting."}], "recChoice": "credit", "evidence": ["S6"]}, {"id": "credits_expiry", "category": "Membership", "title": "Should membership credits expire?", "prompt": "Decide whether credits roll over indefinitely, expire, or cap.", "why": "Credits that never expire can create large liabilities and scheduling pressure.", "recommendation": "Use credits that expire after 60-90 days, with clear terms and member reminders.", "choices": [{"id": "never", "label": "Never expire", "detail": "Credits roll forever.", "pros": "Customer-friendly.", "cons": "Liability and availability risk."}, {"id": "60", "label": "60-day expiry", "detail": "Credits expire after 60 days.", "pros": "Controls liability.", "cons": "Some customers dislike expiry."}, {"id": "cap", "label": "Rollover cap", "detail": "Credits roll over up to a cap.", "pros": "Balanced.", "cons": "More complex."}], "recChoice": "60", "evidence": []}, {"id": "giftcards", "category": "Membership", "title": "Should gift cards or punch passes launch before memberships?", "prompt": "Decide what lower-complexity loyalty product should come first.", "why": "Gift cards and prepaid packages create cash without recurring membership obligations.", "recommendation": "Launch gift cards and a 3-booking punch pass before recurring subscriptions.", "choices": [{"id": "memberships-first", "label": "Memberships first", "detail": "Launch recurring plans immediately.", "pros": "Recurring revenue.", "cons": "More complexity."}, {"id": "gift-punch", "label": "Gift cards + punch pass first", "detail": "Prepaid value without unlimited promises.", "pros": "Simple and safe.", "cons": "Less recurring revenue."}, {"id": "none", "label": "No loyalty products", "detail": "Just rentals.", "pros": "Simplest.", "cons": "Misses repeat purchase path."}], "recChoice": "gift-punch", "evidence": ["S6"]}, {"id": "profile_timing", "category": "Website & Conversion", "title": "When should the website ask for a profile?", "prompt": "Decide whether profile creation happens before browsing, before draft, before request, or after checkout.", "why": "Early account creation hurts checkout flow. But the host needs a profile before waivers and booking requests.", "recommendation": "Let users browse and draft first. Require lightweight profile only when submitting booking request. Never make existing users recreate a profile.", "choices": [{"id": "before-browse", "label": "Before browsing", "detail": "Users create profile before seeing availability.", "pros": "More data.", "cons": "Terrible conversion."}, {"id": "before-request", "label": "Before booking request", "detail": "Browse/draft first, profile at request.", "pros": "Best balance.", "cons": "Requires draft persistence."}, {"id": "after-deposit", "label": "After deposit", "detail": "Collect profile after payment.", "pros": "Low early friction.", "cons": "Not enough for waiver/safety before request."}], "recChoice": "before-request", "evidence": ["S8", "S9"]}, {"id": "delivery_visibility", "category": "Website & Conversion", "title": "When should delivery cost be shown?", "prompt": "Decide how early customers see delivery estimates.", "why": "Users need total cost clarity before committing. Delivery is a major part of mobile sauna economics.", "recommendation": "Show delivery estimate on sauna detail, pricing, and booking summary using zones/manual estimate. Final confirmation happens by phone.", "choices": [{"id": "late", "label": "Show at final checkout only", "detail": "Keep earlier pages cleaner.", "pros": "Less early complexity.", "cons": "Can feel like hidden fee."}, {"id": "early", "label": "Show estimate early", "detail": "Display delivery estimate before checkout.", "pros": "Builds trust.", "cons": "Must explain estimate."}, {"id": "custom", "label": "Only say custom quote", "detail": "No estimate shown.", "pros": "Owner control.", "cons": "Lower conversion."}], "recChoice": "early", "evidence": ["S10", "S4"]}, {"id": "cookie_persistence", "category": "Website & Conversion", "title": "How should cookie consent behave?", "prompt": "Decide how the banner persists after a user chooses.", "why": "Repeated cookie prompts are annoying and make the site feel broken.", "recommendation": "Persist cookie choice in localStorage and IndexedDB. Do not show again unless Cookie Preferences or Reset Demo Data.", "choices": [{"id": "session", "label": "Session only", "detail": "Choice resets often.", "pros": "Easy.", "cons": "Annoying."}, {"id": "persistent", "label": "Persistent preference", "detail": "Choice survives reloads.", "pros": "Professional.", "cons": "Needs storage."}, {"id": "none", "label": "No banner", "detail": "Skip consent UI.", "pros": "Simpler.", "cons": "Not aligned with tracking preferences."}], "recChoice": "persistent", "evidence": ["S9"]}, {"id": "seo_focus", "category": "Website & Conversion", "title": "What SEO strategy should launch first?", "prompt": "Decide how to make the site findable without creating thin pages.", "why": "Mobile sauna is local intent. Service-area pages can work only if useful and honest.", "recommendation": "Create useful service-area pages for Ixonia, Oconomowoc, Lake Country, Waukesha, Madison, Milwaukee, and nearby towns. Include delivery notes, FAQs, and clear CTA.", "choices": [{"id": "homepage-only", "label": "Homepage only", "detail": "One polished page.", "pros": "Fast.", "cons": "Limited local SEO."}, {"id": "service-pages", "label": "Useful service-area pages", "detail": "Localized pages with real content.", "pros": "Best local discovery.", "cons": "Needs content quality."}, {"id": "many-thin", "label": "Many thin city pages", "detail": "Lots of location pages with similar text.", "pros": "More URLs.", "cons": "Low quality and risky."}], "recChoice": "service-pages", "evidence": []}, {"id": "trust_signals", "category": "Website & Conversion", "title": "What trust signals should be visible near booking CTAs?", "prompt": "Decide what reassurances customers need before submitting a request.", "why": "A mobile sauna involves fire, delivery, cleanliness, weather, and safety. Trust reduces friction.", "recommendation": "Show: cleaned/sanitized, locally owned, final confirmation call, waiver requirement, professional setup, weather/terrain awareness, secure future payments, and clear cancellation terms.", "choices": [{"id": "minimal", "label": "Minimal trust copy", "detail": "Let visuals carry trust.", "pros": "Clean.", "cons": "May not answer objections."}, {"id": "near-ctas", "label": "Trust notes near CTAs", "detail": "Reassurance next to booking actions.", "pros": "Best conversion.", "cons": "Needs concise copy."}, {"id": "faq-only", "label": "FAQ only", "detail": "Put safety details in FAQ.", "pros": "Less clutter.", "cons": "Users may miss it."}], "recChoice": "near-ctas", "evidence": ["S10"]}, {"id": "launch_sequence", "category": "Launch Plan", "title": "If the business started today, what should happen first?", "prompt": "Choose the operational launch sequence before pushing heavy automation.", "why": "A good website cannot fix unclear policies, weak pricing, missing insurance answers, or unknown delivery rules.", "recommendation": "Start with policy decisions, pricing packages, waiver/legal review, admin calendar, booking request flow, and a small beta of real bookings before memberships.", "choices": [{"id": "site-first", "label": "Launch website first", "detail": "Build the full public site and start taking requests.", "pros": "Fast market test.", "cons": "May expose unresolved policies."}, {"id": "ops-first", "label": "Ops decisions first", "detail": "Resolve policies, pricing, waivers, delivery, admin flow, then launch.", "pros": "Stronger business foundation.", "cons": "Slower launch."}, {"id": "beta", "label": "Private beta first", "detail": "Run 5-10 controlled bookings before public launch.", "pros": "Best learning and lower risk.", "cons": "Less immediate scale."}], "recChoice": "beta", "evidence": ["S2", "S4", "S7"]}];
+    const SOURCES = [{"id": "S1", "title": "SaunaShare market summary", "url": "https://saunashare.com/location/usa/", "note": "Summarizes mobile sauna rentals commonly around $300-$600/day depending on market, duration, and amenities."}, {"id": "S2", "title": "Sisu Mobile Sauna pricing", "url": "https://sisumobilesauna.com/rental-pricing", "note": "Shows included delivery/setup within 20 miles, $2/mile beyond, $400/night and $100/additional night."}, {"id": "S3", "title": "PNW Mobile Spa price list", "url": "https://pnwmobilespa.com/price-list", "note": "Shows premium one-day sauna packages $595-$795, 2-day packages $745-$945, weekly $1,195-$1,395, and add-on pricing."}, {"id": "S4", "title": "Spa Fleet pricing", "url": "https://spafleetrental.com/pricing-availability/", "note": "Shows $650 for one night, $150/additional night, and delivery fees displayed by location before checkout."}, {"id": "S5", "title": "Elevate Sauna Rentals pricing", "url": "https://www.elevatesaunarentals.com/pricing", "note": "Shows premium market examples: $550 midweek day and $650 weekend day."}, {"id": "S6", "title": "Smokin' Barrel Sauna pricing", "url": "https://www.smokinbarrelsauna.com/", "note": "Shows public pop-ups at $10/person, private weekend rentals at $550 Fri-Sun, week-long rentals at $950, $250 refundable security deposit."}, {"id": "S7", "title": "Embrace Mobile Sauna waivers", "url": "https://www.embracesauna.ca/waivers", "note": "States every participant must sign a waiver, and minors require parent/guardian signature."}, {"id": "S8", "title": "Baymard delayed account creation", "url": "https://baymard.com/blog/delayed-account-creation", "note": "Research-backed warning that asking users to create accounts too early distracts from checkout completion."}, {"id": "S9", "title": "Baymard checkout form fields", "url": "https://baymard.com/blog/checkout-flow-average-form-fields", "note": "Shows checkout UX suffers more from too many fields than from reasonable step counts."}, {"id": "S10", "title": "Baymard estimated delivery/shipping costs", "url": "https://baymard.com/blog/show-shipping-costs-on-product-pages", "note": "Recommends showing estimated delivery/shipping costs so users can evaluate total cost early."}, {"id": "S11", "title": "Supabase Magic Links", "url": "https://supabase.com/docs/guides/auth/auth-email-passwordless", "note": "Magic links let users sign in through a one-time email link without passwords."}, {"id": "S12", "title": "Wisconsin DNR firewood guidance", "url": "https://dnr.wisconsin.gov/topic/Invasives/firewood", "note": "Certified firewood is processed to kill pests/disease and can be moved legally around Wisconsin."}, {"id": "S13", "title": "CDC hot tub safety", "url": "https://www.cdc.gov/healthy-swimming/safety/what-you-can-do-to-stay-healthy-in-hot-tubs.html", "note": "Warns against alcohol before/during hot tub use, notes pregnancy provider guidance, capacity, showering, and healthy use rules."}, {"id": "S14", "title": "UCLA Health sauna safety", "url": "https://www.uclahealth.org/news/article/benefits-sauna-bathing-heart-health", "note": "Recommends hydration, limiting sauna sessions, avoiding alcohol, and talking with a provider if pregnant or with low blood pressure."}];
+    const MARKET = {"benchmarkRows": [["SaunaShare", "General USA", "$300-$600/day common range", "Market context for mobile sauna rental pricing."], ["Sisu Mobile Sauna", "Metro Detroit", "$400/night + $100/additional night; delivery included 20 miles, then $2/mile", "Good delivery model benchmark."], ["PNW Mobile Spa", "Seattle/PNW", "$595-$795 one-day; $745-$945 weekend; $1,195-$1,395 week", "Premium package benchmark."], ["Spa Fleet", "NY/NJ/CT/PA/MA/VT", "$650 first night + $150/additional night; delivery by location", "Premium first-night/additional-night model."], ["Elevate Sauna Rentals", "Summit County, CO", "$550 midweek day; $650 weekend day", "High-demand vacation-market benchmark."], ["Smokin' Barrel Sauna", "Madison/Dane County style benchmark", "$550 Fri-Sun; $950 week; $10/person pop-ups; $250 deposit", "Great model separation between private rental and per-person pop-ups."]], "recommendedPricing": [["Hitch N Heat", "$325", "$375", "$550", "$900"], ["Tow-ster", "$475", "$525", "$750", "$1,250"], ["Rolling Retreat", "$625", "$700", "$995", "$1,750"]], "pricingTakeaway": "Use package pricing rather than a daily percentage formula. Private rentals should be flat within capacity; per-person pricing belongs to public pop-ups or ticketed sessions."};
+    const CREATED = "June 13, 2026";
+
+    const DB_NAME = 'dropnglow_decision_workbook_v1';
+    const STORE = 'kv';
+    const STATE_KEY = 'decision_state';
+    let db;
+    let state = {
+      currentIndex: 0,
+      answers: {},
+      updatedAt: new Date().toISOString()
+    };
+    let saveTimer;
+    let currentView = 'questions';
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const database = req.result;
+          if (!database.objectStoreNames.contains(STORE)) database.createObjectStore(STORE);
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function idbGet(key) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readonly');
+        const req = tx.objectStore(STORE).get(key);
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function idbSet(key, value) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readwrite');
+        tx.objectStore(STORE).put(value, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+
+    function debounceSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveState, 220);
+    }
+
+    async function saveState() {
+      state.updatedAt = new Date().toISOString();
+      await idbSet(STATE_KEY, state);
+      updateProgress();
+    }
+
+    function answerFor(id) {
+      if (!state.answers[id]) state.answers[id] = { choiceId: '', status: 'open', notes: '', research: '' };
+      return state.answers[id];
+    }
+
+    function isDone(q) {
+      const a = state.answers[q.id];
+      if (!a) return false;
+      return (a.status === 'research') || (a.status === 'decided' && !!a.choiceId);
+    }
+
+    function counts() {
+      let decided = 0, research = 0, open = 0, done = 0;
+      QUESTIONS.forEach(q => {
+        const a = state.answers[q.id];
+        if (a?.status === 'decided' && a.choiceId) decided++;
+        else if (a?.status === 'research') research++;
+        else open++;
+        if (isDone(q)) done++;
+      });
+      return { decided, research, open, done, total: QUESTIONS.length };
+    }
+
+    function categoryCounts() {
+      const map = new Map();
+      QUESTIONS.forEach(q => {
+        const item = map.get(q.category) || { total: 0, done: 0 };
+        item.total++;
+        if (isDone(q)) item.done++;
+        map.set(q.category, item);
+      });
+      return map;
+    }
+
+    function currentQuestion() {
+      return QUESTIONS[state.currentIndex] || QUESTIONS[0];
+    }
+
+    function choiceLabel(q, choiceId) {
+      return q.choices.find(c => c.id === choiceId)?.label || '';
+    }
+
+    function sourceById(id) {
+      return SOURCES.find(s => s.id === id);
+    }
+
+    function esc(str) {
+      return String(str ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[ch]));
+    }
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 1900);
+    }
+
+    function renderNav() {
+      const list = document.getElementById('questionList');
+      const term = document.getElementById('questionSearch').value.trim().toLowerCase();
+      const cats = categoryCounts();
+      let lastCat = '';
+      list.innerHTML = QUESTIONS.map((q, index) => {
+        const searchable = (q.title + ' ' + q.category + ' ' + q.prompt).toLowerCase();
+        if (term && !searchable.includes(term)) return '';
+        const a = state.answers[q.id] || { status: 'open' };
+        const statusClass = isDone(q) ? (a.status === 'research' ? 'research' : 'decided') : 'open';
+        const active = index === state.currentIndex ? 'active' : '';
+        const catLabel = q.category !== lastCat ? `<div class="pill" style="margin:10px 6px 6px">${esc(q.category)} · ${cats.get(q.category)?.done || 0}/${cats.get(q.category)?.total || 0}</div>` : '';
+        lastCat = q.category;
+        return `${catLabel}<button class="qnav ${active}" data-index="${index}">
+          <span class="dot ${statusClass}"></span>
+          <span><span class="qnav-title">${index + 1}. ${esc(q.title)}</span><span class="qnav-cat">${esc(q.category)}</span></span>
+        </button>`;
+      }).join('');
+      list.querySelectorAll('.qnav').forEach(btn => btn.addEventListener('click', () => {
+        state.currentIndex = Number(btn.dataset.index);
+        saveState();
+        showQuestionView();
+        renderAll();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }));
+    }
+
+    function renderQuestion() {
+      const q = currentQuestion();
+      const a = answerFor(q.id);
+      const card = document.getElementById('questionCard');
+      const qIndex = state.currentIndex + 1;
+      const statusPill = a.status === 'research' ? '<span class="pill amber">Needs research</span>' :
+        (a.status === 'decided' && a.choiceId ? '<span class="pill green">Decision selected</span>' : '<span class="pill">Open</span>');
+      const evidenceHtml = (q.evidence || []).map(id => {
+        const s = sourceById(id);
+        if (!s) return '';
+        return `<a class="source-link" href="${esc(s.url)}" target="_blank" rel="noreferrer">${esc(s.id)} · ${esc(s.title)}</a>`;
+      }).join('');
+
+      card.innerHTML = `
+        <div class="q-meta">
+          <span class="pill dark">${qIndex} / ${QUESTIONS.length}</span>
+          <span class="pill">${esc(q.category)}</span>
+          ${statusPill}
+        </div>
+        <h2 class="q-title">${esc(q.title)}</h2>
+        <p class="prompt">${esc(q.prompt)}</p>
+        <div class="info-grid">
+          <div class="info-box"><strong>Why this matters</strong>${esc(q.why)}</div>
+          <div class="info-box"><strong>Recommended choice</strong>${esc(q.recommendation)}</div>
+        </div>
+        <div class="choices">
+          ${q.choices.map(choice => `
+            <button class="choice-card ${a.choiceId === choice.id ? 'selected' : ''}" data-choice="${esc(choice.id)}">
+              <span class="choice-radio" aria-hidden="true"></span>
+              <span>
+                <span class="choice-title">${esc(choice.label)} ${choice.id === q.recChoice ? '<span class="rec-badge">Recommended</span>' : ''}</span>
+                <span class="choice-detail">${esc(choice.detail)}</span>
+                <span class="choice-procon">
+                  <span><strong>Pros:</strong> ${esc(choice.pros)}</span>
+                  <span><strong>Cons:</strong> ${esc(choice.cons)}</span>
+                </span>
+              </span>
+            </button>
+          `).join('')}
+        </div>
+        <div class="status-row" role="group" aria-label="Decision status">
+          <button class="status-btn open ${a.status === 'open' ? 'active' : ''}" data-status="open">Still open</button>
+          <button class="status-btn decided ${a.status === 'decided' ? 'active' : ''}" data-status="decided">Use selected decision</button>
+          <button class="status-btn research ${a.status === 'research' ? 'active' : ''}" data-status="research">Need to research this more</button>
+        </div>
+        <div class="notes-grid">
+          <div>
+            <label class="field-label" for="notesArea">Notes, context, or owner preference</label>
+            <textarea id="notesArea" placeholder="Write anything the owner is leaning toward, edge cases, constraints, or tradeoffs…">${esc(a.notes)}</textarea>
+          </div>
+          <div>
+            <label class="field-label" for="researchArea">Research needed / what would clarify this?</label>
+            <textarea id="researchArea" placeholder="If pending, write who to ask, what source to check, or what must be decided…">${esc(a.research)}</textarea>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:18px">
+          <strong>Sources connected to this question</strong>
+          <div class="source-list">${evidenceHtml || '<span style="color:var(--muted)">No external source attached. This is an internal operating decision.</span>'}</div>
+        </div>
+        <div class="nav-actions">
+          <button class="btn" id="prevBtn">← Previous</button>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn" id="researchBtn">Mark research</button>
+            <button class="btn primary" id="nextBtn">Save & next →</button>
+          </div>
+        </div>
+      `;
+
+      card.querySelectorAll('.choice-card').forEach(btn => btn.addEventListener('click', () => {
+        const ans = answerFor(q.id);
+        ans.choiceId = btn.dataset.choice;
+        ans.status = 'decided';
+        debounceSave();
+        renderAll();
+      }));
+
+      card.querySelectorAll('.status-btn').forEach(btn => btn.addEventListener('click', () => {
+        const ans = answerFor(q.id);
+        ans.status = btn.dataset.status;
+        if (ans.status === 'decided' && !ans.choiceId) {
+          const rec = q.recChoice || q.choices[0]?.id;
+          ans.choiceId = rec;
+          toast('No choice was selected, so the recommendation was selected.');
+        }
+        debounceSave();
+        renderAll();
+      }));
+
+      document.getElementById('notesArea').addEventListener('input', (e) => {
+        answerFor(q.id).notes = e.target.value;
+        debounceSave();
+      });
+      document.getElementById('researchArea').addEventListener('input', (e) => {
+        answerFor(q.id).research = e.target.value;
+        debounceSave();
+      });
+      document.getElementById('prevBtn').addEventListener('click', () => go(-1));
+      document.getElementById('nextBtn').addEventListener('click', () => go(1));
+      document.getElementById('researchBtn').addEventListener('click', () => {
+        answerFor(q.id).status = 'research';
+        debounceSave();
+        renderAll();
+      });
+    }
+
+    function go(direction) {
+      state.currentIndex = Math.min(Math.max(0, state.currentIndex + direction), QUESTIONS.length - 1);
+      saveState();
+      renderAll();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function jumpIncomplete() {
+      const start = state.currentIndex + 1;
+      const ordered = QUESTIONS.map((q, i) => [q, i]).slice(start).concat(QUESTIONS.map((q, i) => [q, i]).slice(0, start));
+      const found = ordered.find(([q]) => !isDone(q));
+      if (found) {
+        state.currentIndex = found[1];
+        showQuestionView();
+        renderAll();
+      } else {
+        showReportView();
+      }
+    }
+
+    function updateProgress() {
+      const c = counts();
+      const pct = Math.round((c.done / c.total) * 100);
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressText').textContent = `${c.done} of ${c.total} complete · ${pct}%`;
+      document.getElementById('remainingText').textContent = c.open === 0 ? 'Report ready' : `${c.open} unresolved`;
+      document.getElementById('decidedCount').textContent = c.decided;
+      document.getElementById('researchCount').textContent = c.research;
+      const title = document.getElementById('encourageTitle');
+      const copy = document.getElementById('encourageCopy');
+      if (pct >= 100) {
+        title.textContent = 'Report ready.';
+        copy.textContent = 'Every question is either decided or marked for research. Print the report or copy the Markdown back into ChatGPT.';
+      } else if (pct >= 80) {
+        title.textContent = 'Almost done.';
+        copy.textContent = 'The remaining questions are probably the ones worth discussing with insurance, legal, or operations.';
+      } else if (pct >= 50) {
+        title.textContent = 'You are building clarity.';
+        copy.textContent = 'The best website comes from resolved business rules, not just better UI.';
+      } else {
+        title.textContent = 'Keep going, you got this.';
+        copy.textContent = 'Every answer becomes a cleaner requirement for booking, admin, waivers, and launch.';
+      }
+    }
+
+    function renderAll() {
+      renderNav();
+      renderQuestion();
+      updateProgress();
+      renderReport(false);
+    }
+
+    function showQuestionView() {
+      currentView = 'questions';
+      document.getElementById('appShell').classList.remove('hidden');
+      document.getElementById('reportView').classList.add('hidden');
+    }
+
+    function showReportView() {
+      currentView = 'report';
+      document.getElementById('appShell').classList.add('hidden');
+      document.getElementById('reportView').classList.remove('hidden');
+      renderReport(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function marketResearchHtml() {
+      const rows = MARKET.benchmarkRows.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join('');
+      const pricing = MARKET.recommendedPricing.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join('');
+      return `
+        <h3>Market research snapshot</h3>
+        <p>${esc(MARKET.pricingTakeaway)}</p>
+        <table><thead><tr><th>Source</th><th>Market</th><th>Pricing</th><th>Use</th></tr></thead><tbody>${rows}</tbody></table>
+        <h3 style="margin-top:24px">Recommended launch pricing</h3>
+        <table><thead><tr><th>Sauna</th><th>Weekday</th><th>Weekend</th><th>2-night</th><th>Week</th></tr></thead><tbody>${pricing}</tbody></table>
+      `;
+    }
+
+    function renderReport(visible) {
+      const c = counts();
+      const categories = [...new Set(QUESTIONS.map(q => q.category))];
+      const catSections = categories.map(cat => {
+        const items = QUESTIONS.filter(q => q.category === cat).map(q => {
+          const a = state.answers[q.id] || {};
+          const choice = q.choices.find(ch => ch.id === a.choiceId);
+          const status = a.status === 'research' ? 'Need research' : (a.status === 'decided' && choice ? 'Decision selected' : 'Open');
+          const statusClass = a.status === 'research' ? 'amber' : (a.status === 'decided' && choice ? 'green' : '');
+          const sourceLinks = (q.evidence || []).map(id => {
+            const s = sourceById(id);
+            return s ? `<a href="${esc(s.url)}" target="_blank" rel="noreferrer">${esc(s.id)}</a>` : '';
+          }).join(' ');
+          return `<article class="decision-item">
+            <div class="decision-meta"><span class="pill ${statusClass}">${esc(status)}</span><span class="pill">${esc(q.category)}</span></div>
+            <h4>${esc(q.title)}</h4>
+            <p><strong>Selected:</strong> ${choice ? esc(choice.label) : 'No choice selected'}</p>
+            <p><strong>Recommended:</strong> ${esc(q.recommendation)}</p>
+            ${a.notes ? `<p><strong>Notes:</strong> ${esc(a.notes)}</p>` : ''}
+            ${a.research ? `<p><strong>Research / revisit:</strong> ${esc(a.research)}</p>` : ''}
+            ${sourceLinks ? `<p><strong>Sources:</strong> ${sourceLinks}</p>` : ''}
+          </article>`;
+        }).join('');
+        return `<h3 style="margin-top:28px">${esc(cat)}</h3>${items}`;
+      }).join('');
+
+      const sourcesHtml = SOURCES.map(s => `<li><strong>${esc(s.id)}.</strong> <a href="${esc(s.url)}" target="_blank" rel="noreferrer">${esc(s.title)}</a> — ${esc(s.note)}</li>`).join('');
+      const ready = c.open === 0;
+      const html = `
+        <div class="report-card panel">
+          <div class="eyebrow" style="color:var(--cedar)">Drop N' Glow decision report</div>
+          <h2>Sauna business decisions</h2>
+          <p class="prompt">Generated from the single-file decision workbook on ${esc(CREATED)}. Saved locally in IndexedDB. ${ready ? 'All questions are either decided or marked for research.' : `${c.open} questions are still open.`}</p>
+          <div class="report-actions screen-only">
+            <button class="btn primary" id="printBtn">Print report</button>
+            <button class="btn" id="copyMdBtn">Copy Markdown</button>
+            <button class="btn" id="backBtn">Back to questions</button>
+          </div>
+          <div class="info-grid">
+            <div class="info-box"><strong>Completion</strong>${c.done} of ${c.total} complete</div>
+            <div class="info-box"><strong>Status</strong>${c.decided} decided · ${c.research} need research · ${c.open} open</div>
+          </div>
+          <h3>Recommended strategy default</h3>
+          <p>Private rental price = sauna package + date range + delivery zone + add-ons + attendant if required. Guest count controls capacity and waiver tracking, not private-rental price. Booking is request-first: availability preview, booking request, admin approval, deposit, guest waivers, final confirmation.</p>
+          ${marketResearchHtml()}
+          ${catSections}
+          <h3>Sources</h3>
+          <ol>${sourcesHtml}</ol>
+        </div>`;
+      document.getElementById('reportView').innerHTML = html;
+      if (visible) {
+        document.getElementById('printBtn')?.addEventListener('click', () => window.print());
+        document.getElementById('copyMdBtn')?.addEventListener('click', copyMarkdown);
+        document.getElementById('backBtn')?.addEventListener('click', () => {
+          showQuestionView();
+          renderAll();
+        });
+      }
+    }
+
+    function markdownReport() {
+      const c = counts();
+      let md = `# Drop N' Glow Sauna Business Decision Report\n\nGenerated: ${CREATED}\n\nProgress: ${c.done}/${c.total} complete. ${c.decided} decided. ${c.research} need research. ${c.open} open.\n\n`;
+      md += `## Recommended strategy default\n\nPrivate rental price = sauna package + date range + delivery zone + add-ons + attendant if required. Guest count controls capacity and waiver tracking, not private-rental price. Booking is request-first: availability preview, booking request, admin approval, deposit, guest waivers, final confirmation.\n\n`;
+      md += `## Decisions\n\n`;
+      QUESTIONS.forEach((q, i) => {
+        const a = state.answers[q.id] || {};
+        const choice = q.choices.find(ch => ch.id === a.choiceId);
+        const status = a.status === 'research' ? 'Need research' : (a.status === 'decided' && choice ? 'Decision selected' : 'Open');
+        md += `### ${i + 1}. ${q.title}\n\n`;
+        md += `Category: ${q.category}\n\nStatus: ${status}\n\nSelected: ${choice ? choice.label : 'None'}\n\nRecommended: ${q.recommendation}\n\n`;
+        if (a.notes) md += `Notes: ${a.notes}\n\n`;
+        if (a.research) md += `Research/revisit: ${a.research}\n\n`;
+      });
+      md += `## Sources\n\n`;
+      SOURCES.forEach(s => md += `- ${s.id}. ${s.title}: ${s.url}\n`);
+      return md;
+    }
+
+    async function copyMarkdown() {
+      try {
+        await navigator.clipboard.writeText(markdownReport());
+        toast('Markdown report copied.');
+      } catch {
+        toast('Could not copy. Use Export JSON instead.');
+      }
+    }
+
+    function exportJson() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        source: 'Drop N Glow Decision Workbook',
+        state,
+        questions: QUESTIONS.map(q => ({ id: q.id, category: q.category, title: q.title, recommendation: q.recommendation }))
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dropnglow-decision-workbook-export.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function resetAll() {
+      if (!confirm('Reset all saved decisions in this browser?')) return;
+      state = { currentIndex: 0, answers: {}, updatedAt: new Date().toISOString() };
+      await saveState();
+      showQuestionView();
+      renderAll();
+      toast('Workbook reset.');
+    }
+
+    function openMarketNotes() {
+      showReportView();
+      const el = [...document.querySelectorAll('#reportView h3')].find(h => h.textContent.includes('Market research'));
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function init() {
+      db = await openDB();
+      const saved = await idbGet(STATE_KEY);
+      if (saved && saved.answers) state = saved;
+      // Add any new questions added after a saved version without disrupting old data.
+      QUESTIONS.forEach(q => answerFor(q.id));
+      renderAll();
+      document.getElementById('questionSearch').addEventListener('input', renderNav);
+      document.getElementById('jumpIncompleteBtn').addEventListener('click', jumpIncomplete);
+      document.getElementById('showReportBtn').addEventListener('click', showReportView);
+      document.getElementById('exportBtn').addEventListener('click', exportJson);
+      document.getElementById('resetBtn').addEventListener('click', resetAll);
+      document.getElementById('startBtn').addEventListener('click', () => document.getElementById('questionCard').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      document.getElementById('marketBtn').addEventListener('click', openMarketNotes);
+      document.addEventListener('keydown', (e) => {
+        if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+        if (e.key === 'ArrowRight') go(1);
+        if (e.key === 'ArrowLeft') go(-1);
+      });
+      await saveState();
+    }
+
+    init().catch(err => {
+      console.error(err);
+      document.body.innerHTML = '<main style="padding:30px;font-family:sans-serif"><h1>Could not start workbook.</h1><p>IndexedDB may be blocked in this browser. Try opening this file in Chrome, Edge, Firefox, or Safari with local storage enabled.</p></main>';
+    });
+  </script>
+</body>
+</html>
